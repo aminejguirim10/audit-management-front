@@ -1,0 +1,312 @@
+:host {
+  --sky-50: #f2f9ff;
+  --sky-100: #e3f2ff;
+  --sky-200: #c7e6ff;
+  --sky-500: #1096f4;
+  --sky-700: #056fbb;
+  --navy-800: #0a3763;
+  --line-soft: rgba(10, 55, 99, 0.15);
+  --text-main: #10375f;
+  --text-muted: #4a6d8f;
+  display: block;
+  min-height: 100dvh;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+.login-page {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: clamp(0.8rem, 1.6vw, 1.6rem);
+  display: flex;
+  align-items: center;
+  background:
+    linear-gradient(150deg, #f8fcff 0%, #edf6ff 36%, #e7f2ff 70%, #e2efff 100%),
+    repeating-linear-gradient(
+      120deg,
+      rgba(17, 127, 206, 0.04) 0,
+      rgba(17, 127, 206, 0.04) 1px,
+      transparent 1px,
+      transparent 20px
+    );
+}
+
+.orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.orb-top {
+  top: -120px;
+  right: -60px;
+  width: 390px;
+  height: 390px;
+  background: radial-gradient(circle, rgba(0, 135, 220, 0.34) 0%, rgba(0, 135, 220, 0) 65%);
+  animation: drift 9s ease-in-out infinite alternate;
+}
+
+.orb-bottom {
+  bottom: -180px;
+  left: -140px;
+  width: 430px;
+  height: 430px;
+  background: radial-gradient(circle, rgba(0, 76, 153, 0.2) 0%, rgba(0, 76, 153, 0) 70%);
+  animation: drift 11s ease-in-out infinite alternate-reverse;
+}
+
+.login-layout {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  min-height: min(680px, calc(100dvh - 1.6rem));
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  box-shadow:
+    0 26px 80px rgba(2, 47, 90, 0.16),
+    0 8px 24px rgba(9, 83, 148, 0.14);
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(10px);
+}
+
+.brand-panel {
+  padding: clamp(1.5rem, 3vw, 3rem);
+  background:
+    linear-gradient(155deg, rgba(233, 246, 255, 0.96), rgba(203, 231, 255, 0.88)),
+    radial-gradient(circle at 80% 20%, rgba(3, 116, 192, 0.22), transparent 36%);
+  border-right: 1px solid var(--line-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.85rem;
+}
+
+.enic-logo {
+  width: min(100%, 450px);
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 16px 34px rgba(4, 67, 122, 0.24);
+  margin-bottom: 0.65rem;
+}
+
+.mini-kicker {
+  margin: 0;
+  color: var(--sky-700);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+h1 {
+  margin: 0;
+  color: #092f56;
+  font-size: clamp(1.85rem, 3vw, 3rem);
+  line-height: 1.07;
+  font-family: 'Sora', 'Trebuchet MS', sans-serif;
+}
+
+.brand-copy {
+  margin: 0;
+  color: #2a567d;
+  line-height: 1.65;
+  max-width: 54ch;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.92);
+  padding: clamp(1.3rem, 2.4vw, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+h2 {
+  margin: 0.4rem 0 0;
+  color: var(--navy-800);
+  font-size: clamp(1.7rem, 2.1vw, 2.2rem);
+  font-family: 'Sora', 'Trebuchet MS', sans-serif;
+}
+
+.form-subtitle {
+  margin-top: 0.65rem;
+  margin-bottom: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.52;
+}
+
+form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+label {
+  color: var(--text-main);
+  font-weight: 650;
+  font-size: 0.95rem;
+}
+
+input {
+  height: 48px;
+  border-radius: 13px;
+  border: 1px solid #bfdaf3;
+  padding: 0 0.92rem;
+  color: #0b3d69;
+  background: #f9fcff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--sky-500);
+  box-shadow: 0 0 0 3px rgba(16, 150, 244, 0.18);
+  background: #ffffff;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 3.2rem;
+}
+
+.ghost-toggle {
+  position: absolute;
+  right: 0.4rem;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: rgba(8, 118, 197, 0.12);
+  color: var(--sky-700);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ghost-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.ghost-toggle:hover {
+  background: rgba(8, 118, 197, 0.2);
+}
+
+.field-invalid {
+  border-color: #da5d67;
+  background: #fff9f9;
+}
+
+.error-text {
+  margin: 0;
+  color: #c53946;
+  font-size: 0.81rem;
+}
+
+.server-message {
+  margin: 0.35rem 0 0;
+  border-radius: 12px;
+  border: 1px solid rgba(3, 137, 108, 0.34);
+  background: rgba(230, 251, 245, 0.8);
+  color: #086f5a;
+  padding: 0.68rem 0.8rem;
+  font-size: 0.91rem;
+}
+
+.server-message-error {
+  border-color: rgba(197, 57, 70, 0.35);
+  background: rgba(255, 238, 240, 0.86);
+  color: #ac1f32;
+}
+
+.submit-btn {
+  margin-top: 0.45rem;
+  min-height: 50px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(102deg, #149df7 0%, #0a75be 55%, #075997 100%);
+  color: #ffffff;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    filter 0.22s ease;
+}
+
+.submit-btn:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(6, 84, 147, 0.34);
+  filter: saturate(1.12);
+}
+
+.submit-btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+@media (max-width: 960px) {
+  .login-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-panel {
+    border-right: 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+}
+
+@media (max-width: 560px) {
+  .login-page {
+    padding: 0.6rem;
+    align-items: stretch;
+  }
+
+  .login-layout {
+    border-radius: 20px;
+    min-height: auto;
+  }
+
+  .brand-panel,
+  .login-card {
+    padding: 1rem;
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    transform: translateY(20px) scale(1.04);
+  }
+}

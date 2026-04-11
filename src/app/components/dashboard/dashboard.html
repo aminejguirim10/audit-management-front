@@ -1,0 +1,22 @@
+<section class="dashboard-shell">
+  <header class="dashboard-header">
+    <div>
+      <p class="kicker">Audit Management Space</p>
+      <h1>Espace securise</h1>
+      <p class="subtitle">
+        Connecte en tant que {{ currentUser()?.email }} ({{ currentUser()?.role }})
+      </p>
+      <p class="subtitle">Espace autorise: {{ expectedRoles().join(', ') }}</p>
+    </div>
+    <button type="button" class="logout-btn" (click)="logout()">Se deconnecter</button>
+  </header>
+
+  <article class="dashboard-card">
+    <h2>Connexion reussie</h2>
+    <p>
+      Votre token JWT est stocke localement. Vous pouvez maintenant proteger vos routes et consommer
+      les endpoints securises du backend.
+    </p>
+    <p class="footnote">ENICarthage Audit Platform - {{ currentYear() }}</p>
+  </article>
+</section>
