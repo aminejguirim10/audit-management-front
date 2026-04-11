@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { Login } from './components/login/login';
 import { Dashboard } from './components/dashboard/dashboard';
+import { ForgotPassword } from './components/forgot-password/forgot-password';
+import { ResetPassword } from './components/reset-password/reset-password';
 import { authGuard } from './guards/auth.guard';
 import { roleGuard } from './guards/role.guard';
 
@@ -13,6 +15,14 @@ export const routes: Routes = [
   {
     path: 'login',
     component: Login,
+  },
+  {
+    path: 'forgot-password',
+    component: ForgotPassword,
+  },
+  {
+    path: 'reset-password',
+    component: ResetPassword,
   },
   {
     path: 'dashboard',

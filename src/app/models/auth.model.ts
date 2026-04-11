@@ -5,6 +5,16 @@ export interface AuthenticationRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export interface AuthenticationResponse {
   access_token: string;
   refresh_token: string;

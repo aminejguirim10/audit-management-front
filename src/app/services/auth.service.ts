@@ -8,6 +8,8 @@ import {
   AuthenticationRequest,
   AuthenticationResponse,
   AuthUser,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
   UserRole,
 } from '../models/auth.model';
 
@@ -35,6 +37,14 @@ export class AuthService {
     return this.http
       .post<ApiResponse<AuthenticationResponse>>(`${this.apiUrl}/auth/login`, payload)
       .pipe(tap((response) => this.persistSession(response)));
+  }
+
+  forgotPassword(payload: ForgotPasswordRequest): Observable<ApiResponse<object>> {
+    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/auth/forgot-password`, payload);
+  }
+
+  resetPassword(payload: ResetPasswordRequest): Observable<ApiResponse<object>> {
+    return this.http.post<ApiResponse<object>>(`${this.apiUrl}/auth/reset-password`, payload);
   }
 
   logout(): void {

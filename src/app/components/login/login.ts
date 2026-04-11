@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -16,11 +17,10 @@ export class Login {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly toastr = inject(ToastrService);
 
   readonly isSubmitting = signal(false);
   readonly showPassword = signal(false);
-  readonly apiMessage = signal<string | null>(null);
-  readonly isErrorMessage = signal(false);
 
   readonly loginForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -45,16 +45,13 @@ export class Login {
     }
 
     this.isSubmitting.set(true);
-    this.apiMessage.set(null);
-    this.isErrorMessage.set(false);
 
     this.authService
       .login(this.loginForm.getRawValue())
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: (response) => {
-          this.apiMessage.set(response.message || 'Connexion reussie');
-          this.isErrorMessage.set(false);
+          this.toastr.success(response.message || 'Connexion reussie', 'Succes');
 
           const returnUrl =
             this.route.snapshot.queryParamMap.get('returnUrl') ||
@@ -66,8 +63,7 @@ export class Login {
           const errorMessage =
             httpError?.error?.message ||
             'Impossible de se connecter pour le moment. Veuillez reessayer.';
-          this.apiMessage.set(errorMessage);
-          this.isErrorMessage.set(true);
+          this.toastr.error(errorMessage, 'Connexion echouee');
         },
       });
   }
