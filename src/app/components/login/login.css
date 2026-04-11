@@ -230,20 +230,17 @@ input:focus {
   font-size: 0.81rem;
 }
 
-.server-message {
-  margin: 0.35rem 0 0;
-  border-radius: 12px;
-  border: 1px solid rgba(3, 137, 108, 0.34);
-  background: rgba(230, 251, 245, 0.8);
-  color: #086f5a;
-  padding: 0.68rem 0.8rem;
-  font-size: 0.91rem;
+.forgot-password-link {
+  justify-self: end;
+  color: #0a6cb0;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.88rem;
 }
 
-.server-message-error {
-  border-color: rgba(197, 57, 70, 0.35);
-  background: rgba(255, 238, 240, 0.86);
-  color: #ac1f32;
+.forgot-password-link:hover {
+  color: #074f82;
+  text-decoration: underline;
 }
 
 .submit-btn {

@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap');
 @import 'tailwindcss';
+@import 'ngx-toastr/toastr';
 
 * {
   box-sizing: border-box;
@@ -13,4 +14,144 @@ body {
 
 body {
   color: #0f365c;
+}
+
+:root {
+  --toast-text: #f8fcff;
+  --toast-shadow: 0 20px 42px rgba(6, 24, 40, 0.28);
+  --toast-border-soft: rgba(255, 255, 255, 0.18);
+}
+
+div.audit-toast {
+  border-left: 0 !important;
+  background-image: none !important;
+}
+
+.toast-container.toast-top-right {
+  top: 1rem;
+  right: 1rem;
+}
+
+.toast-container .audit-toast {
+  width: 360px;
+  margin-bottom: 0.9rem;
+  border-radius: 18px;
+  border: 1px solid var(--toast-border-soft) !important;
+  border-left: 0 !important;
+  box-shadow: var(--toast-shadow) !important;
+  color: var(--toast-text);
+  padding: 1rem 1rem 1rem 1.1rem;
+  background-image: none !important;
+  background-color: #12324a;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-container .audit-toast::before {
+  display: none !important;
+  content: none !important;
+  background: none !important;
+  border: none !important;
+  width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.toast-container .audit-toast::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.toast-container .audit-toast .audit-toast-title {
+  font-family: 'Sora', 'Trebuchet MS', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+  letter-spacing: 0.01em;
+}
+
+.toast-container .audit-toast .audit-toast-message {
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  opacity: 0.98;
+}
+
+.toast-container .audit-toast .toast-close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.72rem;
+  color: #ffffff;
+  text-shadow: none;
+  opacity: 0.82;
+  font-size: 1.15rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.toast-container .audit-toast .toast-close-button:hover {
+  opacity: 1;
+}
+
+.toast-container .audit-toast .toast-progress {
+  height: 3px;
+  border-radius: 999px;
+  opacity: 0.96;
+}
+
+.toast-container .audit-toast.audit-toast-success {
+  background-color: #0d7f67 !important;
+  background-image: linear-gradient(135deg, #12a07f 0%, #0c7b65 55%, #075a4d 100%) !important;
+  border-left: 0 !important;
+}
+
+.toast-container .audit-toast.audit-toast-error {
+  background-color: #9d2639 !important;
+  background-image: linear-gradient(135deg, #ca3550 0%, #a12a41 55%, #741b2b 100%) !important;
+  border-left: 0 !important;
+}
+
+.toast-container .audit-toast.audit-toast-warning {
+  background-color: #d48a19 !important;
+  background-image: linear-gradient(135deg, #f1bf4f 0%, #d99a27 55%, #b77712 100%) !important;
+  color: #281d00 !important;
+  border-left: 0 !important;
+}
+
+.toast-container .audit-toast.audit-toast-info {
+  background-color: #1769b1 !important;
+  background-image: linear-gradient(135deg, #2790de 0%, #1b75c0 55%, #124f9a 100%) !important;
+  border-left: 0 !important;
+}
+
+.toast-container .audit-toast.audit-toast-warning .toast-close-button {
+  color: #281d00;
+}
+
+@keyframes auditToastIn {
+  from {
+    opacity: 0;
+    transform: translate3d(18px, -10px, 0) scale(0.98);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.toast-container .audit-toast {
+  animation: auditToastIn 0.32s ease-out both;
+}
+
+@media (max-width: 640px) {
+  .toast-container .audit-toast {
+    width: calc(100vw - 1.15rem);
+  }
 }
