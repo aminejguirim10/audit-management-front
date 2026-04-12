@@ -4,7 +4,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../../../services/auth.service';
+
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,7 @@ export class Login {
 
   constructor() {
     if (this.authService.isAuthenticated()) {
-      const roleHome = this.authService.getDefaultRouteForCurrentRole() ?? '/dashboard';
+      const roleHome = this.authService.getDefaultRouteForCurrentRole() ?? '/login';
       void this.router.navigateByUrl(roleHome);
     }
   }
@@ -56,7 +57,7 @@ export class Login {
           const returnUrl =
             this.route.snapshot.queryParamMap.get('returnUrl') ||
             this.authService.getDefaultRouteForCurrentRole() ||
-            '/dashboard';
+            '/login';
           void this.router.navigateByUrl(returnUrl);
         },
         error: (httpError) => {

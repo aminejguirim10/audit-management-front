@@ -1,0 +1,83 @@
+<div class="shell-root" [class.sidebar-open]="sidebarOpen()">
+  <aside class="sidebar" aria-label="Navigation principale">
+    <div class="brand-block">
+      <a
+        class="brand-name"
+        [routerLink]="navigationItems()[0]?.route ?? '/login'"
+        (click)="onNavigate()"
+      >
+        AuditPro
+      </a>
+      <p class="brand-role">{{ roleLabel() }}</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navigationItems(); track item.route) {
+        <a
+          class="nav-item"
+          [routerLink]="item.route"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: true }"
+          (click)="onNavigate()"
+        >
+          <span class="nav-glyph">{{ item.shortLabel }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <button type="button" class="logout-btn" (click)="logout()">
+      <span class="nav-glyph">
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M16 17v-3H9v-4h7V7l5 5-5 5M14 2a2 2 0 0 1 2 2v2h-2V4H5v16h9v-2h2v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9Z"
+          />
+        </svg>
+      </span>
+      <span>Deconnexion</span>
+    </button>
+  </aside>
+
+  <button
+    type="button"
+    class="sidebar-backdrop"
+    (click)="closeSidebar()"
+    aria-label="Fermer la navigation"
+  ></button>
+
+  <section class="main-zone">
+    <header class="topbar">
+      <button type="button" class="menu-btn" aria-label="Ouvrir le menu" (click)="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="topbar-right">
+        @if (showNotificationButton()) {
+          <button type="button" class="notif-btn" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path
+                d="M12 3a5 5 0 0 0-5 5v2.6c0 .7-.2 1.4-.7 2L4.8 15c-.6.8 0 2 1 2h12.4c1 0 1.6-1.2 1-2l-1.5-2.4c-.4-.6-.7-1.3-.7-2V8a5 5 0 0 0-5-5Zm0 18a2.5 2.5 0 0 1-2.4-2h4.8A2.5 2.5 0 0 1 12 21Z"
+              />
+            </svg>
+            <span class="notif-dot"></span>
+          </button>
+        }
+
+        <div class="user-block">
+          <div class="avatar">{{ initials() }}</div>
+          <div class="user-meta">
+            <p class="user-name">{{ displayName() }}</p>
+            <p class="user-email">{{ email() }}</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <router-outlet />
+    </main>
+  </section>
+</div>

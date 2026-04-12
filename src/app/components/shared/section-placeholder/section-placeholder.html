@@ -1,0 +1,16 @@
+<section class="section-wrap">
+  <header class="section-head">
+    <h1>{{ title() }}</h1>
+    <p>{{ subtitle() }}</p>
+  </header>
+
+  <article class="placeholder-card">
+    @if (badge()) {
+      <span class="badge">{{ badge() }}</span>
+    }
+    <p>{{ description() }}</p>
+    <p class="hint">
+      Cette page est un composant dedie a la verification de la navigation par role et des guards.
+    </p>
+  </article>
+</section>

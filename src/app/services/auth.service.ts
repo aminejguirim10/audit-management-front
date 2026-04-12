@@ -75,13 +75,13 @@ export class AuthService {
 
     switch (currentRole) {
       case 'ADMIN':
-        return '/dashboard/admin';
+        return '/admin/tableau-de-bord';
       case 'AUDITEUR':
-        return '/dashboard/auditeur';
+        return '/auditeur/tableau-de-bord';
       case 'AUDITE':
-        return '/dashboard/audite';
+        return '/audite/tableau-de-bord';
       case 'ETUDIANT':
-        return '/dashboard/etudiant';
+        return '/etudiant/soumettre-idee';
       default:
         return null;
     }
