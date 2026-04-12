@@ -1,4 +1,152 @@
-﻿<section class="page-placeholder">
-  <h1>Admin - Types d audits</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ADMIN.</p>
-</section>
+﻿<div class="container">
+
+  <!-- En-tête -->
+  <div class="entete">
+    <div>
+      <h1>Types d'audits</h1>
+      <p>Gérer les différents types d'audits</p>
+    </div>
+    <button class="btn-primaire" (click)="ouvrirModalCreation()">
+      + Nouveau type
+    </button>
+  </div>
+
+  <!-- Erreur -->
+  <div class="erreur" *ngIf="erreur">{{ erreur }}</div>
+
+  <!-- Chargement -->
+  <div class="chargement" *ngIf="chargement">Chargement...</div>
+
+  <!-- Barre de recherche -->
+ <div class="recherche-container">
+  <input
+    type="text"
+    [(ngModel)]="recherche"
+    placeholder="Rechercher par nom, description ou couleur..."
+    class="recherche-input"
+  />
+ </div>
+
+  <!-- Tableau -->
+  <div class="carte" *ngIf="!chargement">
+    <h2>Liste des types d'audits</h2>
+    <table>
+      <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Description</th>
+        <th>Couleur</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let type of typesAuditsFiltres">
+        <td><strong>{{ type.name }}</strong></td>
+        <td>{{ type.description }}</td>
+        <td>
+          <div class="couleur-cell">
+            <span class="couleur-apercu" [style.background-color]="type.color"></span>
+            <span>{{ type.color }}</span>
+          </div>
+        </td>
+        <td>
+          <div class="actions">
+            <button class="btn-modifier" (click)="ouvrirModalModification(type)" title="Modifier">✏️</button>
+            <button class="btn-supprimer" (click)="ouvrirModalSuppression(type)" title="Supprimer">🗑️</button>
+          </div>
+        </td>
+      </tr>
+      <tr *ngIf="typesAuditsFiltres.length === 0">
+        <td colspan="4" class="vide">Aucun type d'audit trouvé</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== MODAL CRÉATION ===== -->
+  <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Nouveau type d'audit</h3>
+        <p>Ajoutez un nouveau type d'audit au système</p>
+        <button class="btn-fermer" (click)="fermerModalCreation()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <div class="champ" *ngIf="erreurCreation">
+          <p class="erreur-msg">{{ erreurCreation }}</p>
+        </div>
+        <div class="champ">
+          <label>Nom</label>
+          <input type="text" [(ngModel)]="nouveauType.name" placeholder="Ex: Audit Académique" />
+        </div>
+        <div class="champ">
+          <label>Description</label>
+          <textarea [(ngModel)]="nouveauType.description" placeholder="Description du type d'audit"></textarea>
+        </div>
+        <div class="champ">
+          <label>Couleur</label>
+          <div class="couleur-input">
+            <input type="color" [(ngModel)]="nouveauType.color" />
+            <input type="text" [(ngModel)]="nouveauType.color" placeholder="#3B82F6" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-primaire" (click)="creer()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="modalModificationOuverte" (click)="fermerModalModification()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Modifier le type d'audit</h3>
+        <p>Modifiez les informations du type d'audit</p>
+        <button class="btn-fermer" (click)="fermerModalModification()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <div class="champ" *ngIf="erreurModification">
+          <p class="erreur-msg">{{ erreurModification }}</p>
+        </div>
+        <div class="champ">
+          <label>Nom</label>
+          <input type="text" [(ngModel)]="modificationDto.name" placeholder="Nom du type d'audit" />
+        </div>
+        <div class="champ">
+          <label>Description</label>
+          <textarea [(ngModel)]="modificationDto.description" placeholder="Description du type d'audit"></textarea>
+        </div>
+        <div class="champ">
+          <label>Couleur</label>
+          <div class="couleur-input">
+            <input type="color" [(ngModel)]="modificationDto.color" />
+            <input type="text" [(ngModel)]="modificationDto.color" placeholder="#3B82F6" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalModification()">Annuler</button>
+        <button class="btn-primaire" (click)="modifier()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
+    <div class="modal modal-suppression" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Confirmer la suppression</h3>
+        <button class="btn-fermer" (click)="fermerModalSuppression()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <p>Êtes-vous sûr de vouloir supprimer le type d'audit <strong>{{ typeASupprimer?.name }}</strong> ?</p>
+        <p class="avertissement">⚠️ Cette action est irréversible.</p>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+</div>
