@@ -74,20 +74,35 @@ export class AdminAuditTypesPage implements OnInit {
   }
 
   creer(): void {
-    if (!this.nouveauType.name.trim() || !this.nouveauType.description.trim()) {
-      this.erreurCreation = 'Le nom et la description sont obligatoires !';
-      return;
-    }
-    this.typeAuditService.add(this.nouveauType).subscribe({
-      next: (type) => {
-        this.typesAudits.push(type);
-        this.fermerModalCreation();
-      },
-      error: (err: any) => {
-        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
-      }
-    });
+  if (!this.nouveauType.name.trim()) {
+    this.erreurCreation = 'Le nom est obligatoire !';
+    return;
   }
+  if (!this.nouveauType.description.trim()) {
+    this.erreurCreation = 'La description est obligatoire !';
+    return;
+  }
+  // Couleur vide
+  if (!this.nouveauType.color.trim()) {
+    this.erreurCreation = 'La couleur est obligatoire !';
+    return;
+  }
+  // Couleur invalide
+  if (!this.nouveauType.color.match(/^#[0-9A-Fa-f]{6}$/)) {
+    this.erreurCreation = 'La couleur doit être un code hexadécimal valide (ex: #FF5733) !';
+    return;
+  }
+
+  this.typeAuditService.add(this.nouveauType).subscribe({
+    next: (type) => {
+      this.typesAudits.push(type);
+      this.fermerModalCreation();
+    },
+    error: (err: any) => {
+      this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
+    }
+  });
+}
 
   // ===== MODIFICATION =====
   ouvrirModalModification(type: TypeAudit): void {
@@ -103,19 +118,38 @@ export class AdminAuditTypesPage implements OnInit {
   }
 
   modifier(): void {
-    if (!this.typeEnModification) return;
-    this.typeAuditService.update(this.typeEnModification.id, this.modificationDto).subscribe({
-      next: (typeModifie: TypeAudit) => {
-        const index = this.typesAudits.findIndex(t => t.id === typeModifie.id);
-        if (index !== -1) this.typesAudits[index] = typeModifie;
-        this.fermerModalModification();
-      },
-      error: (err: any) => {
-        this.erreurModification = err.error?.message ?? 'Erreur lors de la modification';
-      }
-    });
+  if (!this.typeEnModification) return;
+
+  if (this.modificationDto.name !== undefined && !this.modificationDto.name.trim()) {
+    this.erreurModification = 'Le nom ne peut pas être vide !';
+    return;
+  }
+  if (this.modificationDto.description !== undefined && !this.modificationDto.description.trim()) {
+    this.erreurModification = 'La description ne peut pas être vide !';
+    return;
+  }
+  // Couleur vide
+  if (this.modificationDto.color !== undefined && !this.modificationDto.color.trim()) {
+    this.erreurModification = 'La couleur est obligatoire !';
+    return;
+  }
+  // Couleur invalide
+  if (this.modificationDto.color && !this.modificationDto.color.match(/^#[0-9A-Fa-f]{6}$/)) {
+    this.erreurModification = 'La couleur doit être un code hexadécimal valide (ex: #FF5733) !';
+    return;
   }
 
+  this.typeAuditService.update(this.typeEnModification.id, this.modificationDto).subscribe({
+    next: (typeModifie: TypeAudit) => {
+      const index = this.typesAudits.findIndex(t => t.id === typeModifie.id);
+      if (index !== -1) this.typesAudits[index] = typeModifie;
+      this.fermerModalModification();
+    },
+    error: (err: any) => {
+      this.erreurModification = err.error?.message ?? 'Erreur lors de la modification';
+    }
+  });
+}
   // ===== SUPPRESSION =====
   ouvrirModalSuppression(type: TypeAudit): void {
     this.typeASupprimer = type;
