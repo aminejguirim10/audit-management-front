@@ -1,4 +1,136 @@
-﻿<section class="page-placeholder">
-  <h1>Admin - Auditeurs</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ADMIN.</p>
-</section>
+<div class="container">
+  <div class="entete">
+    <div>
+      <h1>Auditeurs</h1>
+      <p>Gérer les auditeurs de la plateforme</p>
+    </div>
+    <button class="btn-primaire" (click)="ouvrirModalCreation()">
+      👤 Ajouter un auditeur
+    </button>
+  </div>
+
+  <div class="erreur" *ngIf="erreur">{{ erreur }}</div>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div class="stat-carte">
+      <p class="stat-label">Total des auditeurs</p>
+      <p class="stat-valeur">{{ totalAuditors }}</p>
+    </div>
+    <div class="stat-carte">
+      <p class="stat-label">Actifs</p>
+      <p class="stat-valeur vert">{{ auditorsActifs }}</p>
+    </div>
+    <div class="stat-carte">
+      <p class="stat-label">Audits en cours</p>
+      <p class="stat-valeur bleu">{{ auditsEnCoursTotal }}</p>
+    </div>
+    <div class="stat-carte">
+      <p class="stat-label">Audits complétés</p>
+      <p class="stat-valeur">{{ auditsCompletesTotal }}</p>
+    </div>
+  </div>
+
+  <div class="recherche-container">
+    <input
+      type="text"
+      [(ngModel)]="recherche"
+      placeholder="Rechercher par nom, email ou département..."
+      class="recherche-input"
+    />
+  </div>
+
+  <div class="chargement" *ngIf="chargement">Chargement...</div>
+
+  <div class="carte" *ngIf="!chargement">
+    <h2>Liste des auditeurs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Département</th>
+          <th>Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let auditor of filteredAuditors">
+          <td data-label="Nom"><strong>{{ auditor.name }}</strong></td>
+          <td data-label="Département">🏢 {{ departementsLabels[auditor.departement] }}</td>
+          <td data-label="Contact">
+            <div class="contact-cell">
+              <span>✉️{{ auditor.email }}</span>
+              <span>📞 {{ auditor.phoneNumber }}</span>
+            </div>
+          </td>
+          <td data-label="Actions">
+            <div class="actions">
+              <button class="btn-supprimer" (click)="ouvrirModalSuppression(auditor)" title="Supprimer">🗑️</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredAuditors.length === 0">
+          <td colspan="6" class="vide">Aucun auditeur trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Ajouter un auditeur</h3>
+        <p>Créer un nouveau compte pour un auditeur</p>
+        <button class="btn-fermer" (click)="fermerModalCreation()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <div class="erreur-msg" *ngIf="erreurCreation">{{ erreurCreation }}</div>
+        <div class="form-grid">
+          <div class="champ">
+            <label>Nom complet *</label>
+            <input type="text" [(ngModel)]="nouveauAuditor.name" placeholder="Ex: Akrem Sakly" />
+          </div>
+          <div class="champ">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="nouveauAuditor.email" placeholder="email@enicar.ucar.tn" />
+          </div>
+          <div class="champ">
+            <label>Téléphone *</label>
+            <input type="text" [(ngModel)]="nouveauAuditor.phoneNumber" placeholder="Ex: 55369472" maxlength="8" />
+          </div>
+          <div class="champ">
+            <label>Département *</label>
+            <select [(ngModel)]="nouveauAuditor.departement">
+              <option value="" disabled selected>Choisir un département</option>
+              <option value="INFORMATIQUE">Informatique</option>
+              <option value="ELECTRIQUE">Électrique</option>
+              <option value="INDUS">Industriel</option>
+            </select>
+        </div>
+        </div>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-primaire" (click)="creerAuditor()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
+    <div class="modal modal-suppression" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Confirmer la suppression</h3>
+        <button class="btn-fermer" (click)="fermerModalSuppression()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <p>Êtes-vous sûr de vouloir supprimer <strong>{{ auditorASupprimer?.name }}</strong> ?</p>
+        <p class="avertissement">⚠️ Cette action est irréversible.</p>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+</div>

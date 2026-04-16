@@ -1,4 +1,137 @@
-﻿<section class="page-placeholder">
-  <h1>Admin - Etudiants</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ADMIN.</p>
-</section>
+<div class="container">
+  <div class="entete">
+    <div>
+      <h1>Étudiants</h1>
+      <p>Gérer les étudiants de la plateforme</p>
+    </div>
+    <button class="btn-primaire" (click)="ouvrirModalCreation()">
+      👤 Ajouter un étudiant
+    </button>
+  </div>
+
+  <div class="erreur" *ngIf="erreur">{{ erreur }}</div>
+
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div class="stat-carte">
+      <p class="stat-label">Total des étudiants</p>
+      <p class="stat-valeur">{{ totalStudents }}</p>
+    </div>
+    <div class="stat-carte">
+      <p class="stat-label">Actifs</p>
+      <p class="stat-valeur vert">{{ studentsActifs }}</p>
+    </div>
+    <div class="stat-carte">
+      <p class="stat-label">Idées soumises</p>
+      <p class="stat-valeur jaune">{{ ideesSoumisesTotal }}</p>
+    </div>
+    <div class="stat-carte">
+      <p class="stat-label">Moyenne d'idées</p>
+      <p class="stat-valeur">{{ moyenneIdees }}</p>
+    </div>
+  </div>
+
+  <div class="recherche-container">
+    <input
+      type="text"
+      [(ngModel)]="recherche"
+      placeholder="Rechercher par nom, email ou département..."
+      class="recherche-input"
+    />
+  </div>
+
+  <div class="chargement" *ngIf="chargement">Chargement...</div>
+
+  <div class="carte" *ngIf="!chargement">
+    <h2>Liste des étudiants</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Département</th>
+          <th>Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of filteredStudents">
+          <td data-label="Nom"><strong>{{ student.name }}</strong></td>
+          <td data-label="Département">🏢 {{ departementsLabels[student.departement] }}</td>
+          <td data-label="Contact">
+            <div class="contact-cell">
+              <span>✉️ {{ student.email }}</span>
+              <span>📞 {{ student.phoneNumber }}</span>
+            </div>
+          </td>
+          <td data-label="Actions">
+            <div class="actions">
+              <button class="btn-supprimer" (click)="ouvrirModalSuppression(student)" title="Supprimer">🗑️</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredStudents.length === 0">
+          <td colspan="6" class="vide">Aucun étudiant trouvé</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+ 
+  <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Ajouter un étudiant</h3>
+        <p>Créer un nouveau compte pour un étudiant</p>
+        <button class="btn-fermer" (click)="fermerModalCreation()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <div class="erreur-msg" *ngIf="erreurCreation">{{ erreurCreation }}</div>
+        <div class="form-grid">
+          <div class="champ">
+            <label>Nom complet *</label>
+            <input type="text" [(ngModel)]="nouveauStudent.name" placeholder="Ex: Ahmed Benali" />
+          </div>
+          <div class="champ">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="nouveauStudent.email" placeholder="email@enicar.ucar.tn" />
+          </div>
+          <div class="champ">
+            <label>Téléphone *</label>
+            <input type="text" [(ngModel)]="nouveauStudent.phoneNumber" placeholder="Ex: 55369472" maxlength="8" />
+          </div>
+          <div class="champ">
+            <label>Département *</label>
+            <select [(ngModel)]="nouveauStudent.departement">
+              <option value="" disabled selected>Choisir un département</option>
+              <option value="INFORMATIQUE">Informatique</option>
+              <option value="ELECTRIQUE">Électrique</option>
+              <option value="INDUS">Industriel</option>
+            </select>
+        </div>
+        </div>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-primaire" (click)="creerStudent()">Créer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
+    <div class="modal modal-suppression" (click)="$event.stopPropagation()">
+      <div class="modal-entete">
+        <h3>Confirmer la suppression</h3>
+        <button class="btn-fermer" (click)="fermerModalSuppression()">✕</button>
+      </div>
+      <div class="modal-corps">
+        <p>Êtes-vous sûr de vouloir supprimer <strong>{{ studentASupprimer?.name }}</strong> ?</p>
+        <p class="avertissement">⚠️ Cette action est irréversible.</p>
+      </div>
+      <div class="modal-pied">
+        <button class="btn-annuler" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+</div>

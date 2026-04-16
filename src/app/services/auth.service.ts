@@ -130,17 +130,41 @@ export class AuthService {
     }
 
     const payload = this.decodeJwtPayload(token);
-    if (!payload) {
+    console.log('Decoded JWT payload:', payload);
+    
+    if (!payload || !payload.sub) {
+      console.warn('JWT payload is missing or missing "sub"', payload);
       return null;
     }
 
-    if (!payload.sub || !payload.role || !this.isValidRole(payload.role)) {
-      return null;
+    // Try to extract role
+    let rawRole = payload.role;
+    if (!rawRole && payload.roles && Array.isArray(payload.roles) && payload.roles.length > 0) {
+        rawRole = payload.roles[0];
+    } else if (!rawRole && payload.authorities && Array.isArray(payload.authorities) && payload.authorities.length > 0) {
+        // Some Spring Boot configurations use 'authorities' array of strings or objects
+        const firstAuth = payload.authorities[0];
+        rawRole = typeof firstAuth === 'string' ? firstAuth : (firstAuth as any).authority;
+    }
+    
+    if (!rawRole) {
+        console.warn('Could not extract role from JWT payload', payload);
+        return null; // Let the app fallback to whatever if no role found, but here we enforce it
+    }
+
+    let parsedRole = String(rawRole).toUpperCase();
+    if (parsedRole.startsWith('ROLE_')) {
+        parsedRole = parsedRole.substring(5);
+    }
+
+    if (!this.isValidRole(parsedRole)) {
+        console.warn('Extracted role is not valid', parsedRole);
+        return null;
     }
 
     return {
       email: payload.sub,
-      role: payload.role,
+      role: parsedRole,
     };
   }
 
@@ -148,7 +172,7 @@ export class AuthService {
     return this.validRoles.has(role as UserRole);
   }
 
-  private decodeJwtPayload(token: string): { exp?: number; sub?: string; role?: string } | null {
+  private decodeJwtPayload(token: string): any {
     try {
       const tokenPart = token.split('.')[1];
       if (!tokenPart) {
@@ -158,8 +182,9 @@ export class AuthService {
       const normalized = tokenPart.replace(/-/g, '+').replace(/_/g, '/');
       const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
       const jsonPayload = atob(padded);
-      return JSON.parse(jsonPayload) as { exp?: number; sub?: string; role?: string };
-    } catch {
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Error decoding JWT token', e);
       return null;
     }
   }

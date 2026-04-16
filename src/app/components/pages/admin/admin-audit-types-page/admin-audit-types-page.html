@@ -18,47 +18,47 @@
   <div class="chargement" *ngIf="chargement">Chargement...</div>
 
   <!-- Barre de recherche -->
- <div class="recherche-container">
-  <input
-    type="text"
-    [(ngModel)]="recherche"
-    placeholder="Rechercher par nom, description ou couleur..."
-    class="recherche-input"
-  />
- </div>
+  <div class="recherche-container">
+    <input
+      type="text"
+      [(ngModel)]="recherche"
+      placeholder="Rechercher par nom, description ou couleur..."
+      class="recherche-input"
+    />
+  </div>
 
   <!-- Tableau -->
   <div class="carte" *ngIf="!chargement">
     <h2>Liste des types d'audits</h2>
     <table>
       <thead>
-      <tr>
-        <th>Nom</th>
-        <th>Description</th>
-        <th>Couleur</th>
-        <th>Actions</th>
-      </tr>
+        <tr>
+          <th>Nom</th>
+          <th>Description</th>
+          <th>Couleur</th>
+          <th>Actions</th>
+        </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let type of typesAuditsFiltres">
-        <td><strong>{{ type.name }}</strong></td>
-        <td>{{ type.description }}</td>
-        <td>
-          <div class="couleur-cell">
-            <span class="couleur-apercu" [style.background-color]="type.color"></span>
-            <span>{{ type.color }}</span>
-          </div>
-        </td>
-        <td>
-          <div class="actions">
-            <button class="btn-modifier" (click)="ouvrirModalModification(type)" title="Modifier">✏️</button>
-            <button class="btn-supprimer" (click)="ouvrirModalSuppression(type)" title="Supprimer">🗑️</button>
-          </div>
-        </td>
-      </tr>
-      <tr *ngIf="typesAuditsFiltres.length === 0">
-        <td colspan="4" class="vide">Aucun type d'audit trouvé</td>
-      </tr>
+        <tr *ngFor="let type of typesAuditsFiltres">
+          <td data-label="Nom"><strong>{{ type.name }}</strong></td>
+          <td data-label="Description">{{ type.description }}</td>
+          <td data-label="Couleur">
+            <div class="couleur-cell">
+              <span class="couleur-apercu" [style.background-color]="type.color"></span>
+              <span>{{ type.color }}</span>
+            </div>
+          </td>
+          <td data-label="Actions">
+            <div class="actions">
+              <button class="btn-modifier" (click)="ouvrirModalModification(type)" title="Modifier">✏️</button>
+              <button class="btn-supprimer" (click)="ouvrirModalSuppression(type)" title="Supprimer">🗑️</button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="typesAuditsFiltres.length === 0">
+          <td colspan="4" class="vide">Aucun type d'audit trouvé</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -87,7 +87,12 @@
           <label>Couleur</label>
           <div class="couleur-input">
             <input type="color" [(ngModel)]="nouveauType.color" />
-            <input type="text" [(ngModel)]="nouveauType.color" placeholder="#3B82F6" />
+            <input
+              type="text"
+              [(ngModel)]="nouveauType.color"
+              placeholder="#3B82F6"
+              maxlength="7"
+            />
           </div>
         </div>
       </div>
@@ -98,6 +103,7 @@
     </div>
   </div>
 
+  <!-- ===== MODAL MODIFICATION ===== -->
   <div class="overlay" *ngIf="modalModificationOuverte" (click)="fermerModalModification()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-entete">
@@ -121,7 +127,12 @@
           <label>Couleur</label>
           <div class="couleur-input">
             <input type="color" [(ngModel)]="modificationDto.color" />
-            <input type="text" [(ngModel)]="modificationDto.color" placeholder="#3B82F6" />
+            <input
+              type="text"
+              [(ngModel)]="modificationDto.color"
+              placeholder="#3B82F6"
+              maxlength="7"
+            />
           </div>
         </div>
       </div>
@@ -132,6 +143,7 @@
     </div>
   </div>
 
+  <!-- ===== MODAL SUPPRESSION ===== -->
   <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
     <div class="modal modal-suppression" (click)="$event.stopPropagation()">
       <div class="modal-entete">
