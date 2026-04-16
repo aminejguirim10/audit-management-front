@@ -78,6 +78,13 @@ const auditeurChildRoutes: Routes = [
       ),
   },
   {
+    path: 'messages/:auditId',
+    loadComponent: () =>
+      import('./components/pages/shared/audit-chat-page/audit-chat-page').then(
+        (m) => m.AuditChatPage,
+      ),
+  },
+  {
     path: 'idees-etudiants',
     loadComponent: () =>
       import('./components/pages/auditeur/auditeur-student-ideas-page/auditeur-student-ideas-page').then(
@@ -111,6 +118,13 @@ const auditeChildRoutes: Routes = [
     loadComponent: () =>
       import('./components/pages/audite/audite-corrective-actions-page/audite-corrective-actions-page').then(
         (m) => m.AuditeCorrectiveActionsPage,
+      ),
+  },
+  {
+    path: 'messages/:auditId',
+    loadComponent: () =>
+      import('./components/pages/shared/audit-chat-page/audit-chat-page').then(
+        (m) => m.AuditChatPage,
       ),
   },
   {
