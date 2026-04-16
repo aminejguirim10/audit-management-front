@@ -25,6 +25,26 @@ export interface AuthenticationResponse {
 }
 
 export interface AuthUser {
+  id: number | null;
+  name: string | null;
   email: string;
   role: UserRole;
+  phoneNumber: string | null;
+  profilePhotoUrl: string | null;
+}
+
+export interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  phoneNumber: string | null;
+  profilePhotoUrl: string | null;
+  role: UserRole;
+  departement: string | null;
+}
+
+export interface UpdateUserProfileRequest {
+  name?: string;
+  phoneNumber?: string;
+  profilePhotoUrl?: string;
 }

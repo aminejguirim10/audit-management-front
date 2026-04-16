@@ -55,6 +55,13 @@ const adminChildRoutes: Routes = [
         (m) => m.AdminStudentsPage,
       ),
   },
+  {
+    path: 'profil',
+    loadComponent: () =>
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
+      ),
+  },
 ];
 
 const auditeurChildRoutes: Routes = [
@@ -92,11 +99,16 @@ const auditeurChildRoutes: Routes = [
       ),
   },
   {
-    path: 'parametres',
+    path: 'profil',
     loadComponent: () =>
-      import('./components/pages/auditeur/auditeur-settings-page/auditeur-settings-page').then(
-        (m) => m.AuditeurSettingsPage,
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
       ),
+  },
+  {
+    path: 'parametres',
+    pathMatch: 'full',
+    redirectTo: 'profil',
   },
 ];
 
@@ -128,11 +140,16 @@ const auditeChildRoutes: Routes = [
       ),
   },
   {
-    path: 'parametres',
+    path: 'profil',
     loadComponent: () =>
-      import('./components/pages/audite/audite-settings-page/audite-settings-page').then(
-        (m) => m.AuditeSettingsPage,
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
       ),
+  },
+  {
+    path: 'parametres',
+    pathMatch: 'full',
+    redirectTo: 'profil',
   },
 ];
 
@@ -154,6 +171,13 @@ const etudiantChildRoutes: Routes = [
     loadComponent: () =>
       import('./components/pages/etudiant/etudiant-my-ideas-page/etudiant-my-ideas-page').then(
         (m) => m.EtudiantMyIdeasPage,
+      ),
+  },
+  {
+    path: 'profil',
+    loadComponent: () =>
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
       ),
   },
 ];
