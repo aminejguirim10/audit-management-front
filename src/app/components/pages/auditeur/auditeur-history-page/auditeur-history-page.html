@@ -1,4 +1,44 @@
-﻿<section class="page-placeholder">
-  <h1>Auditeur - Historique</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role AUDITEUR.</p>
+﻿<section class="audit-list-page">
+  <header>
+    <p class="eyebrow">Historique auditeur</p>
+    <h1>Audits suivis</h1>
+    <p>Accédez rapidement à la conversation de chaque audit.</p>
+  </header>
+
+  <div class="status-box" *ngIf="error">{{ error }}</div>
+  <div class="status-box loading" *ngIf="loading && !error">Chargement des audits...</div>
+
+  <article class="table-card" *ngIf="!loading && !error">
+    <table *ngIf="audits.length > 0; else emptyTemplate">
+      <thead>
+        <tr>
+          <th>Audit</th>
+          <th>Type</th>
+          <th>Statut</th>
+          <th>Période</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let audit of audits; trackBy: trackByAuditId">
+          <td>
+            <strong>{{ audit.title }}</strong>
+            <small>#{{ audit.id }} - {{ audit.department }}</small>
+          </td>
+          <td>{{ audit.typeAuditName || 'N/A' }}</td>
+          <td>
+            <span class="status-chip">{{ audit.status }}</span>
+          </td>
+          <td>{{ formatDate(audit.dateDebut) }} - {{ formatDate(audit.dateFin) }}</td>
+          <td>
+            <a class="chat-link" [routerLink]="['/auditeur/messages', audit.id]">Messages</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyTemplate>
+      <div class="empty-box">Aucun audit dans l'historique.</div>
+    </ng-template>
+  </article>
 </section>

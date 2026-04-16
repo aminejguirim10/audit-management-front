@@ -4,6 +4,7 @@ import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../models/api-response.model';
 import { API_BASE_URL } from '../config/api.config';
+import { NotificationService } from './notification.service';
 import {
   AuthenticationRequest,
   AuthenticationResponse,
@@ -18,6 +19,7 @@ import {
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly notificationService = inject(NotificationService);
 
   private readonly apiUrl = API_BASE_URL;
   private readonly accessTokenStorageKey = 'audit_access_token';
@@ -50,6 +52,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.accessTokenStorageKey);
     localStorage.removeItem(this.refreshTokenStorageKey);
+    this.notificationService.clearCache();
     this.userSignal.set(null);
   }
 
@@ -113,6 +116,7 @@ export class AuthService {
       return;
     }
 
+    this.notificationService.clearCache();
     localStorage.setItem(this.accessTokenStorageKey, response.data.access_token);
     localStorage.setItem(this.refreshTokenStorageKey, response.data.refresh_token);
 

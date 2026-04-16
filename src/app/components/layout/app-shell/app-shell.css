@@ -180,41 +180,7 @@
   display: flex;
   align-items: center;
   gap: 0.9rem;
-}
-
-.notif-btn {
-  width: 2.9rem;
-  height: 2.9rem;
-  border-radius: 14px;
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-}
-
-.notif-btn:hover {
-  border-color: #9eb2cf;
-}
-
-.notif-btn svg {
-  width: 1.2rem;
-  height: 1.2rem;
-  fill: #2f4f77;
-}
-
-.notif-dot {
-  width: 0.56rem;
-  height: 0.56rem;
-  border-radius: 50%;
-  background: #f73753;
-  border: 2px solid #fff;
-  position: absolute;
-  top: 0.33rem;
-  right: 0.33rem;
 }
 
 .user-block {

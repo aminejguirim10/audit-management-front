@@ -56,14 +56,69 @@
 
       <div class="topbar-right">
         @if (showNotificationButton()) {
-          <button type="button" class="notif-btn" aria-label="Notifications">
+          <button
+            type="button"
+            class="notif-btn"
+            aria-label="Notifications"
+            [attr.aria-expanded]="notificationPanelOpen()"
+            (click)="toggleNotificationsPanel()"
+          >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path
                 d="M12 3a5 5 0 0 0-5 5v2.6c0 .7-.2 1.4-.7 2L4.8 15c-.6.8 0 2 1 2h12.4c1 0 1.6-1.2 1-2l-1.5-2.4c-.4-.6-.7-1.3-.7-2V8a5 5 0 0 0-5-5Zm0 18a2.5 2.5 0 0 1-2.4-2h4.8A2.5 2.5 0 0 1 12 21Z"
               />
             </svg>
-            <span class="notif-dot"></span>
+            @if (unreadNotificationsCount() > 0) {
+              <span class="notif-dot">
+                {{ unreadNotificationsCount() > 99 ? '99+' : unreadNotificationsCount() }}
+              </span>
+            }
           </button>
+
+          @if (notificationPanelOpen()) {
+            <section class="notif-panel" aria-label="Centre de notifications">
+              <header class="notif-panel-header">
+                <div>
+                  <p class="notif-panel-title">Notifications</p>
+                  <p class="notif-panel-subtitle">
+                    {{ unreadNotificationsCount() }} {{ unreadNotificationsCaption() }}
+                  </p>
+                </div>
+              </header>
+
+              @if (notificationPanelLoading()) {
+                <p class="notif-state">Chargement...</p>
+              } @else if (notificationPanelError()) {
+                <p class="notif-state notif-state-error">{{ notificationPanelError() }}</p>
+              } @else if (notifications().length === 0) {
+                <p class="notif-state">Aucune notification pour le moment.</p>
+              } @else {
+                <ul class="notif-list">
+                  @for (
+                    notification of notifications();
+                    track trackByNotificationId($index, notification)
+                  ) {
+                    <li>
+                      <button
+                        type="button"
+                        class="notif-item"
+                        [class.unread]="!notification.isRead"
+                        (click)="openNotification(notification)"
+                      >
+                        <span class="notif-item-head">
+                          <span class="notif-sender">{{
+                            notification.senderName || 'Notification'
+                          }}</span>
+                          <time>{{ formatNotificationDate(notification.createdAt) }}</time>
+                        </span>
+                        <span class="notif-content">{{ notification.content }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+          }
         }
 
         <div class="user-block">
