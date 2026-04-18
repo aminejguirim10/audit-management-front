@@ -52,6 +52,11 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
       route: '/audite/actions-correctives',
       shortLabel: 'AC',
     },
+    {
+      label: 'Assistant qualite',
+      route: '/audite/assistant-qualite',
+      shortLabel: 'IA',
+    },
     { label: 'Profil', route: '/audite/profil', shortLabel: 'PR' },
   ],
   ETUDIANT: [
