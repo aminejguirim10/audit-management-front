@@ -1,6 +1,7 @@
 export const environment = {
   production: true,
   apiUrl: 'https://audit-management-production.com',
+  aiAssistantApiUrl: 'https://audit-management-ai-assistant-production.com/api',
   supabase: {
     url: 'https://jcuvxwdrivmjgolvnlly.supabase.co',
     anonKey:

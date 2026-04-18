@@ -133,6 +133,13 @@ const auditeChildRoutes: Routes = [
       ),
   },
   {
+    path: 'assistant-qualite',
+    loadComponent: () =>
+      import('./components/pages/audite/audite-ai-assistant-page/audite-ai-assistant-page').then(
+        (m) => m.AuditeAiAssistantPage,
+      ),
+  },
+  {
     path: 'messages/:auditId',
     loadComponent: () =>
       import('./components/pages/shared/audit-chat-page/audit-chat-page').then(
