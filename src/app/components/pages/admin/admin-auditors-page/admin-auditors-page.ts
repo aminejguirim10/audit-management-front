@@ -13,16 +13,12 @@ import { Auditor } from '../../../../models/auditor.model';
 })
 export class AdminAuditorsPage implements OnInit {
   private service = inject(AuditorService);
-
   auditors: Auditor[] = [];
   chargement = false;
   erreur = '';
   recherche = '';
 
   get totalAuditors(): number { return this.auditors.length; }
-  get auditorsActifs(): number { return 0; }
-  get auditsEnCoursTotal(): number { return 0; }
-  get auditsCompletesTotal(): number { return 0; }
 
   readonly departements = ['INFORMATIQUE', 'ELECTRIQUE', 'INDUS'];
   readonly departementsLabels: Record<string, string> = {
@@ -30,9 +26,8 @@ export class AdminAuditorsPage implements OnInit {
     'ELECTRIQUE': 'Génie Électrique',
     'INDUS': 'Génie Industriel'
   };
-  ngOnInit(): void {
-    this.loadAuditors();
-  }
+
+  ngOnInit(): void { this.loadAuditors(); }
 
   get filteredAuditors(): Auditor[] {
     const term = this.recherche.trim().toLowerCase();
@@ -48,17 +43,32 @@ export class AdminAuditorsPage implements OnInit {
     this.chargement = true;
     this.erreur = '';
     this.service.findAll().subscribe({
-      next: (data: Auditor[]) => {
-        this.auditors = data;
-        this.chargement = false;
-      },
-      error: () => {
-        this.erreur = 'Erreur lors du chargement des auditeurs';
-        this.chargement = false;
-      }
+      next: (data: Auditor[]) => { this.auditors = data; this.chargement = false; },
+      error: () => { this.erreur = 'Erreur lors du chargement'; this.chargement = false; }
     });
   }
 
+
+  getOffset(value: number, total: number): number {
+    if (total === 0) return 251.2;
+    return 251.2 * (1 - Math.min(value / total, 1));
+  }
+
+  countByDept(dept: string): number {
+    return this.auditors.filter(a => a.departement === dept).length;
+  }
+
+  getPct(dept: string): number {
+    if (this.totalAuditors === 0) return 0;
+    return Math.round((this.countByDept(dept) / this.totalAuditors) * 100);
+  }
+
+  getInitials(name: string | undefined): string {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  // ── Modal création ──
   modalCreationOuverte = false;
   nouveauAuditor: Partial<Auditor> = {};
   erreurCreation = '';
@@ -69,47 +79,27 @@ export class AdminAuditorsPage implements OnInit {
     this.modalCreationOuverte = true;
   }
 
-  fermerModalCreation(): void {
-    this.modalCreationOuverte = false;
-  }
+  fermerModalCreation(): void { this.modalCreationOuverte = false; }
 
   creerAuditor(): void {
-    if (!this.nouveauAuditor.name?.trim()) {
-      this.erreurCreation = 'Le nom complet est obligatoire !';
-      return;
-    }
-    if (!this.nouveauAuditor.email?.trim()) {
-      this.erreurCreation = 'L\'email est obligatoire !';
-      return;
-    }
+    if (!this.nouveauAuditor.name?.trim()) { this.erreurCreation = 'Le nom est obligatoire !'; return; }
+    if (!this.nouveauAuditor.email?.trim()) { this.erreurCreation = "L'email est obligatoire !"; return; }
     if (!this.nouveauAuditor.email.match(/^[a-zA-Z0-9._%+-]+@enicar\.ucar\.tn$/)) {
-      this.erreurCreation = 'L\'email doit être au format @enicar.ucar.tn !';
-      return;
+      this.erreurCreation = "L'email doit être au format @enicar.ucar.tn !"; return;
     }
-    if (!this.nouveauAuditor.phoneNumber?.trim()) {
-      this.erreurCreation = 'Le numéro de téléphone est obligatoire !';
-      return;
-    }
+    if (!this.nouveauAuditor.phoneNumber?.trim()) { this.erreurCreation = 'Le téléphone est obligatoire !'; return; }
     if (!this.nouveauAuditor.phoneNumber.match(/^[0-9]{8}$/)) {
-      this.erreurCreation = 'Le numéro de téléphone doit contenir exactement 8 chiffres !';
-      return;
+      this.erreurCreation = 'Le téléphone doit contenir exactement 8 chiffres !'; return;
     }
-    if (!this.nouveauAuditor.departement) {
-      this.erreurCreation = 'Le département est obligatoire !';
-      return;
-    }
+    if (!this.nouveauAuditor.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
+
     this.service.create(this.nouveauAuditor).subscribe({
-      next: (auditorCree: Auditor) => {
-        this.auditors.push(auditorCree);
-        this.fermerModalCreation();
-        this.loadAuditors();
-      },
-      error: (err: any) => {
-        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
-      }
+      next: () => { this.fermerModalCreation(); this.loadAuditors(); },
+      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
     });
   }
 
+  // ── Modal suppression ──
   modalSuppressionOuverte = false;
   auditorASupprimer: Auditor | null = null;
 
@@ -130,10 +120,7 @@ export class AdminAuditorsPage implements OnInit {
         this.auditors = this.auditors.filter(a => a.id !== this.auditorASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => {
-        this.erreur = 'Erreur lors de la suppression';
-        this.fermerModalSuppression();
-      }
+      error: () => { this.erreur = 'Erreur lors de la suppression'; this.fermerModalSuppression(); }
     });
   }
 }

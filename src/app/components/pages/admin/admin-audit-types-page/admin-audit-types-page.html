@@ -1,162 +1,403 @@
-﻿<div class="container">
+﻿<div class="page-wrap">
 
-  <!-- En-tête -->
-  <div class="entete">
-    <div>
-      <h1>Types d'audits</h1>
-      <p>Gérer les différents types d'audits</p>
+
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Types d'audits</h1>
+        <p>Gérer les catégories d'audits de la plateforme</p>
+      </div>
     </div>
-    <button class="btn-primaire" (click)="ouvrirModalCreation()">
-      + Nouveau type
+    <button class="add-btn" (click)="ouvrirModalCreation()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nouveau type
     </button>
   </div>
 
-  <!-- Erreur -->
-  <div class="erreur" *ngIf="erreur">{{ erreur }}</div>
 
-  <!-- Chargement -->
-  <div class="chargement" *ngIf="chargement">Chargement...</div>
-
-  <!-- Barre de recherche -->
-  <div class="recherche-container">
-    <input
-      type="text"
-      [(ngModel)]="recherche"
-      placeholder="Rechercher par nom, description ou couleur..."
-      class="recherche-input"
-    />
+  <div class="alert-err" *ngIf="erreur">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ erreur }}
   </div>
 
-  <!-- Tableau -->
-  <div class="carte" *ngIf="!chargement">
-    <h2>Liste des types d'audits</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Description</th>
-          <th>Couleur</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let type of typesAuditsFiltres">
-          <td data-label="Nom"><strong>{{ type.name }}</strong></td>
-          <td data-label="Description">{{ type.description }}</td>
-          <td data-label="Couleur">
-            <div class="couleur-cell">
-              <span class="couleur-apercu" [style.background-color]="type.color"></span>
-              <span>{{ type.color }}</span>
-            </div>
-          </td>
-          <td data-label="Actions">
-            <div class="actions">
-              <button class="btn-modifier" (click)="ouvrirModalModification(type)" title="Modifier">✏️</button>
-              <button class="btn-supprimer" (click)="ouvrirModalSuppression(type)" title="Supprimer">🗑️</button>
-            </div>
-          </td>
-        </tr>
-        <tr *ngIf="typesAuditsFiltres.length === 0">
-          <td colspan="4" class="vide">Aucun type d'audit trouvé</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="loading-wrap" *ngIf="chargement">
+    <div class="ring"></div>
+    <p>Chargement des types d'audits...</p>
   </div>
 
-  <!-- ===== MODAL CRÉATION ===== -->
-  <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Nouveau type d'audit</h3>
-        <p>Ajoutez un nouveau type d'audit au système</p>
-        <button class="btn-fermer" (click)="fermerModalCreation()">✕</button>
+  <div *ngIf="!chargement">
+
+
+    <div class="circles-row">
+
+      <!-- Total -->
+      <div class="circle-card circle-total">
+        <div class="circle-svg-wrap">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle class="c-bg" cx="55" cy="55" r="46"/>
+            <circle class="c-fill" cx="55" cy="55" r="46"
+              stroke="url(#grad-total)"
+              [style.stroke-dashoffset]="0"/>
+            <defs>
+              <linearGradient id="grad-total" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#6366F1"/>
+                <stop offset="100%" stop-color="#3B82F6"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="circle-center">
+            <span class="c-num">{{ typesAudits.length }}</span>
+            <span class="c-sub">types</span>
+          </div>
+        </div>
+        <div class="circle-info">
+          <span class="c-label">Total</span>
+          <span class="c-desc">Types enregistrés</span>
+        </div>
       </div>
-      <div class="modal-corps">
-        <div class="champ" *ngIf="erreurCreation">
-          <p class="erreur-msg">{{ erreurCreation }}</p>
+
+      <!-- Plus récent -->
+      <div class="circle-card circle-recent">
+        <div class="circle-svg-wrap">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle class="c-bg" cx="55" cy="55" r="46"/>
+            <circle class="c-fill" cx="55" cy="55" r="46"
+              stroke="#818CF8"
+              [style.stroke-dashoffset]="getOffset(1, typesAudits.length || 1)"/>
+          </svg>
+          <div class="circle-center">
+            <span class="c-num" style="font-size:1rem">{{ typesAudits[typesAudits.length-1]?.name?.slice(0,5) || '—' }}</span>
+            <span class="c-sub">récent</span>
+          </div>
         </div>
-        <div class="champ">
-          <label>Nom</label>
-          <input type="text" [(ngModel)]="nouveauType.name" placeholder="Ex: Audit Académique" />
+        <div class="circle-info">
+          <span class="c-label">Dernier ajout</span>
+          <span class="c-desc">{{ typesAudits[typesAudits.length-1]?.name || 'Aucun' }}</span>
         </div>
-        <div class="champ">
-          <label>Description</label>
-          <textarea [(ngModel)]="nouveauType.description" placeholder="Description du type d'audit"></textarea>
+      </div>
+
+      <!-- Couleurs uniques -->
+      <div class="circle-card circle-colors">
+        <div class="circle-svg-wrap">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle class="c-bg" cx="55" cy="55" r="46"/>
+            <circle class="c-fill" cx="55" cy="55" r="46"
+              stroke="#A5B4FC"
+              [style.stroke-dashoffset]="getOffset(uniqueColors, typesAudits.length || 1)"/>
+          </svg>
+          <div class="circle-center">
+            <span class="c-num">{{ uniqueColors }}</span>
+            <span class="c-sub">couleurs</span>
+          </div>
         </div>
-        <div class="champ">
-          <label>Couleur</label>
-          <div class="couleur-input">
-            <input type="color" [(ngModel)]="nouveauType.color" />
-            <input
-              type="text"
-              [(ngModel)]="nouveauType.color"
-              placeholder="#3B82F6"
-              maxlength="7"
-            />
+        <div class="circle-info">
+          <span class="c-label">Couleurs uniques</span>
+          <span class="c-desc">{{ colorPct }}% personnalisés</span>
+        </div>
+      </div>
+
+      <!-- Résultats filtrés -->
+      <div class="circle-card circle-filtered">
+        <div class="circle-svg-wrap">
+          <svg width="110" height="110" viewBox="0 0 110 110">
+            <circle class="c-bg" cx="55" cy="55" r="46"/>
+            <circle class="c-fill" cx="55" cy="55" r="46"
+              stroke="#93C5FD"
+              [style.stroke-dashoffset]="getOffset(typesAuditsFiltres.length, typesAudits.length || 1)"/>
+          </svg>
+          <div class="circle-center">
+            <span class="c-num">{{ typesAuditsFiltres.length }}</span>
+            <span class="c-sub">filtrés</span>
+          </div>
+        </div>
+        <div class="circle-info">
+          <span class="c-label">Résultats</span>
+          <span class="c-desc">{{ recherche ? 'Recherche active' : 'Tous affichés' }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── TOOLBAR ── -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input class="search-inp" type="text" [(ngModel)]="recherche"
+          placeholder="Rechercher un type d'audit..." />
+        <button class="search-clear" *ngIf="recherche" (click)="recherche = ''">✕</button>
+      </div>
+      <div class="view-toggle">
+        <button class="toggle-btn" [class.active]="vue === 'cards'" (click)="vue = 'cards'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button class="toggle-btn" [class.active]="vue === 'table'" (click)="vue = 'table'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ── VUE CARDS ── -->
+    <div class="cards-grid" *ngIf="vue === 'cards'">
+      <div class="type-card" *ngFor="let type of typesAuditsFiltres; let i = index"
+           [style.animation-delay]="i * 40 + 'ms'">
+        <div class="card-stripe" [style.background]="type.color"></div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="color-swatch-lg" [style.background]="type.color + '22'" [style.border]="'2px solid ' + type.color + '44'">
+              <span class="color-dot-lg" [style.background]="type.color"></span>
+            </div>
+            <div class="card-actions">
+              <button class="icon-btn edit" (click)="ouvrirModalModification(type)" title="Modifier">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="icon-btn del" (click)="ouvrirModalSuppression(type)" title="Supprimer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <h3 class="card-name">{{ type.name }}</h3>
+          <p class="card-desc">{{ type.description }}</p>
+          <div class="card-footer">
+            <span class="hex-badge" [style.color]="type.color">{{ type.color }}</span>
+            <span class="id-badge">#{{ type.id }}</span>
           </div>
         </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalCreation()">Annuler</button>
-        <button class="btn-primaire" (click)="creer()">Créer</button>
+
+      <!-- Empty state -->
+      <div class="empty-cards" *ngIf="typesAuditsFiltres.length === 0">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p>Aucun type d'audit trouvé</p>
+      </div>
+    </div>
+
+    <!-- ── VUE TABLE ── -->
+    <div class="tbl-card" *ngIf="vue === 'table'">
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nom</th>
+              <th>Description</th>
+              <th>Couleur</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let type of typesAuditsFiltres; let i = index" [style.animation-delay]="i * 25 + 'ms'">
+              <td data-label="ID">
+                <span class="id-tag">#{{ type.id }}</span>
+              </td>
+              <td data-label="Nom">
+                <div class="name-cell">
+                  <span class="name-dot" [style.background]="type.color"></span>
+                  <strong>{{ type.name }}</strong>
+                </div>
+              </td>
+              <td data-label="Description">
+                <span class="desc-text">{{ type.description }}</span>
+              </td>
+              <td data-label="Couleur">
+                <div class="color-cell">
+                  <span class="color-swatch" [style.background]="type.color"></span>
+                  <code class="color-code">{{ type.color }}</code>
+                </div>
+              </td>
+              <td data-label="Actions">
+                <div class="action-wrap">
+                  <button class="icon-btn edit" (click)="ouvrirModalModification(type)" title="Modifier">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
+                  <button class="icon-btn del" (click)="ouvrirModalSuppression(type)" title="Supprimer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="typesAuditsFiltres.length === 0">
+              <td colspan="5" class="empty-td">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="1.5">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p>Aucun type d'audit trouvé</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════ MODAL CRÉATION ══════ -->
+  <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        </div>
+        <div class="modal-head-text">
+          <h3>Nouveau type d'audit</h3>
+          <p>Ajouter une nouvelle catégorie d'audit</p>
+        </div>
+        <button class="modal-close" (click)="fermerModalCreation()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-err" *ngIf="erreurCreation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          {{ erreurCreation }}
+        </div>
+        <div class="field">
+          <label>Nom *</label>
+          <input type="text" [(ngModel)]="nouveauType.name" placeholder="Ex: Audit de sécurité" />
+        </div>
+        <div class="field">
+          <label>Description *</label>
+          <textarea [(ngModel)]="nouveauType.description" placeholder="Description détaillée du type d'audit..." rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label>Couleur *</label>
+          <div class="color-field">
+            <div class="color-preview" [style.background]="nouveauType.color"></div>
+            <input type="color" [(ngModel)]="nouveauType.color" class="color-native" />
+            <input type="text" [(ngModel)]="nouveauType.color" placeholder="#3B82F6" maxlength="7" class="color-text" />
+          </div>
+          <div class="color-presets">
+            <span *ngFor="let c of presetColors" class="preset-dot"
+              [style.background]="c"
+              [class.selected]="nouveauType.color === c"
+              (click)="nouveauType.color = c" title="{{ c }}">
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-submit" (click)="creer()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Créer le type
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ===== MODAL MODIFICATION ===== -->
+  <!-- ══════ MODAL MODIFICATION ══════ -->
   <div class="overlay" *ngIf="modalModificationOuverte" (click)="fermerModalModification()">
     <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Modifier le type d'audit</h3>
-        <p>Modifiez les informations du type d'audit</p>
-        <button class="btn-fermer" (click)="fermerModalModification()">✕</button>
-      </div>
-      <div class="modal-corps">
-        <div class="champ" *ngIf="erreurModification">
-          <p class="erreur-msg">{{ erreurModification }}</p>
+      <div class="modal-head">
+        <div class="modal-icon edit-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
         </div>
-        <div class="champ">
+        <div class="modal-head-text">
+          <h3>Modifier le type</h3>
+          <p>{{ typeEnModification?.name }}</p>
+        </div>
+        <button class="modal-close" (click)="fermerModalModification()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-err" *ngIf="erreurModification">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          {{ erreurModification }}
+        </div>
+        <div class="field">
           <label>Nom</label>
           <input type="text" [(ngModel)]="modificationDto.name" placeholder="Nom du type d'audit" />
         </div>
-        <div class="champ">
+        <div class="field">
           <label>Description</label>
-          <textarea [(ngModel)]="modificationDto.description" placeholder="Description du type d'audit"></textarea>
+          <textarea [(ngModel)]="modificationDto.description" placeholder="Description..." rows="3"></textarea>
         </div>
-        <div class="champ">
+        <div class="field">
           <label>Couleur</label>
-          <div class="couleur-input">
-            <input type="color" [(ngModel)]="modificationDto.color" />
-            <input
-              type="text"
-              [(ngModel)]="modificationDto.color"
-              placeholder="#3B82F6"
-              maxlength="7"
-            />
+          <div class="color-field">
+            <div class="color-preview" [style.background]="modificationDto.color"></div>
+            <input type="color" [(ngModel)]="modificationDto.color" class="color-native" />
+            <input type="text" [(ngModel)]="modificationDto.color" placeholder="#3B82F6" maxlength="7" class="color-text" />
+          </div>
+          <div class="color-presets">
+            <span *ngFor="let c of presetColors" class="preset-dot"
+              [style.background]="c"
+              [class.selected]="modificationDto.color === c"
+              (click)="modificationDto.color = c" title="{{ c }}">
+            </span>
           </div>
         </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalModification()">Annuler</button>
-        <button class="btn-primaire" (click)="modifier()">Enregistrer</button>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalModification()">Annuler</button>
+        <button class="btn-submit" (click)="modifier()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Enregistrer
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ===== MODAL SUPPRESSION ===== -->
+  <!-- ══════ MODAL SUPPRESSION ══════ -->
   <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
-    <div class="modal modal-suppression" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Confirmer la suppression</h3>
-        <button class="btn-fermer" (click)="fermerModalSuppression()">✕</button>
+    <div class="modal modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-icon del-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+          </svg>
+        </div>
+        <div class="modal-head-text">
+          <h3>Confirmer la suppression</h3>
+          <p>Cette action est irréversible</p>
+        </div>
+        <button class="modal-close" (click)="fermerModalSuppression()">✕</button>
       </div>
-      <div class="modal-corps">
-        <p>Êtes-vous sûr de vouloir supprimer le type d'audit <strong>{{ typeASupprimer?.name }}</strong> ?</p>
-        <p class="avertissement">⚠️ Cette action est irréversible.</p>
+      <div class="modal-body">
+        <div class="del-warn">
+          <div class="del-type-preview" [style.background]="typeASupprimer?.color + '15'" [style.border-color]="typeASupprimer?.color + '44'">
+            <span class="del-dot" [style.background]="typeASupprimer?.color"></span>
+            <strong>{{ typeASupprimer?.name }}</strong>
+          </div>
+          <p class="del-msg">Ce type d'audit sera supprimé définitivement du système.</p>
+        </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalSuppression()">Annuler</button>
-        <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-del" (click)="confirmerSuppression()">Supprimer</button>
       </div>
     </div>
   </div>

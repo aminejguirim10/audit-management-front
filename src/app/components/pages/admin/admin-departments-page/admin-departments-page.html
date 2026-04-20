@@ -1,137 +1,252 @@
-﻿<div class="container">
+﻿<div class="page-wrap">
 
-
-  <div class="entete">
-    <div>
-      <h1>Chefs de département</h1>
-      <p>Gérer les chefs de département (audités)</p>
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon" style="background: linear-gradient(135deg,#0bf5d6,#0649d9)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Chefs de département</h1>
+        <p>Gestion des responsables par département</p>
+      </div>
     </div>
-    <button class="btn-primaire" (click)="ouvrirModalCreation()">
-      👤 Ajouter un chef
+    <button class="add-btn" style="background:linear-gradient(135deg,#0bf5d6,#0649d9)" (click)="ouvrirModalCreation()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter un chef
     </button>
   </div>
 
+  <div class="alert-err" *ngIf="erreur">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ erreur }}
+  </div>
 
-  <div class="erreur" *ngIf="erreur">{{ erreur }}</div>
+  <!-- CIRCLE STATS -->
+  <div class="circles-row">
 
-  <!-- Statistiques -->
-  <div class="stats-grid">
-    <div class="stat-carte">
-      <p class="stat-label">Total des chefs</p>
-      <p class="stat-valeur">{{ totalChefs }}</p>
+    <!-- Total -->
+    <div class="circle-card" style="--accent:#10B981">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40"
+            stroke="#10B981"
+            [style.stroke-dashoffset]="getOffset(totalChefs, totalChefs || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ totalChefs }}</span>
+          <span class="circle-pct">chefs</span>
+        </div>
+      </div>
+      <div class="circle-label">Total des chefs</div>
+      <div class="circle-sub">Responsables enregistrés</div>
     </div>
-    <div class="stat-carte">
-      <p class="stat-label">Actifs</p>
-      <p class="stat-valeur vert">{{ chefsActifs }}</p>
+
+    <!-- Par département INFO -->
+    <div class="circle-card" style="--accent:#3B82F6">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40"
+            stroke="#3B82F6"
+            [style.stroke-dashoffset]="getOffset(countByDept('INFORMATIQUE'), totalChefs || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ countByDept('INFORMATIQUE') }}</span>
+          <span class="circle-pct">{{ getPct('INFORMATIQUE') }}%</span>
+        </div>
+      </div>
+      <div class="circle-label">Génie Informatique</div>
+      <div class="circle-sub">Chefs dans ce département</div>
     </div>
-    <div class="stat-carte">
-      <p class="stat-label">Audits en cours</p>
-      <p class="stat-valeur">{{ auditsEnCours }}</p>
+
+    <!-- Par département ELEC -->
+    <div class="circle-card" style="--accent:#F59E0B">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40"
+            stroke="#F59E0B"
+            [style.stroke-dashoffset]="getOffset(countByDept('ELECTRIQUE'), totalChefs || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ countByDept('ELECTRIQUE') }}</span>
+          <span class="circle-pct">{{ getPct('ELECTRIQUE') }}%</span>
+        </div>
+      </div>
+      <div class="circle-label">Génie Électrique</div>
+      <div class="circle-sub">Chefs dans ce département</div>
+    </div>
+
+    <!-- Par département INDUS -->
+    <div class="circle-card" style="--accent:#8B5CF6">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40"
+            stroke="#8B5CF6"
+            [style.stroke-dashoffset]="getOffset(countByDept('INDUS'), totalChefs || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ countByDept('INDUS') }}</span>
+          <span class="circle-pct">{{ getPct('INDUS') }}%</span>
+        </div>
+      </div>
+      <div class="circle-label">Génie Industriel</div>
+      <div class="circle-sub">Chefs dans ce département</div>
+    </div>
+
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-inp" type="text" [(ngModel)]="recherche" placeholder="Rechercher par nom, email ou département..." />
+    </div>
+    <span class="results-tag">{{ filteredChefs.length }} résultat{{ filteredChefs.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-wrap" *ngIf="chargement">
+    <div class="ring"></div>
+    <p>Chargement des chefs...</p>
+  </div>
+
+  <!-- TABLE -->
+  <div class="tbl-card" *ngIf="!chargement">
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Responsable</th>
+            <th>Département</th>
+            <th>Contact</th>
+            <th>Rôle</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let chef of filteredChefs; let i = index" [style.animation-delay]="i * 25 + 'ms'">
+            <td data-label="Responsable">
+              <div class="person-cell">
+                <div class="avatar-lg" style="background:#ECFDF5;color:#059669">{{ getInitials(chef.name) }}</div>
+                <div>
+                  <div class="person-name">{{ chef.name }}</div>
+                  <div class="person-id">#{{ chef.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td data-label="Département">
+              <span class="dept-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                {{ departementsLabels[chef.departement] }}
+              </span>
+            </td>
+            <td data-label="Contact">
+              <div class="contact-col">
+                <div class="contact-row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  {{ chef.email }}
+                </div>
+                <div class="contact-row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82 19.79 19.79 0 01.38 1.22 2 2 0 012.38 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.82 7.45A16 16 0 0016.55 17.18l.81-.81a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                  {{ chef.phoneNumber }}
+                </div>
+              </div>
+            </td>
+            <td data-label="Rôle">
+              <span class="role-badge" style="background:#ECFDF5;color:#065F46">CHEF</span>
+            </td>
+            <td data-label="Actions">
+              <div class="action-wrap">
+                <button class="icon-btn del" (click)="ouvrirModalSuppression(chef)" title="Supprimer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="empty-row" *ngIf="filteredChefs.length === 0">
+            <td colspan="5">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <p>Aucun chef de département trouvé</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-
-  <div class="recherche-container">
-    <input
-      type="text"
-      [(ngModel)]="recherche"
-      placeholder="Rechercher par nom, email ou département..."
-      class="recherche-input"
-    />
-  </div>
-
- 
-  <div class="chargement" *ngIf="chargement">Chargement...</div>
-
-
-  <div class="carte" *ngIf="!chargement">
-    <h2>Liste des chefs de département</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Département</th>
-          <th>Contact</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let chef of filteredChefs">
-          <td data-label="Nom"><strong>{{ chef.name }}</strong></td>
-          <td data-label="Département">🏢 {{ departementsLabels[chef.departement] }}</td>
-          <td data-label="Contact">
-            <div class="contact-cell">
-              <span>✉️ {{ chef.email }}</span>
-              <span>📞 {{ chef.phoneNumber }}</span>
-            </div>
-          </td>
-          <td data-label="Actions">
-            <div class="actions">
-              <button class="btn-supprimer" (click)="ouvrirModalSuppression(chef)" title="Supprimer">🗑️</button>
-            </div>
-          </td>
-        </tr>
-        <tr *ngIf="filteredChefs.length === 0">
-          <td colspan="6" class="vide">Aucun chef de département trouvé</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  
+  <!-- MODAL CRÉATION -->
   <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
     <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Ajouter un chef de département</h3>
-        <p>Créer un nouveau compte pour un chef de département</p>
-        <button class="btn-fermer" (click)="fermerModalCreation()">✕</button>
+      <div class="modal-head">
+        <div class="modal-head-text">
+          <h3>Ajouter un chef de département</h3>
+          <p>Créer un nouveau compte responsable</p>
+        </div>
+        <button class="modal-close" (click)="fermerModalCreation()">✕</button>
       </div>
-      <div class="modal-corps">
-        <div class="erreur-msg" *ngIf="erreurCreation">{{ erreurCreation }}</div>
+      <div class="modal-body">
+        <div class="modal-err" *ngIf="erreurCreation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+          {{ erreurCreation }}
+        </div>
         <div class="form-grid">
-          <div class="champ">
+          <div class="field">
             <label>Nom complet *</label>
-            <input type="text" [(ngModel)]="nouveauChef.name" placeholder="Ex: Dr. Marie Dubois" />
+            <input type="text" [(ngModel)]="nouveauChef.name" placeholder="Dr. Marie Dubois" />
           </div>
-          <div class="champ">
+          <div class="field">
             <label>Email *</label>
             <input type="email" [(ngModel)]="nouveauChef.email" placeholder="email@enicar.ucar.tn" />
           </div>
-          <div class="champ">
+          <div class="field">
             <label>Téléphone *</label>
-            <input type="text" [(ngModel)]="nouveauChef.phoneNumber" placeholder="Ex: 26140507" maxlength="8" />
+            <input type="text" [(ngModel)]="nouveauChef.phoneNumber" placeholder="26140507" maxlength="8" />
           </div>
-          <div class="champ">
+          <div class="field">
             <label>Département *</label>
-              <select [(ngModel)]="nouveauChef.departement">
-                <option value="">Sélectionner un département</option>
-                <option *ngFor="let dep of departements" [value]="dep">
-                  {{ departementsLabels[dep] }}
-                </option>
-              </select>
+            <select [(ngModel)]="nouveauChef.departement">
+              <option value="">Sélectionner...</option>
+              <option *ngFor="let dep of departements" [value]="dep">{{ departementsLabels[dep] }}</option>
+            </select>
           </div>
         </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalCreation()">Annuler</button>
-        <button class="btn-primaire" (click)="creerChef()">Créer</button>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-submit" style="background:linear-gradient(135deg,#10B981,#059669)" (click)="creerChef()">Créer le chef</button>
       </div>
     </div>
   </div>
 
+  <!-- MODAL SUPPRESSION -->
   <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
-    <div class="modal modal-suppression" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Confirmer la suppression</h3>
-        <button class="btn-fermer" (click)="fermerModalSuppression()">✕</button>
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-head-text">
+          <h3>Confirmer la suppression</h3>
+          <p>Cette action est irréversible</p>
+        </div>
+        <button class="modal-close" (click)="fermerModalSuppression()">✕</button>
       </div>
-      <div class="modal-corps">
-        <p>Êtes-vous sûr de vouloir supprimer <strong>{{ chefASupprimer?.name }}</strong> ?</p>
-        <p class="avertissement">⚠️ Cette action est irréversible.</p>
+      <div class="modal-body">
+        <div class="del-warn">
+          <div class="del-warn-icon">⚠️</div>
+          <div>
+            <p>Supprimer <strong>{{ chefASupprimer?.name }}</strong> ?</p>
+            <small>Cette action supprimera définitivement ce compte.</small>
+          </div>
+        </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalSuppression()">Annuler</button>
-        <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-del-confirm" (click)="confirmerSuppression()">Supprimer</button>
       </div>
     </div>
   </div>

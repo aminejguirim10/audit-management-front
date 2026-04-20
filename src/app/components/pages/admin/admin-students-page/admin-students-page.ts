@@ -13,29 +13,21 @@ import { Student } from '../../../../models/student.model';
 })
 export class AdminStudentsPage implements OnInit {
   private service = inject(StudentService);
-
   students: Student[] = [];
   chargement = false;
   erreur = '';
   recherche = '';
 
   get totalStudents(): number { return this.students.length; }
-  get studentsActifs(): number { return 0; }
-  get ideesSoumisesTotal(): number { return 0; }
-  get moyenneIdees(): number { return 0 ;}
 
-  readonly departements = ['Génie Informatique', 'Génie Mécatronique', 'Génie Industriel'];
-  
+  readonly departements = ['INFORMATIQUE', 'ELECTRIQUE', 'INDUS'];
   readonly departementsLabels: Record<string, string> = {
     'INFORMATIQUE': 'Génie Informatique',
     'ELECTRIQUE': 'Génie Électrique',
     'INDUS': 'Génie Industriel'
   };
 
-
-  ngOnInit(): void {
-    this.loadStudents();
-  }
+  ngOnInit(): void { this.loadStudents(); }
 
   get filteredStudents(): Student[] {
     const term = this.recherche.trim().toLowerCase();
@@ -51,17 +43,32 @@ export class AdminStudentsPage implements OnInit {
     this.chargement = true;
     this.erreur = '';
     this.service.findAll().subscribe({
-      next: (data: Student[]) => {
-        this.students = data;
-        this.chargement = false;
-      },
-      error: () => {
-        this.erreur = 'Erreur lors du chargement des étudiants';
-        this.chargement = false;
-      }
+      next: (data: Student[]) => { this.students = data; this.chargement = false; },
+      error: () => { this.erreur = 'Erreur lors du chargement'; this.chargement = false; }
     });
   }
 
+  // ── Circle helpers ──
+  getOffset(value: number, total: number): number {
+    if (total === 0) return 251.2;
+    return 251.2 * (1 - Math.min(value / total, 1));
+  }
+
+  countByDept(dept: string): number {
+    return this.students.filter(s => s.departement === dept).length;
+  }
+
+  getPct(dept: string): number {
+    if (this.totalStudents === 0) return 0;
+    return Math.round((this.countByDept(dept) / this.totalStudents) * 100);
+  }
+
+  getInitials(name: string | undefined): string {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  // ── Modal création ──
   modalCreationOuverte = false;
   nouveauStudent: Partial<Student> = {};
   erreurCreation = '';
@@ -72,48 +79,27 @@ export class AdminStudentsPage implements OnInit {
     this.modalCreationOuverte = true;
   }
 
-  fermerModalCreation(): void {
-    this.modalCreationOuverte = false;
-  }
+  fermerModalCreation(): void { this.modalCreationOuverte = false; }
 
   creerStudent(): void {
-    if (!this.nouveauStudent.name?.trim()) {
-      this.erreurCreation = 'Le nom complet est obligatoire !';
-      return;
-    }
-    if (!this.nouveauStudent.email?.trim()) {
-      this.erreurCreation = 'L\'email est obligatoire !';
-      return;
-    }
+    if (!this.nouveauStudent.name?.trim()) { this.erreurCreation = 'Le nom est obligatoire !'; return; }
+    if (!this.nouveauStudent.email?.trim()) { this.erreurCreation = "L'email est obligatoire !"; return; }
     if (!this.nouveauStudent.email.match(/^[a-zA-Z0-9._%+-]+@enicar\.ucar\.tn$/)) {
-      this.erreurCreation = 'L\'email doit être au format @enicar.ucar.tn !';
-      return;
+      this.erreurCreation = "L'email doit être au format @enicar.ucar.tn !"; return;
     }
-   if (!this.nouveauStudent.phoneNumber?.trim()) {
-      this.erreurCreation = 'Le numéro de téléphone est obligatoire !';
-      return;
-    }
+    if (!this.nouveauStudent.phoneNumber?.trim()) { this.erreurCreation = 'Le téléphone est obligatoire !'; return; }
     if (!this.nouveauStudent.phoneNumber.match(/^[0-9]{8}$/)) {
-      this.erreurCreation = 'Le numéro de téléphone doit contenir exactement 8 chiffres !';
-      return;
+      this.erreurCreation = 'Le téléphone doit contenir exactement 8 chiffres !'; return;
     }
-    if (!this.nouveauStudent.departement) {
-      this.erreurCreation = 'Le département est obligatoire !';
-      return;
-    }
- 
+    if (!this.nouveauStudent.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
+
     this.service.create(this.nouveauStudent).subscribe({
-      next: (studentCree: Student) => {
-        this.students.push(studentCree);
-        this.fermerModalCreation();
-        this.loadStudents();
-      },
-      error: (err: any) => {
-        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
-      }
+      next: () => { this.fermerModalCreation(); this.loadStudents(); },
+      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
     });
   }
 
+  // ── Modal suppression ──
   modalSuppressionOuverte = false;
   studentASupprimer: Student | null = null;
 
@@ -134,10 +120,7 @@ export class AdminStudentsPage implements OnInit {
         this.students = this.students.filter(s => s.id !== this.studentASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => {
-        this.erreur = 'Erreur lors de la suppression';
-        this.fermerModalSuppression();
-      }
+      error: () => { this.erreur = 'Erreur lors de la suppression'; this.fermerModalSuppression(); }
     });
   }
 }

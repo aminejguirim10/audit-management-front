@@ -18,11 +18,7 @@ export class AdminDepartmentsPage implements OnInit {
   erreur = '';
   recherche = '';
 
- 
   get totalChefs(): number { return this.chefs.length; }
-  get chefsActifs(): number { return 0; }
-  get auditsEnCours(): number { return  0; }
-
 
   readonly departements = ['INFORMATIQUE', 'ELECTRIQUE', 'INDUS'];
   readonly departementsLabels: Record<string, string> = {
@@ -31,94 +27,81 @@ export class AdminDepartmentsPage implements OnInit {
     'INDUS': 'Génie Industriel'
   };
 
-  ngOnInit(): void {
-    this.loadChefs();
+  ngOnInit(): void { this.loadChefs(); }
+
+  get filteredChefs(): Chef[] {
+    const term = this.recherche.trim().toLowerCase();
+    if (!term) return this.chefs;
+    return this.chefs.filter(c =>
+      c.name?.toLowerCase().includes(term) ||
+      c.email?.toLowerCase().includes(term) ||
+      c.departement?.toLowerCase().includes(term)
+    );
   }
 
-
-get filteredChefs(): Chef[] {
-  const term = this.recherche.trim().toLowerCase();
-  if (!term) return this.chefs;
-  return this.chefs.filter(c =>
-    c.name?.toLowerCase().includes(term) ||
-    c.email?.toLowerCase().includes(term) ||
-    c.departement?.toLowerCase().includes(term)
-  );
-}
-
- 
   loadChefs(): void {
     this.chargement = true;
     this.erreur = '';
     this.service.findAll().subscribe({
-      next: (data: Chef[]) => {
-        this.chefs = data;
-        this.chargement = false;
-      },
-      error: () => {
-        this.erreur = 'Erreur lors du chargement des chefs';
-        this.chargement = false;
-      }
+      next: (data: Chef[]) => { this.chefs = data; this.chargement = false; },
+      error: () => { this.erreur = 'Erreur lors du chargement des chefs'; this.chargement = false; }
     });
   }
 
- 
+  // ── Circle helpers ──
+  /** Stroke-dashoffset for a circle with r=40 (circumference ≈ 251.2) */
+  getOffset(value: number, total: number): number {
+    if (total === 0) return 251.2;
+    const pct = Math.min(value / total, 1);
+    return 251.2 * (1 - pct);
+  }
+
+  countByDept(dept: string): number {
+    return this.chefs.filter(c => c.departement === dept).length;
+  }
+
+  getPct(dept: string): number {
+    if (this.totalChefs === 0) return 0;
+    return Math.round((this.countByDept(dept) / this.totalChefs) * 100);
+  }
+
+  getInitials(name: string | undefined): string {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  }
+
+  // ── Modal création ──
   modalCreationOuverte = false;
   nouveauChef: Partial<Chef> = {};
   erreurCreation = '';
 
-ouvrirModalCreation(): void {
-  this.nouveauChef = { departement: 'INFORMATIQUE' };
-  this.erreurCreation = '';
-  this.modalCreationOuverte = true;
-}
-  fermerModalCreation(): void {
-    this.modalCreationOuverte = false;
+  ouvrirModalCreation(): void {
+    this.nouveauChef = { departement: 'INFORMATIQUE' };
+    this.erreurCreation = '';
+    this.modalCreationOuverte = true;
   }
 
+  fermerModalCreation(): void { this.modalCreationOuverte = false; }
+
   creerChef(): void {
-  
-    if (!this.nouveauChef.name?.trim()) {
-      this.erreurCreation = 'Le nom complet est obligatoire !';
-      return;
-    }
-   
-    if (!this.nouveauChef.email?.trim()) {
-      this.erreurCreation = 'L\'email est obligatoire !';
-      return;
-    }
+    if (!this.nouveauChef.name?.trim()) { this.erreurCreation = 'Le nom complet est obligatoire !'; return; }
+    if (!this.nouveauChef.email?.trim()) { this.erreurCreation = "L'email est obligatoire !"; return; }
     if (!this.nouveauChef.email.match(/^[a-zA-Z0-9._%+-]+@enicar\.ucar\.tn$/)) {
-      this.erreurCreation = 'L\'email doit être au format @enicar.ucar.tn !';
-      return;
+      this.erreurCreation = "L'email doit être au format @enicar.ucar.tn !"; return;
     }
-  
-    if (!this.nouveauChef.phoneNumber?.trim()) {
-      this.erreurCreation = 'Le numéro de téléphone est obligatoire !';
-      return;
-    }
+    if (!this.nouveauChef.phoneNumber?.trim()) { this.erreurCreation = 'Le téléphone est obligatoire !'; return; }
     if (!this.nouveauChef.phoneNumber.match(/^[0-9]{8}$/)) {
-      this.erreurCreation = 'Le numéro de téléphone doit contenir exactement 8 chiffres !';
-      return;
+      this.erreurCreation = 'Le téléphone doit contenir exactement 8 chiffres !'; return;
     }
-    
-    if (!this.nouveauChef.departement) {
-      this.erreurCreation = 'Le département est obligatoire !';
-      return;
-    }
+    if (!this.nouveauChef.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
 
     this.service.create(this.nouveauChef).subscribe({
-      next: (chefCree: Chef) => {
-        this.chefs.push(chefCree);
-        this.fermerModalCreation();
-        this.loadChefs();
-      },
-      error: (err: any) => {
-        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
-      }
+      next: () => { this.fermerModalCreation(); this.loadChefs(); },
+      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
     });
   }
 
- 
+  // ── Modal suppression ──
   modalSuppressionOuverte = false;
   chefASupprimer: Chef | null = null;
 
@@ -139,10 +122,7 @@ ouvrirModalCreation(): void {
         this.chefs = this.chefs.filter(c => c.id !== this.chefASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => {
-        this.erreur = 'Erreur lors de la suppression';
-        this.fermerModalSuppression();
-      }
+      error: () => { this.erreur = 'Erreur lors de la suppression'; this.fermerModalSuppression(); }
     });
   }
 }
