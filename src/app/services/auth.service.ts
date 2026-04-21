@@ -81,7 +81,7 @@ export class AuthService {
       case 'AUDITE':
         return '/audite/tableau-de-bord';
       case 'ETUDIANT':
-        return '/etudiant/soumettre-idee';
+        return '/etudiant/tableau-de-bord';
       default:
         return null;
     }

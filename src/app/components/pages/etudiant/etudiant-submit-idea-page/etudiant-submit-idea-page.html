@@ -1,4 +1,109 @@
-﻿<section class="page-placeholder">
-  <h1>Etudiant - Soumettre une idee</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ETUDIANT.</p>
-</section>
+﻿<div class="container">
+  <div class="header">
+    <h1>💡 Partager une Idée</h1>
+    <p>Votre idée peut améliorer notre école. Exprimez-vous !</p>
+  </div>
+
+  <form [formGroup]="ideaForm" (ngSubmit)="submit()" class="form-card">
+    <!-- Titre -->
+    <div class="form-group">
+      <label for="title" class="label">
+        <span>Titre de l'idée</span>
+        <span class="required">*</span>
+      </label>
+      <input
+        id="title"
+        type="text"
+        formControlName="title"
+        placeholder="Ex: Améliorer le système de WiFi"
+        class="input"
+        [class.input-error]="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched"
+      />
+      <p
+        *ngIf="ideaForm.get('title')?.invalid && ideaForm.get('title')?.touched"
+        class="error-message"
+      >
+        {{ titleError }}
+      </p>
+      <div class="char-count">{{ ideaForm.get('title')?.value?.length ?? 0 }}/100</div>
+    </div>
+
+    <!-- Description -->
+    <div class="form-group">
+      <label for="description" class="label">
+        <span>Description</span>
+        <span class="required">*</span>
+      </label>
+      <textarea
+        id="description"
+        formControlName="description"
+        placeholder="Décrivez votre idée en détail..."
+        rows="5"
+        class="textarea"
+        [class.input-error]="
+          ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched
+        "
+      ></textarea>
+      <p
+        *ngIf="ideaForm.get('description')?.invalid && ideaForm.get('description')?.touched"
+        class="error-message"
+      >
+        {{ descriptionError }}
+      </p>
+      <div class="char-count">{{ ideaForm.get('description')?.value?.length ?? 0 }}/500</div>
+    </div>
+
+    <!-- Catégorie & Département -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="category" class="label">
+          <span>Catégorie</span>
+          <span class="required">*</span>
+        </label>
+        <select id="category" formControlName="category" class="select">
+          <option *ngFor="let cat of categories" [value]="cat">
+            {{ categoryLabels[cat] }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="department" class="label">
+          <span>Département</span>
+          <span class="required">*</span>
+        </label>
+        <select id="department" formControlName="department" class="select">
+          <option *ngFor="let dept of departments" [value]="dept">
+            {{ departmentLabels[dept] }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn-primary" [disabled]="ideaForm.invalid || isSubmitting()">
+        <span *ngIf="!isSubmitting()">Soumettre l'idée</span>
+        <span *ngIf="isSubmitting()">Envoi en cours...</span>
+      </button>
+      <button
+        type="reset"
+        class="btn-secondary"
+        (click)="ideaForm.reset({ category: 'SERVICES', department: 'INFORMATIQUE' })"
+      >
+        Réinitialiser
+      </button>
+    </div>
+  </form>
+
+  <!-- Tips -->
+  <div class="tips-section">
+    <h3>💡 Conseils pour une bonne idée</h3>
+    <ul>
+      <li>Soyez clair et concis dans votre titre</li>
+      <li>Expliquez le problème et votre solution</li>
+      <li>Indiquez le département concerné</li>
+      <li>Les idées constructives sont plus susceptibles d'être acceptées</li>
+    </ul>
+  </div>
+</div>

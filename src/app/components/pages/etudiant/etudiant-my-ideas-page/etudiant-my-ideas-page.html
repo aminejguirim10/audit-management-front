@@ -1,4 +1,110 @@
-﻿<section class="page-placeholder">
-  <h1>Etudiant - Mes idees</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ETUDIANT.</p>
-</section>
+﻿<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>📝 Mes Idées</h1>
+      <p>Gérez et suivez vos idées proposées</p>
+    </div>
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Rechercher une idée..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des idées...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && filteredIdeas().length === 0" class="empty-state">
+    <span class="empty-icon">📭</span>
+    <h3>Aucune idée trouvée</h3>
+    <p>
+      {{
+        searchTerm()
+          ? 'Aucune idée ne correspond à votre recherche'
+          : 'Soyez le premier à proposer une idée !'
+      }}
+    </p>
+  </div>
+
+  <!-- Ideas Grid -->
+  <div class="ideas-grid">
+    <div *ngFor="let idea of filteredIdeas(); trackBy: trackByIdea" class="idea-card">
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="header-left">
+          <h3 class="idea-title">{{ idea.title }}</h3>
+          <span [ngClass]="getStatusBadgeClass(idea.status)">
+            {{ statusLabels[idea.status] }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Card Meta -->
+      <div class="card-meta">
+        <span [ngClass]="getCategoryBadgeClass(idea.category)">
+          {{ categoryLabels[idea.category] }}
+        </span>
+        <span class="author">👤 {{ idea.studentName }}</span>
+      </div>
+
+      <!-- Card Description -->
+      <p class="description">{{ idea.description }}</p>
+
+      <!-- Card Footer - Stats & Actions -->
+      <div class="card-footer">
+        <div class="stats">
+          <button
+            class="stat-btn vote-btn"
+            (click)="toggleVote(idea.id)"
+            [disabled]="votingId() === idea.id"
+            title="Voter pour cette idée"
+          >
+            👍
+            <span class="count">{{ idea.voteCount }}</span>
+          </button>
+          <button
+            class="stat-btn comment-btn"
+            (click)="toggleComments(idea.runtimeId)"
+            [attr.aria-expanded]="activeCommentIdeaId() === idea.runtimeId"
+            title="Afficher les commentaires"
+          >
+            💬 {{ idea.comments.length }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Expanded Details -->
+      <div class="expanded-section" *ngIf="activeCommentIdeaId() === idea.runtimeId">
+        <!-- Comments Section -->
+        <div class="comments-section">
+          <h4>💬 Commentaires ({{ idea.comments.length }})</h4>
+
+          <!-- Comments List -->
+          <div class="comments-list" *ngIf="idea.comments && idea.comments.length > 0">
+            <div *ngFor="let comment of idea.comments" class="comment">
+              <div class="comment-header">
+                <strong>{{ comment.studentName }}</strong>
+                <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
+              </div>
+              <p class="comment-content">{{ comment.content }}</p>
+            </div>
+          </div>
+
+          <p *ngIf="!idea.comments || idea.comments.length === 0" class="no-comments">
+            Aucun commentaire pour le moment
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

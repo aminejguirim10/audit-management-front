@@ -126,7 +126,14 @@ const etudiantChildRoutes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'soumettre-idee',
+    redirectTo: 'tableau-de-bord',
+  },
+  {
+    path: 'tableau-de-bord',
+    loadComponent: () =>
+      import('./components/pages/etudiant/etudiant-dashboard-page/etudiant-dashboard-page').then(
+        (m) => m.EtudiantDashboardPage,
+      ),
   },
   {
     path: 'soumettre-idee',

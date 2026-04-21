@@ -1,4 +1,237 @@
-﻿<section class="page-placeholder">
-  <h1>Audite - Tableau de bord</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role AUDITE.</p>
+<section class="audite-dashboard">
+  <header class="hero-card">
+    <div class="hero-copy">
+      <span class="eyebrow">Espace audite</span>
+      <h1>Consultez vos audits et repondez dans une interface claire</h1>
+      <p>
+        Le tableau de bord centralise vos audits assignes dans un tableau moderne. Un clic ouvre
+        un espace de reponse complet avec un seul bouton d'envoi en fin de formulaire.
+      </p>
+    </div>
+
+    <div class="hero-panel">
+      <span class="panel-label">Suivi rapide</span>
+      <strong>{{ stats().total }}</strong>
+      <p>audit(s) visible(s) pour votre espace audite</p>
+    </div>
+  </header>
+
+  <section class="stats-grid">
+    <article class="stat-card stat-total">
+      <span>Total audits</span>
+      <strong>{{ stats().total }}</strong>
+      <small>Toutes les missions qui vous sont assignees</small>
+    </article>
+    <article class="stat-card stat-plan">
+      <span>Planifies</span>
+      <strong>{{ stats().planned }}</strong>
+      <small>Audits a preparer avant leur ouverture</small>
+    </article>
+    <article class="stat-card stat-live">
+      <span>En cours</span>
+      <strong>{{ stats().active }}</strong>
+      <small>Questionnaires actuellement actifs</small>
+    </article>
+    <article class="stat-card stat-done">
+      <span>Termines</span>
+      <strong>{{ stats().completed }}</strong>
+      <small>Audits deja traites et consultables</small>
+    </article>
+  </section>
+
+  <section class="toolbar-card">
+    <div class="search-box">
+      <label>Recherche</label>
+      <input
+        type="text"
+        placeholder="Titre, type, departement ou auditeur"
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+      />
+    </div>
+
+    <div class="filter-box">
+      <label>Statut</label>
+      <select [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)">
+        <option *ngFor="let status of statusOptions" [value]="status">
+          {{ status === 'TOUS' ? 'Tous' : getStatusLabel(status) }}
+        </option>
+      </select>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Mes audits</span>
+        <h2>Liste des audits assignes</h2>
+      </div>
+      <span class="results-pill">{{ filteredAudits().length }} resultat(s)</span>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && filteredAudits().length === 0">
+      <h3>Aucun audit trouve</h3>
+      <p>Essayez un autre filtre ou revenez plus tard si aucun audit ne vous est encore assigne.</p>
+    </div>
+
+    <div class="table-wrapper" *ngIf="filteredAudits().length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Audit</th>
+            <th>Type</th>
+            <th>Departement</th>
+            <th>Auditeur</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let audit of filteredAudits(); trackBy: trackByAudit" class="audit-row" (click)="openAuditWorkspace(audit)">
+            <td>
+              <div class="audit-name">
+                <strong>{{ audit.title }}</strong>
+                <small>#{{ audit.id }}</small>
+              </div>
+            </td>
+            <td><span class="type-pill">{{ audit.typeAuditName }}</span></td>
+            <td>{{ formatDepartment(audit.department) }}</td>
+            <td>{{ audit.auditeurName }}</td>
+            <td>
+              <span class="status-chip" [ngClass]="getStatusClass(audit.status)">
+                {{ getStatusLabel(audit.status) }}
+              </span>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <button 
+                type="button" 
+                class="edit-button" 
+                *ngIf="audit.status === 'EN_COURS'"
+                (click)="editAuditResponses(audit)"
+                title="Modifier les reponses"
+              >
+                ✏️
+              </button>
+              <span *ngIf="audit.status !== 'EN_COURS'" class="no-action">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="modal-overlay" *ngIf="showAuditWorkspace()" (click)="closeAuditWorkspace()"></div>
+
+  <section class="audit-modal" *ngIf="showAuditWorkspace()">
+    <header class="modal-header">
+      <div *ngIf="selectedAuditSummary() as audit">
+        <span class="section-kicker">Formulaire audit</span>
+        <h2>{{ audit.title }}</h2>
+        <p>{{ audit.typeAuditName }} - {{ formatDepartment(audit.department) }}</p>
+      </div>
+      <button type="button" class="close-button" (click)="closeAuditWorkspace()">✕</button>
+    </header>
+
+    <div class="modal-body">
+      <div class="feedback-card" *ngIf="loadingDetails()">Chargement des details de l'audit...</div>
+
+      <ng-container *ngIf="selectedAuditDetails() as details">
+        <div class="summary-strip">
+          <article>
+            <span>Periode</span>
+            <strong>{{ formatDate(details.dateDebut) }} - {{ formatDate(details.dateFin) }}</strong>
+          </article>
+          <article>
+            <span>Avancement</span>
+            <strong>{{ completionRatio() }}%</strong>
+          </article>
+          <article>
+            <span>Questions repondues</span>
+            <strong>{{ completedDraftQuestionsCount() }}/{{ details.questions.length }}</strong>
+          </article>
+        </div>
+
+        <div class="locked-banner planifie" *ngIf="details.status === 'PLANIFIE'">
+          Cet audit est planifie et n'a pas encore commence. Vous ne pouvez pas repondre aux questions pour le moment.
+        </div>
+
+        <div class="locked-banner" *ngIf="details.status === 'TERMINEE'">
+          Cet audit est termine. Vous pouvez consulter vos reponses dans cette interface.
+        </div>
+
+        <div class="locked-banner success" *ngIf="details.status === 'EN_COURS' && answeredQuestionsCount() === 0">
+          Veuillez repondre a toutes les questions puis envoyer vos reponses.
+        </div>
+
+        <div class="locked-banner warning" *ngIf="details.status === 'EN_COURS' && answeredQuestionsCount() > 0">
+          Les reponses deja enregistrees peuvent maintenant etre modifiees dans cette interface,
+          puis renvoyees en une seule fois avec le bouton final.
+        </div>
+
+        <div class="question-form" *ngIf="details.questions.length > 0; else noQuestions">
+          <article class="question-card" *ngFor="let question of details.questions; trackBy: trackByQuestion">
+            <div class="question-head">
+              <div>
+                <span class="question-index">Question {{ question.id }}</span>
+                <h3>{{ question.title }}</h3>
+              </div>
+              <span class="answer-flag" [class.done]="hasPersistedResponse(question)" [class.consultation]="details.status !== 'EN_COURS'">
+                {{ details.status === 'PLANIFIE' ? 'En attente' : (hasPersistedResponse(question) ? 'Repondu' : 'Non repondu') }}
+              </span>
+            </div>
+
+            <div class="options-stack">
+              <button
+                type="button"
+                class="option-row"
+                *ngFor="let option of question.options; trackBy: trackByOption"
+                [class.selected]="getSelectedOptionId(question) === option.id"
+                [disabled]="details.status === 'PLANIFIE' || details.status === 'TERMINEE'"
+                (click)="selectOption(question, option)"
+              >
+                <span class="option-order">{{ getOptionOrder(option) }}</span>
+                <span class="option-text">{{ option.label }}</span>
+              </button>
+            </div>
+
+            <p class="question-note" *ngIf="question.score !== null">
+              Score deja calcule pour cette question: {{ question.score }}/1
+            </p>
+          </article>
+        </div>
+
+        <ng-template #noQuestions>
+          <div class="empty-state inner">
+            <h3>Aucune question pour cet audit</h3>
+            <p>Le questionnaire n'a pas encore ete defini pour cet audit.</p>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <footer class="modal-footer">
+      <button type="button" class="secondary-button" (click)="closeAuditWorkspace()">Fermer</button>
+      <button
+        type="button"
+        class="submit-button"
+        *ngIf="selectedAuditDetails()?.status === 'EN_COURS'"
+        [disabled]="!canSubmitCurrentAudit() || submittingAnswers()"
+        (click)="submitResponses()"
+      >
+        {{
+          submittingAnswers()
+            ? 'Envoi en cours...'
+            : 'Envoyer les reponses'
+        }}
+      </button>
+      <button
+        type="button"
+        class="submit-button disabled"
+        *ngIf="selectedAuditDetails()?.status !== 'EN_COURS'"
+        disabled
+      >
+        {{ selectedAuditDetails()?.status === 'TERMINEE' ? 'Audit termine' : 'Audit planifie' }}
+      </button>
+    </footer>
+  </section>
 </section>

@@ -1,4 +1,181 @@
-﻿<section class="page-placeholder">
-  <h1>Auditeur - Historique</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role AUDITEUR.</p>
+<section class="history-page">
+  <header class="hero-card">
+    <div class="hero-copy">
+      <span class="eyebrow">Historique des audits</span>
+      <h1>Archive elegante des audits termines</h1>
+      <p>
+        Cette interface rassemble les audits clotures dans un tableau moderne, puis les replace
+        dans une timeline d'activite pour mieux suivre les campagnes deja menees.
+      </p>
+    </div>
+
+    <div class="hero-highlight">
+      <span class="highlight-label">Audits termines</span>
+      <strong>{{ stats().completedCount }}</strong>
+      <p>{{ filteredCompletedAudits().length }} visible(s) avec les filtres actifs</p>
+    </div>
+  </header>
+
+  <section class="stats-grid">
+    <article class="stat-card accent-blue">
+      <span>Audits clotures</span>
+      <strong>{{ stats().completedCount }}</strong>
+      <small>Historique complet de vos audits finalises</small>
+    </article>
+
+    <article class="stat-card accent-amber">
+      <span>Departements couverts</span>
+      <strong>{{ stats().departmentCount }}</strong>
+      <small>Vision transversale des poles deja audites</small>
+    </article>
+
+    <article class="stat-card accent-emerald">
+      <span>Types d'audit</span>
+      <strong>{{ stats().typeCount }}</strong>
+      <small>Academic, qualite, installations et plus</small>
+    </article>
+  </section>
+
+  <section class="filters-card">
+    <div class="filters-head">
+      <div>
+        <h2>Audits termines</h2>
+        <p>Filtrez rapidement le tableau avant de consulter la timeline.</p>
+      </div>
+
+      <button class="refresh-button" type="button" (click)="loadHistory()">Actualiser</button>
+    </div>
+
+    <div class="filters-grid">
+      <label class="field">
+        <span>Recherche</span>
+        <input
+          type="text"
+          placeholder="Titre, audite, type ou departement"
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </label>
+
+      <label class="field">
+        <span>Departement</span>
+        <select
+          [value]="selectedDepartment()"
+          (change)="selectedDepartment.set($any($event.target).value)"
+        >
+          <option value="TOUS">Tous les departements</option>
+          <option *ngFor="let department of departmentOptions()" [value]="department">
+            {{ formatDepartment(department) }}
+          </option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Type d'audit</span>
+        <select [value]="selectedType()" (change)="selectedType.set($any($event.target).value)">
+          <option value="TOUS">Tous les types</option>
+          <option *ngFor="let type of typeOptions()" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="table-card">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Tableau moderne</span>
+        <h2>Liste des audits termines</h2>
+      </div>
+      <span class="results-chip">{{ filteredCompletedAudits().length }} resultat(s)</span>
+    </div>
+
+    <div class="feedback-card error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+    <div class="feedback-card" *ngIf="loading()">Chargement de l'historique en cours...</div>
+
+    <div class="table-wrapper" *ngIf="!loading() && filteredCompletedAudits().length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Audit</th>
+            <th>Type</th>
+            <th>Departement</th>
+            <th>Audite</th>
+            <th>Auditeur</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let audit of filteredCompletedAudits(); trackBy: trackByAudit">
+            <td>
+              <div class="audit-cell">
+                <span class="audit-index">#{{ audit.id }}</span>
+                <div>
+                  <strong>{{ audit.title }}</strong>
+                  <small>Cloture et archive de reference</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="type-pill">{{ audit.typeAuditName }}</span>
+            </td>
+            <td>{{ formatDepartment(audit.department) }}</td>
+            <td>{{ audit.auditeName }}</td>
+            <td>{{ audit.auditeurName }}</td>
+            <td>
+              <span class="status-pill status-completed">
+                {{ getStatusLabel(audit.status) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && filteredCompletedAudits().length === 0">
+      <h3>Aucun audit termine ne correspond aux filtres</h3>
+      <p>Essayez une autre recherche ou retirez un filtre pour retrouver les archives.</p>
+    </div>
+  </section>
+
+  <section class="timeline-card">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Timeline</span>
+        <h2>Chronologie des audits</h2>
+      </div>
+    </div>
+
+    <div class="feedback-card" *ngIf="loadingTimeline()">
+      Construction de la timeline a partir des details des audits...
+    </div>
+
+    <div class="timeline-list" *ngIf="!loadingTimeline() && timelineItems().length > 0">
+      <article class="timeline-item" *ngFor="let item of timelineItems(); trackBy: trackByTimeline">
+        <div class="timeline-rail">
+          <span class="timeline-dot"></span>
+        </div>
+
+        <div class="timeline-content">
+          <div class="timeline-head">
+            <span class="timeline-badge">{{ getTimelineBadgeLabel(item.status) }}</span>
+            <time>{{ item.period }}</time>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.subtitle }}</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="empty-state timeline-empty" *ngIf="!loadingTimeline() && timelineItems().length === 0">
+      <h3>La timeline sera visible ici</h3>
+      <p>
+        Elle apparait des que des audits termines avec details dates sont disponibles pour les
+        filtres actifs.
+      </p>
+    </div>
+  </section>
 </section>
