@@ -1,4 +1,176 @@
-﻿<section class="page-placeholder">
-  <h1>Admin - Audits</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ADMIN.</p>
-</section>
+﻿<div class="page-wrapper">
+
+
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="M9 12h6M9 16h4"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Audits</h1>
+        <p>Vue d'ensemble de tous les audits</p>
+      </div>
+    </div>
+    <div class="header-meta" *ngIf="!chargement">
+      <span class="total-badge">{{ audits.length }} audits</span>
+    </div>
+  </div>
+
+
+  <div class="alert-erreur" *ngIf="erreur">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    {{ erreur }}
+  </div>
+
+
+  <div class="stats-row">
+    <button class="stat-btn" (click)="filtreStatut = ''" [class.active]="filtreStatut === ''">
+      <div class="stat-top">
+        <div class="stat-icon all">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <span class="stat-trend">Total</span>
+      </div>
+      <div class="stat-number">{{ audits.length }}</div>
+      <div class="stat-label">Tous les audits</div>
+    </button>
+
+    <button class="stat-btn planifie" (click)="filtreStatut = 'PLANIFIE'" [class.active]="filtreStatut === 'PLANIFIE'">
+      <div class="stat-top">
+        <div class="stat-icon yellow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <span class="stat-trend planifie-color">Planifiés</span>
+      </div>
+      <div class="stat-number planifie-color">{{ totalPlanifies }}</div>
+      <div class="stat-label">En attente</div>
+    </button>
+
+    <button class="stat-btn en-cours" (click)="filtreStatut = 'EN_COURS'" [class.active]="filtreStatut === 'EN_COURS'">
+      <div class="stat-top">
+        <div class="stat-icon blue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        </div>
+        <span class="stat-trend en-cours-color">En cours</span>
+      </div>
+      <div class="stat-number en-cours-color">{{ totalEnCours }}</div>
+      <div class="stat-label">En progression</div>
+    </button>
+
+    <button class="stat-btn terminee" (click)="filtreStatut = 'TERMINEE'" [class.active]="filtreStatut === 'TERMINEE'">
+      <div class="stat-top">
+        <div class="stat-icon green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span class="stat-trend terminee-color">Terminés</span>
+      </div>
+      <div class="stat-number terminee-color">{{ totalTermines }}</div>
+      <div class="stat-label">Complétés</div>
+    </button>
+  </div>
+
+  <!-- Barre outils -->
+  <div class="toolbar">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input
+        type="text"
+        [(ngModel)]="recherche"
+        placeholder="Rechercher par type, auditeur, audité, département..."
+        class="search-input"
+      />
+      <button class="clear-btn" *ngIf="recherche" (click)="recherche = ''">✕</button>
+    </div>
+    <div class="filter-chips" *ngIf="filtreStatut">
+      <span class="chip">
+        {{ statusLabels[filtreStatut] }}
+        <button (click)="filtreStatut = ''">✕</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- Chargement -->
+  <div class="loading-state" *ngIf="chargement">
+    <div class="spinner-ring"></div>
+    <p>Chargement des audits...</p>
+  </div>
+
+  <!-- Tableau -->
+  <div class="table-card" *ngIf="!chargement">
+    <div class="table-header-row">
+      <span class="results-count">{{ auditsFiltres.length }} résultat{{ auditsFiltres.length > 1 ? 's' : '' }}</span>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Type d'audit</th>
+            <th>Département</th>
+            <th>Auditeur</th>
+            <th>Audité</th>
+            <th>Date début</th>
+            <th>Date fin</th>
+            <th>Score</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let audit of auditsFiltres; let i = index" [style.animation-delay]="i * 30 + 'ms'">
+            <td data-label="Type">
+              <div class="type-pill">
+                <span class="type-dot" [style.background]="audit.typeAuditColor ?? '#3B82F6'"></span>
+                <span>{{ audit.typeAuditName }}</span>
+              </div>
+            </td>
+            <td data-label="Département">
+              <span class="dept-tag">{{ departementLabels[audit.department] }}</span>
+            </td>
+            <td data-label="Auditeur">
+              <div class="person-cell">
+                <div class="avatar auditeur">{{ getInitials(audit.auditeurName) }}</div>
+                <span>{{ audit.auditeurName }}</span>
+              </div>
+            </td>
+            <td data-label="Audité">
+              <div class="person-cell">
+                <div class="avatar audite">{{ getInitials(audit.auditeName) }}</div>
+                <span>{{ audit.auditeName }}</span>
+              </div>
+            </td>
+            <td data-label="Date début">
+              <span class="date-cell">{{ formaterDate(audit.dateDebut) }}</span>
+            </td>
+            <td data-label="Date fin">
+              <span class="date-cell">{{ formaterDate(audit.dateFin) }}</span>
+            </td>
+            <td data-label="Score">
+              <span class="score-chip" [class.score-zero]="(audit.scoreTotal ?? 0) === 0">
+                {{ audit.scoreTotal ?? 0 }}
+              </span>
+            </td>
+            <td data-label="Statut">
+              <span class="status-badge"
+                [class.badge-planifie]="audit.status === 'PLANIFIE'"
+                [class.badge-en-cours]="audit.status === 'EN_COURS'"
+                [class.badge-terminee]="audit.status === 'TERMINEE'">
+                <span class="badge-dot"></span>
+                {{ statusLabels[audit.status] }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="auditsFiltres.length === 0">
+            <td colspan="8" class="empty-state">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <p>Aucun audit trouvé</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
