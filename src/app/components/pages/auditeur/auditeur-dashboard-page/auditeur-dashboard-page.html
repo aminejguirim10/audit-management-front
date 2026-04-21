@@ -1,44 +1,650 @@
-﻿<section class="audit-list-page">
-  <header>
-    <p class="eyebrow">Auditeur</p>
-    <h1>Audits et conversations</h1>
-    <p>Choisissez un audit puis ouvrez la conversation en temps réel avec l'audité.</p>
+﻿<div class="auditeur-dashboard">
+  <header class="dashboard-header">
+    <div class="dashboard-intro">
+      <span class="eyebrow">Tableau de bord auditeur</span>
+      <h1>Suivi des audits et création rapide</h1>
+      <p>
+        Visualisez les statistiques, filtrez les audits et créez un nouvel audit en quelques clics.
+      </p>
+    </div>
+    <button class="btn-primary" type="button" (click)="toggleCreatePanel()">Créer un audit</button>
   </header>
 
-  <div class="status-box" *ngIf="error">{{ error }}</div>
-  <div class="status-box loading" *ngIf="loading && !error">Chargement des audits...</div>
+  <section class="stats-grid">
+    <article class="stat-card stat-primary">
+      <span>Total audits</span>
+      <strong>{{ stats().total }}</strong>
+      <small>Vue globale de votre portefeuille d'audits</small>
+    </article>
+    <article class="stat-card stat-warm">
+      <span>Planifiés</span>
+      <strong>{{ stats().planned }}</strong>
+      <small>Audits prêts à démarrer prochainement</small>
+    </article>
+    <article class="stat-card stat-cool">
+      <span>En cours</span>
+      <strong>{{ stats().active }}</strong>
+      <small>Campagnes actuellement en suivi</small>
+    </article>
+    <article class="stat-card stat-success">
+      <span>Terminés</span>
+      <strong>{{ stats().completed }}</strong>
+      <small>Audits finalisés et archivés</small>
+    </article>
+  </section>
 
-  <article class="table-card" *ngIf="!loading && !error">
-    <table *ngIf="audits.length > 0; else emptyTemplate">
-      <thead>
-        <tr>
-          <th>Audit</th>
-          <th>Type</th>
-          <th>Statut</th>
-          <th>Période</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let audit of audits; trackBy: trackByAuditId">
-          <td>
-            <strong>{{ audit.title }}</strong>
-            <small>#{{ audit.id }} - {{ audit.department }}</small>
-          </td>
-          <td>{{ audit.typeAuditName || 'N/A' }}</td>
-          <td>
-            <span class="status-chip">{{ audit.status }}</span>
-          </td>
-          <td>{{ formatDate(audit.dateDebut) }} - {{ formatDate(audit.dateFin) }}</td>
-          <td>
-            <a class="chat-link" [routerLink]="['/auditeur/messages', audit.id]">Messages</a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <section class="controls-panel">
+    <div class="filter-row">
+      <div class="search-box">
+        <label>Recherche</label>
+        <input
+          type="text"
+          placeholder="Rechercher par titre, audité ou type"
+          [value]="filterTerm()"
+          (input)="onSearchInput($event)"
+        />
+      </div>
+      <div class="status-box">
+        <label>Statut</label>
+        <select [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)">
+          <option *ngFor="let status of statusOptions" [value]="status">
+            {{ status === 'TOUS' ? 'Tous' : getStatusLabel(status) }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <p class="filter-summary">
+      {{ filteredAudits().length }} audit(s) affiché(s) • {{ audits().length }} audit(s) total(s)
+    </p>
+  </section>
 
-    <ng-template #emptyTemplate>
-      <div class="empty-box">Aucun audit disponible pour la messagerie.</div>
-    </ng-template>
-  </article>
-</section>
+  <section class="audit-list">
+    <!-- Tableau des audits -->
+    <div class="audit-table-container" *ngIf="filteredAudits().length > 0">
+      <div class="audit-table-header">
+        <div class="table-col col-title">Titre</div>
+        <div class="table-col col-type">Type</div>
+        <div class="table-col col-dept">Département</div>
+        <div class="table-col col-audite">Auditée</div>
+        <div class="table-col col-status">Statut</div>
+        <div class="table-col col-actions">Actions</div>
+      </div>
+
+      <div class="audit-table-body">
+        <div
+          class="audit-table-row"
+          *ngFor="let audit of filteredAudits(); trackBy: trackByAudit"
+          (click)="viewAuditDetails(audit)"
+        >
+          <div class="table-col col-title cursor-pointer">{{ audit.title }}</div>
+          <div class="table-col col-type">
+            <span class="tag">{{ audit.typeAuditName }}</span>
+          </div>
+          <div class="table-col col-dept">{{ audit.department }}</div>
+          <div class="table-col col-audite">{{ audit.auditeName }}</div>
+          <div class="table-col col-status">
+            <span class="status-badge" [ngClass]="getStatusClass(audit.status)">
+              {{ getStatusLabel(audit.status) }}
+            </span>
+          </div>
+          <div class="table-col col-actions" (click)="$event.stopPropagation()">
+            <button
+              class="action-btn edit-btn"
+              title="Modifier cet audit"
+              (click)="editAudit(audit)"
+            >
+              ✏️
+            </button>
+            <button
+              class="action-btn delete-btn"
+              title="Supprimer cet audit"
+              (click)="confirmDeleteAudit(audit)"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!loading() && filteredAudits().length === 0">
+      <h3>Aucun audit trouvé</h3>
+      <p>Affinez votre recherche ou créez un nouvel audit pour démarrer.</p>
+    </div>
+  </section>
+
+  <!-- Modal Détails de l'audit -->
+  <div class="modal-overlay" *ngIf="selectedAudit()" (click)="closeAuditDetails()"></div>
+  <div class="details-modal" *ngIf="selectedAudit()">
+    <div class="modal-header">
+      <h2>Détails de l'audit</h2>
+      <button type="button" class="btn-close" (click)="closeAuditDetails()" title="Fermer">
+        ✕
+      </button>
+    </div>
+    <div class="modal-body" *ngIf="selectedAudit()">
+      <!-- Informations générales -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="label">Titre</span>
+          <span class="value">{{ selectedAudit()?.title }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Type</span>
+          <span class="value">{{ selectedAudit()?.typeAuditName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Département</span>
+          <span class="value">{{ selectedAudit()?.department }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Auditée</span>
+          <span class="value">{{ selectedAudit()?.auditeName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Auditeur</span>
+          <span class="value">{{ selectedAudit()?.auditeurName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Date de début</span>
+          <span class="value">{{ selectedAudit()?.dateDebut }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Date de fin</span>
+          <span class="value">{{ selectedAudit()?.dateFin }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Statut</span>
+          <span class="value status-value" [ngClass]="getStatusClass(selectedAudit()?.status!)">
+            {{ getStatusLabel(selectedAudit()?.status!) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Score Total et Résultat -->
+      <div class="score-section" *ngIf="selectedAudit()?.scoreTotal !== undefined">
+        <div class="score-card">
+          <div class="score-item">
+            <span class="label">Score Total</span>
+            <span class="score-value">{{ selectedAudit()?.scoreTotal }}/100</span>
+          </div>
+          <div class="score-item" *ngIf="selectedAudit()?.auditResult">
+            <span class="label">Résultat</span>
+            <span
+              class="result-badge"
+              [ngClass]="'result-' + selectedAudit()?.auditResult?.toLowerCase()"
+            >
+              {{ selectedAudit()?.auditResult }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Questions avec Réponses et Scores -->
+      <div
+        class="questions-section"
+        *ngIf="selectedAudit()?.questions && selectedAudit()?.questions!.length > 0"
+      >
+        <h3 class="questions-title">Questions et Réponses</h3>
+        <div class="questions-list">
+          <div
+            class="question-card"
+            *ngFor="let question of selectedAudit()?.questions; let i = index"
+          >
+            <div class="question-header">
+              <span class="question-number">Q{{ i + 1 }}</span>
+              <h4 class="question-text">{{ question.title }}</h4>
+            </div>
+
+            <!-- Options disponibles -->
+            <div class="options-container">
+              <p class="options-label">Options disponibles:</p>
+              <div
+                class="option-item"
+                *ngFor="let option of question.options; let j = index"
+                [class.selected]="option.id === question.optionChoisieId"
+              >
+                <span class="option-badge">{{ j + 1 }}</span>
+                <span class="option-label">{{ option.label }}</span>
+                <span class="selected-check" *ngIf="option.id === question.optionChoisieId">✓</span>
+              </div>
+            </div>
+
+            <!-- Réponse et Score -->
+            <div
+              class="response-section"
+              *ngIf="question.optionChoisieId || question.score !== null"
+            >
+              <div class="response-item">
+                <span class="label">Réponse:</span>
+                <span class="value">{{ getQuestionResponseLabel(question) }}</span>
+              </div>
+              <div class="response-item" *ngIf="question.score !== null">
+                <span class="label">Score:</span>
+                <span class="score-badge"
+                  >{{ question.score }}/{{
+                    100 / (selectedAudit()?.questions!.length || 1) | number: '1.0-0'
+                  }}</span
+                >
+              </div>
+            </div>
+
+            <!-- Pas de réponse -->
+            <div class="no-response" *ngIf="!question.optionChoisieId && question.score === null">
+              <p>Aucune réponse fournie</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pas de questions -->
+      <div
+        class="no-questions"
+        *ngIf="!selectedAudit()?.questions || selectedAudit()?.questions!.length === 0"
+      >
+        <p>Aucune question définie pour cet audit</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeAuditDetails()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Édition Audit -->
+<div class="modal-overlay" *ngIf="editingAudit()" (click)="cancelEditAudit()"></div>
+<div class="edit-modal" *ngIf="editingAudit()">
+  <div class="modal-header">
+    <h2>Modifier l'audit</h2>
+    <button type="button" class="btn-close" (click)="cancelEditAudit()" title="Fermer">✕</button>
+  </div>
+  <form [formGroup]="editAuditForm" class="edit-form">
+    <div class="modal-body">
+      <div class="info-badge" *ngIf="loadingEditAudit()">
+        Chargement des informations actuelles de l'audit...
+      </div>
+
+      <div class="edit-form-grid">
+        <div class="form-group">
+          <label>Titre <span class="required">*</span></label>
+          <input
+            type="text"
+            formControlName="title"
+            placeholder="Ex: Audit de sécurité informatique Q1 2026"
+            class="form-input"
+          />
+          <span
+            class="error"
+            *ngIf="editAuditForm.get('title')?.invalid && editAuditForm.get('title')?.touched"
+          >
+            Le titre est requis (min 3 caractères)
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Département <span class="required">*</span></label>
+          <select formControlName="department" class="form-input">
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Type d'audit <span class="required">*</span></label>
+          <select formControlName="typeAuditId" class="form-input">
+            <option [ngValue]="null">Sélectionner un type</option>
+            <option *ngFor="let type of typeAudits()" [ngValue]="type.id">
+              {{ type.name }}
+            </option>
+          </select>
+          <span
+            class="error"
+            *ngIf="
+              editAuditForm.get('typeAuditId')?.invalid && editAuditForm.get('typeAuditId')?.touched
+            "
+          >
+            Le type est requis
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Date de début <span class="required">*</span></label>
+          <input type="date" formControlName="dateDebut" class="form-input" />
+          <span
+            class="error"
+            *ngIf="
+              editAuditForm.get('dateDebut')?.invalid && editAuditForm.get('dateDebut')?.touched
+            "
+          >
+            La date de début est requise
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Date de fin <span class="required">*</span></label>
+          <input type="date" formControlName="dateFin" class="form-input" />
+          <span
+            class="error"
+            *ngIf="editAuditForm.get('dateFin')?.invalid && editAuditForm.get('dateFin')?.touched"
+          >
+            La date de fin est requise
+          </span>
+        </div>
+      </div>
+
+      <div class="info-badge">
+        <strong>ℹ️ Note:</strong> Seuls les audits planifiés ou en cours peuvent être modifiés.
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" (click)="cancelEditAudit()">Annuler</button>
+      <button
+        type="submit"
+        class="btn-primary"
+        (click)="saveAuditChanges()"
+        [disabled]="editAuditForm.invalid || savingEdit()"
+      >
+        {{ savingEdit() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal Confirmation Suppression -->
+<div class="modal-overlay" *ngIf="auditToDelete()" (click)="cancelDelete()"></div>
+<div class="delete-modal" *ngIf="auditToDelete()">
+  <div class="modal-header delete-header">
+    <h2>Supprimer cet audit ?</h2>
+    <button type="button" class="btn-close" (click)="cancelDelete()" title="Fermer">✕</button>
+  </div>
+  <div class="modal-body">
+    <div class="delete-warning">
+      <p class="delete-lead">Cette action est irréversible.</p>
+      <div class="audit-to-delete">
+        <strong>{{ auditToDelete()?.title }}</strong>
+        <span>{{ auditToDelete()?.typeAuditName }} • {{ auditToDelete()?.department }}</span>
+      </div>
+      <p class="warning-text">
+        Seuls les audits planifiés peuvent être supprimés.
+      </p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn-secondary" (click)="cancelDelete()">Annuler</button>
+    <button type="button" class="btn-danger" (click)="deleteAudit()" [disabled]="deletingAudit()">
+      {{ deletingAudit() ? 'Suppression...' : 'Supprimer' }}
+    </button>
+  </div>
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" *ngIf="showCreatePanel()" (click)="cancelCreation()"></div>
+
+<!-- Modal Création Audit - Stepper -->
+<div class="create-modal" *ngIf="showCreatePanel()">
+  <div class="modal-header">
+    <h2>Créer un nouvel audit</h2>
+    <button type="button" class="btn-close" (click)="cancelCreation()" title="Fermer">✕</button>
+  </div>
+
+  <!-- Stepper Steps Indicator -->
+  <div class="stepper">
+    <div class="step" [class.active]="currentStep() === 1" [class.completed]="currentStep() > 1">
+      <div class="step-number">1</div>
+      <div class="step-label">Informations</div>
+    </div>
+    <div class="step-connector" [class.completed]="currentStep() > 1"></div>
+    <div class="step" [class.active]="currentStep() === 2" [class.completed]="currentStep() > 2">
+      <div class="step-number">2</div>
+      <div class="step-label">Questions</div>
+    </div>
+    <div class="step-connector" [class.completed]="currentStep() > 2"></div>
+    <div class="step" [class.active]="currentStep() === 3">
+      <div class="step-number">3</div>
+      <div class="step-label">Confirmation</div>
+    </div>
+  </div>
+
+  <form [formGroup]="auditForm" class="create-form">
+    <!-- Étape 1: Informations Générales -->
+    <div class="step-content" *ngIf="currentStep() === 1">
+      <h3 class="step-title">Informations générales</h3>
+      <div class="form-group">
+        <label>Titre de l'audit <span class="required">*</span></label>
+        <input
+          type="text"
+          formControlName="title"
+          placeholder="Ex: Audit de sécurité informatique Q1 2026"
+          class="form-input"
+        />
+        <span
+          class="error"
+          *ngIf="auditForm.get('title')?.invalid && auditForm.get('title')?.touched"
+        >
+          Le titre est requis (min 3 caractères)
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Département <span class="required">*</span></label>
+          <select formControlName="department" class="form-input">
+            <option *ngFor="let dept of departments" [value]="dept">{{ dept }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Type d'audit <span class="required">*</span></label>
+          <select formControlName="typeAuditId" class="form-input">
+            <option [ngValue]="null">Sélectionner un type</option>
+            <option *ngFor="let type of typeAudits()" [ngValue]="type.id">
+              {{ type.name }}
+            </option>
+          </select>
+          <span
+            class="error"
+            *ngIf="auditForm.get('typeAuditId')?.invalid && auditForm.get('typeAuditId')?.touched"
+          >
+            Le type est requis
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Audité <span class="required">*</span></label>
+        <select formControlName="auditeId" class="form-input">
+          <option [ngValue]="null">Sélectionner un audité</option>
+          <option *ngFor="let audite of audites()" [ngValue]="audite.id">
+            {{ audite.name }}
+          </option>
+        </select>
+        <span
+          class="error"
+          *ngIf="auditForm.get('auditeId')?.invalid && auditForm.get('auditeId')?.touched"
+        >
+          L'audité est requis
+        </span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date de début <span class="required">*</span></label>
+          <input type="date" formControlName="dateDebut" class="form-input" />
+          <span
+            class="error"
+            *ngIf="auditForm.get('dateDebut')?.invalid && auditForm.get('dateDebut')?.touched"
+          >
+            La date est requise
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Date de fin <span class="required">*</span></label>
+          <input type="date" formControlName="dateFin" class="form-input" />
+          <span
+            class="error"
+            *ngIf="auditForm.get('dateFin')?.invalid && auditForm.get('dateFin')?.touched"
+          >
+            La date est requise
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 2: Questions -->
+    <div class="step-content" *ngIf="currentStep() === 2">
+      <h3 class="step-title">Ajouter les questions</h3>
+      <div class="info-panel">
+        <strong>ℹ️ Info</strong>
+        <p>Ordonnez les options du moins bon au meilleur.</p>
+        <p>Le score est calculé automatiquement selon la position (meilleure moitié = 1).</p>
+        <p>Ex : Mauvais → Moyen → Bon → Excellent</p>
+      </div>
+      <button type="button" class="btn-secondary add-question-btn" (click)="addQuestion()">
+        + Ajouter une question
+      </button>
+
+      <div formArrayName="questions">
+        <div
+          class="questions-list"
+          *ngIf="questions.length > 0 && questionsCount() >= 0; else noQuestions"
+        >
+          <div
+            class="question-item"
+            *ngFor="let question of questions.controls; let qi = index; trackBy: trackByIndex"
+          >
+            <div class="question-number">Q{{ qi + 1 }}</div>
+
+            <div [formGroupName]="qi" class="question-content">
+              <div class="form-group">
+                <input
+                  type="text"
+                  formControlName="title"
+                  placeholder="Énoncé de la question..."
+                  class="form-input"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Type</label>
+                <select
+                  formControlName="type"
+                  (change)="onQuestionTypeChange(qi)"
+                  class="form-input"
+                >
+                  <option value="TRUE_FALSE">Vrai/Faux</option>
+                  <option value="RADIO">Choix multiple</option>
+                </select>
+              </div>
+
+              <!-- Options pour les questions RADIO uniquement -->
+              <div class="options-section" *ngIf="questions.at(qi).get('type')?.value === 'RADIO'">
+                <label class="options-label">Options possibles</label>
+                <div formArrayName="options">
+                  <div
+                    class="option-item"
+                    *ngFor="let optionControl of getOptions(qi).controls; let oi = index"
+                    [formGroupName]="oi"
+                  >
+                    <input
+                      type="text"
+                      formControlName="label"
+                      placeholder="Option..."
+                      class="form-input"
+                    />
+                    <button
+                      type="button"
+                      class="btn-icon"
+                      (click)="removeOption(qi, oi)"
+                      [disabled]="getOptions(qi).length === 1"
+                      title="Supprimer"
+                    >
+                      🗑
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn-tertiary"
+                  (click)="addOption(qi)"
+                  style="margin-top: 8px"
+                >
+                  + Ajouter une option
+                </button>
+              </div>
+
+              <!-- Info pour Vrai/Faux -->
+              <div class="info-badge" *ngIf="questions.at(qi).get('type')?.value === 'TRUE_FALSE'">
+                ✓ Vrai/Faux - Les options seront "Vrai" ou "Faux"
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn-remove"
+              (click)="removeQuestion(qi)"
+              [disabled]="questions.length === 1"
+              title="Supprimer la question"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+
+        <ng-template #noQuestions>
+          <div class="empty-questions">
+            <p>Aucune question pour le moment</p>
+            <p class="small">Cliquez sur "Ajouter une question" pour commencer</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Étape 3: Confirmation -->
+    <div class="step-content" *ngIf="currentStep() === 3">
+      <h3 class="step-title">Vérification et création</h3>
+      <div class="summary-box">
+        <h4>Récapitulatif de l'audit</h4>
+        <div class="summary-item">
+          <span class="label">Titre</span>
+          <span class="value">{{ auditForm.get('title')?.value }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Département</span>
+          <span class="value">{{ auditForm.get('department')?.value }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Type</span>
+          <span class="value">{{ getTypeAuditName(auditForm.get('typeAuditId')?.value) }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">Période</span>
+          <span class="value"
+            >{{ auditForm.get('dateDebut')?.value }} à {{ auditForm.get('dateFin')?.value }}</span
+          >
+        </div>
+        <div class="summary-item">
+          <span class="label">Nombre de questions</span>
+          <span class="value badge">{{ questions.length }}</span>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- Buttons Navigation -->
+  <div class="form-actions">
+    <button type="button" class="btn-secondary" (click)="previousStep()" *ngIf="currentStep() > 1">
+      ← Précédent
+    </button>
+
+    <div class="spacer"></div>
+
+    <button type="button" class="btn-cancel" (click)="cancelCreation()">Annuler</button>
+
+    <button type="button" class="btn-secondary" (click)="nextStep()" *ngIf="currentStep() < 3">
+      Suivant →
+    </button>
+
+    <button type="button" class="btn-primary" (click)="submitAudit()" *ngIf="currentStep() === 3">
+      Créer l'audit
+    </button>
+  </div>
+</div>

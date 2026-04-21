@@ -60,6 +60,7 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
     { label: 'Profil', route: '/audite/profil', shortLabel: 'PR' },
   ],
   ETUDIANT: [
+    { label: 'Tableau de bord', route: '/etudiant/tableau-de-bord', shortLabel: 'TB' },
     {
       label: 'Soumettre une idee',
       route: '/etudiant/soumettre-idee',

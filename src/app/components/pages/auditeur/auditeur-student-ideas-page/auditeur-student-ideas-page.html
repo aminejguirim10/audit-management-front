@@ -1,4 +1,142 @@
-﻿<section class="page-placeholder">
-  <h1>Auditeur - Idees des etudiants</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role AUDITEUR.</p>
-</section>
+﻿<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>💡 Idées des Étudiants</h1>
+      <p>Examinez et gérez le statut des idées de votre département</p>
+    </div>
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Rechercher une idée..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+        class="search-input"
+      />
+      <span class="search-icon">🔍</span>
+    </div>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="filter-section">
+    <button
+      class="filter-btn"
+      [class.active]="filterStatus() === 'TOUS'"
+      (click)="filterStatus.set('TOUS')"
+    >
+      📊 Tous les statuts
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="filterStatus() === 'ENCOURS'"
+      (click)="filterStatus.set('ENCOURS')"
+    >
+      ⏳ En Cours
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="filterStatus() === 'ACCEPTE'"
+      (click)="filterStatus.set('ACCEPTE')"
+    >
+      ✅ Acceptées
+    </button>
+    <button
+      class="filter-btn"
+      [class.active]="filterStatus() === 'REJETE'"
+      (click)="filterStatus.set('REJETE')"
+    >
+      ❌ Rejetées
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement des idées...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && filteredIdeas().length === 0" class="empty-state">
+    <span class="empty-icon">📭</span>
+    <h3>Aucune idée trouvée</h3>
+    <p>Essayez d'ajuster vos filtres ou votre recherche</p>
+  </div>
+
+  <!-- Ideas Grid -->
+  <div *ngIf="!loading() && filteredIdeas().length > 0" class="ideas-grid">
+    <div *ngFor="let idea of filteredIdeas()" class="idea-card">
+      <!-- Card Header -->
+      <div class="card-header">
+        <div class="card-title">
+          <h3>{{ idea.title }}</h3>
+          <p class="author">👤 {{ idea.studentName }}</p>
+        </div>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <!-- Status and Category Badges -->
+        <div class="badges-section">
+          <span class="badge status-badge" [ngClass]="getStatusBadgeClass(idea.status)">
+            {{ statusLabels[idea.status] }}
+          </span>
+          <span class="badge category-badge" [ngClass]="getCategoryBadgeClass(idea.category)">
+            {{ categoryLabels[idea.category] }}
+          </span>
+          <span class="badge department-badge"> 🏢 {{ departmentLabels[idea.department] }} </span>
+        </div>
+
+        <!-- Description -->
+        <p class="description">{{ idea.description }}</p>
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <span class="stat">👍 {{ idea.voteCount }} votes</span>
+          <button
+            type="button"
+            class="comment-toggle-btn comment-toggle-bottom"
+            (click)="toggleComments(idea.runtimeId)"
+            [attr.aria-expanded]="activeCommentIdeaId() === idea.runtimeId"
+          >
+            💬 {{ idea.comments.length || 0 }}
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons-two">
+          <button
+            type="button"
+            class="btn-action btn-accept"
+            (click)="updateStatus(idea, 'ACCEPTE')"
+            [disabled]="updatingIdeaId() === idea.id"
+          >
+            ✅ Accepter
+          </button>
+          <button
+            type="button"
+            class="btn-action btn-reject"
+            (click)="updateStatus(idea, 'REJETE')"
+            [disabled]="updatingIdeaId() === idea.id"
+          >
+            ❌ Rejeter
+          </button>
+        </div>
+
+        <div *ngIf="activeCommentIdeaId() === idea.runtimeId" class="comment-section-card">
+          <div *ngIf="idea.comments.length > 0" class="comments-section">
+            <h4>💬 Commentaires ({{ idea.comments.length }})</h4>
+            <div class="comments-list">
+              <div *ngFor="let comment of idea.comments" class="comment-item">
+                <p class="comment-author">👤 {{ comment.studentName || 'Anonyme' }}</p>
+                <p class="comment-text">{{ comment.content }}</p>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="!idea.comments.length" class="no-comments">
+            <p>Aucun commentaire pour le moment</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
