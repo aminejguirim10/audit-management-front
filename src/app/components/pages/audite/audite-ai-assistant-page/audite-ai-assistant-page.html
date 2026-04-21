@@ -1,0 +1,435 @@
+<section class="assistant-shell">
+  <header class="hero-block">
+    <p class="hero-kicker">Audit Agent</p>
+    <h1>Chatbot IA audit</h1>
+    <p>
+      Selectionnez un critere d audit pour chaque message afin de donner un contexte riche et
+      obtenir des reponses plus precises, plus actionnables et plus rapides.
+    </p>
+  </header>
+
+  <div
+    class="conversation-limit-banner"
+    role="note"
+    aria-label="Limite des images par conversation"
+  >
+    <span class="conversation-limit-banner-icon" aria-hidden="true">
+      <fa-icon [icon]="faCircleInfo"></fa-icon>
+    </span>
+    <div class="conversation-limit-banner-copy">
+      <p class="conversation-limit-banner-title">Limite d'images</p>
+      <p class="conversation-limit-banner-text">
+        Maximum 5 images au total par conversation, deja envoyees et en attente.
+      </p>
+    </div>
+  </div>
+
+  <form class="workspace" [formGroup]="assistantForm" (ngSubmit)="submit()" novalidate>
+    <aside class="panel conversations-panel">
+      <header class="conversations-header">
+        <div>
+          <p class="conversations-eyebrow">Audite uniquement</p>
+          <h2>Conversations IA</h2>
+        </div>
+        <button
+          type="button"
+          class="btn btn-new-conversation"
+          [disabled]="isConversationActionBusy()"
+          (click)="createConversation()"
+        >
+          <span class="btn-new-conversation-icon" aria-hidden="true">
+            <fa-icon class="btn-new-conversation-icon-main" [icon]="faComments"></fa-icon>
+            <span class="btn-new-conversation-icon-badge">
+              <fa-icon [icon]="faPlus"></fa-icon>
+            </span>
+          </span>
+          <span> Chat</span>
+        </button>
+      </header>
+
+      <div class="conversations-body">
+        @if (isLoadingConversations) {
+          <p class="conversation-feedback">Chargement des conversations...</p>
+        } @else if (conversations.length === 0) {
+          <p class="conversation-feedback">
+            Aucune conversation IA pour le moment. Envoyez un premier message pour en creer une.
+          </p>
+        } @else {
+          <div class="conversation-list">
+            @for (conversation of conversations; track conversation.id) {
+              <article
+                class="conversation-item"
+                [class.is-active]="isConversationSelected(conversation.id)"
+              >
+                <button
+                  type="button"
+                  class="conversation-main"
+                  [disabled]="isConversationActionBusy()"
+                  (click)="selectConversation(conversation.id)"
+                >
+                  <div class="conversation-item-row">
+                    <p>{{ conversation.title }}</p>
+                    <span>{{ conversation.imageCount }}/5 img</span>
+                  </div>
+                  <small>{{ conversationPreview(conversation) }}</small>
+                  <small class="conversation-item-date">
+                    {{ conversationTimestampLabel(conversation) }}
+                  </small>
+                </button>
+
+                <div class="conversation-item-actions">
+                  <button
+                    type="button"
+                    class="conversation-action-btn is-edit"
+                    [disabled]="isConversationActionBusy()"
+                    (click)="openEditConversationModal(conversation, $event)"
+                    title="Modifier le titre"
+                    aria-label="Modifier le titre"
+                  >
+                    <fa-icon [icon]="faPenToSquare" aria-hidden="true"></fa-icon>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="conversation-action-btn is-delete"
+                    [disabled]="isConversationActionBusy()"
+                    (click)="openDeleteConversationModal(conversation, $event)"
+                    title="Supprimer la conversation"
+                    aria-label="Supprimer la conversation"
+                  >
+                    <fa-icon [icon]="faTrashCan" aria-hidden="true"></fa-icon>
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        }
+
+        @if (conversationErrorMessage) {
+          <p class="conversation-feedback is-error">{{ conversationErrorMessage }}</p>
+        }
+      </div>
+    </aside>
+
+    <section class="panel chat-panel">
+      <header class="chat-header">
+        <div>
+          <p class="chat-eyebrow">Conversation audit</p>
+          <h2>{{ selectedConversationTitle }}</h2>
+          <p class="chat-subtitle">
+            Critere du prochain message: <strong>{{ selectedCriterionLabel() }}</strong>
+          </p>
+        </div>
+        <span class="status-pill" [class]="statusClass()">{{ statusLabel() }}</span>
+      </header>
+
+      <div class="messages-stream" [class.is-empty]="chat.messages.length === 0">
+        @if (chat.messages.length === 0) {
+          <div class="empty-state">
+            <h3>Demarrez la conversation</h3>
+            <p>
+              Choisissez un critere, ecrivez votre situation reelle puis envoyez votre message. Les
+              conversations sont sauvegardees et rechargeables a gauche.
+            </p>
+          </div>
+        }
+
+        @for (message of chat.messages; track message.id) {
+          <article class="message-card" [class.user]="message.role === 'user'">
+            <p class="message-author">{{ messageLabel(message.role) }}</p>
+
+            <div class="message-parts">
+              @for (part of message.parts; track $index) {
+                @switch (part.type) {
+                  @case ('text') {
+                    <div class="part-markdown" [innerHTML]="renderMarkdown(part.text)"></div>
+                  }
+                  @case ('file') {
+                    @if (part.mediaType.startsWith('image/')) {
+                      <figure class="part-file-image">
+                        <img
+                          [src]="part.url"
+                          [alt]="part.filename || 'Image du chat'"
+                          loading="lazy"
+                        />
+                        @if (part.filename) {
+                          <figcaption>{{ part.filename }}</figcaption>
+                        }
+                      </figure>
+                    } @else {
+                      <a
+                        class="part-file-link"
+                        [href]="part.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {{ part.filename || 'Fichier joint' }}
+                      </a>
+                    }
+                  }
+                  @case ('reasoning') {
+                    <details class="part-reasoning">
+                      <summary>Raisonnement</summary>
+                      <p>{{ part.text }}</p>
+                    </details>
+                  }
+                }
+              }
+            </div>
+          </article>
+        }
+
+        @if (chat.status === 'submitted') {
+          <p class="stream-feedback">Requete envoyee. L assistant analyse votre contexte...</p>
+        }
+
+        @if (chat.status === 'streaming') {
+          <p class="stream-feedback">Streaming en cours...</p>
+        }
+      </div>
+
+      <div class="composer-block">
+        <div class="composer-grid">
+          <label class="field inline-field">
+            <span>Critere de ce message</span>
+            <select formControlName="auditCriterion">
+              @for (criterion of criterionOptions; track criterion.value) {
+                <option [value]="criterion.value">{{ criterion.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="image-upload-block">
+          <div class="upload-header">
+            <p class="upload-title">Images de contexte</p>
+            <span class="upload-counter">{{ imageCountLabel }}</span>
+          </div>
+
+          <p class="upload-hint">Maximum 5 images sur toute la conversation.</p>
+          <p class="upload-hint">
+            {{ sentImageCount }} image(s) deja envoyee(s) au modele, {{ uploadedImages.length }} en
+            attente.
+          </p>
+
+          <input
+            #chatImagesInput
+            class="upload-input"
+            type="file"
+            accept="image/*"
+            multiple
+            [disabled]="isUploadingImages || isSubmittingConversationTurn"
+            (change)="onImageFilesSelected($event)"
+          />
+
+          <button
+            type="button"
+            class="btn btn-upload"
+            [disabled]="
+              isUploadingImages ||
+              isSubmittingConversationTurn ||
+              sentImageCount + uploadedImages.length >= maxConversationImages
+            "
+            (click)="chatImagesInput.click()"
+          >
+            {{
+              isSubmittingConversationTurn
+                ? 'Envoi du message...'
+                : isUploadingImages
+                  ? 'Televersement...'
+                  : 'Ajouter des images'
+            }}
+          </button>
+
+          @if (uploadFeedbackMessage) {
+            <small class="upload-feedback" [class.is-error]="uploadFeedbackType === 'error'">
+              {{ uploadFeedbackMessage }}
+            </small>
+          }
+
+          @if (uploadedImages.length > 0) {
+            <div class="uploaded-images-grid">
+              @for (image of uploadedImages; track image.id) {
+                <article class="uploaded-image-card">
+                  <button
+                    type="button"
+                    class="image-delete-btn"
+                    [disabled]="
+                      image.isDeleting || isUploadingImages || isSubmittingConversationTurn
+                    "
+                    (click)="removeUploadedImage(image)"
+                    aria-label="Supprimer cette image"
+                    title="Supprimer"
+                  >
+                    {{ image.isDeleting ? '...' : 'x' }}
+                  </button>
+
+                  <div class="uploaded-image-frame">
+                    <img [src]="image.publicUrl" [alt]="image.filename" loading="lazy" />
+                  </div>
+
+                  <div class="uploaded-image-meta">
+                    <p>{{ image.filename }}</p>
+                    <small>Sera envoyee avec le prochain message</small>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </div>
+
+        <label class="field prompt-field">
+          <span>Votre message</span>
+          <textarea
+            rows="5"
+            formControlName="prompt"
+            [disabled]="
+              chat.status !== 'ready' ||
+              isSubmittingConversationTurn ||
+              isLoadingConversationDetails ||
+              isUploadingImages
+            "
+            (keydown)="onPromptKeydown($event)"
+            [attr.maxlength]="maxPromptLength"
+            placeholder="Expliquez la situation, le niveau de risque, les preuves disponibles et le resultat attendu..."
+          ></textarea>
+        </label>
+
+        <div class="composer-footer">
+          <div class="composer-feedback">
+            <small class="field-hint">{{ promptLength }} / {{ maxPromptLength }}</small>
+            @if (promptErrorMessage()) {
+              <small class="field-error">{{ promptErrorMessage() }}</small>
+            }
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-send" [disabled]="!canSend()">Envoyer</button>
+            <button type="button" class="btn btn-stop" [disabled]="!canStop()" (click)="stop()">
+              Arreter
+            </button>
+            <button
+              type="button"
+              class="btn btn-regenerate"
+              [disabled]="chat.status !== 'ready' || chat.messages.length === 0"
+              (click)="regenerate()"
+            >
+              Regenerer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      @if (chat.error; as error) {
+        <div class="error-banner">
+          <strong>Impossible de recuperer une reponse.</strong>
+          <span>{{ error.message }}</span>
+        </div>
+      }
+    </section>
+  </form>
+
+  @if (isEditConversationModalOpen) {
+    <div class="assistant-modal-overlay" (click)="closeEditConversationModal()">
+      <div class="assistant-modal" (click)="$event.stopPropagation()">
+        <div class="assistant-modal-header">
+          <h3>Modifier le titre</h3>
+          <button
+            type="button"
+            class="assistant-modal-close"
+            [disabled]="isUpdatingConversationTitle"
+            (click)="closeEditConversationModal()"
+            aria-label="Fermer"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="assistant-modal-body">
+          <p>Renommez la conversation pour mieux l identifier dans votre historique.</p>
+
+          <label class="field">
+            <span>Nouveau titre</span>
+            <input
+              type="text"
+              [value]="editConversationTitle"
+              maxlength="180"
+              [disabled]="isUpdatingConversationTitle"
+              (input)="onEditConversationTitleInput($event)"
+              (keydown.enter)="confirmEditConversationTitle()"
+              placeholder="Ex: Audit securite laboratoire finance"
+            />
+          </label>
+
+          <small class="field-hint">{{ editTitleLength() }} / 180</small>
+        </div>
+
+        <div class="assistant-modal-footer">
+          <button
+            type="button"
+            class="modal-btn modal-btn-cancel"
+            [disabled]="isUpdatingConversationTitle"
+            (click)="closeEditConversationModal()"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="modal-btn modal-btn-confirm"
+            [disabled]="!canConfirmEditConversation()"
+            (click)="confirmEditConversationTitle()"
+          >
+            {{ isUpdatingConversationTitle ? 'Mise a jour...' : 'Enregistrer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (isDeleteConversationModalOpen) {
+    <div class="assistant-modal-overlay" (click)="closeDeleteConversationModal()">
+      <div class="assistant-modal assistant-modal-danger" (click)="$event.stopPropagation()">
+        <div class="assistant-modal-header">
+          <h3>Confirmer la suppression</h3>
+          <button
+            type="button"
+            class="assistant-modal-close"
+            [disabled]="isDeletingConversation"
+            (click)="closeDeleteConversationModal()"
+            aria-label="Fermer"
+          >
+            X
+          </button>
+        </div>
+
+        <div class="assistant-modal-body">
+          <p>
+            Cette action supprimera la conversation
+            <strong>{{ deleteConversationTarget?.title || 'selectionnee' }}</strong>
+            ainsi que tous ses messages et ses images associees.
+          </p>
+          <p>Cette operation est irreversible.</p>
+        </div>
+
+        <div class="assistant-modal-footer">
+          <button
+            type="button"
+            class="modal-btn modal-btn-cancel"
+            [disabled]="isDeletingConversation"
+            (click)="closeDeleteConversationModal()"
+          >
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="modal-btn modal-btn-danger"
+            [disabled]="isDeletingConversation"
+            (click)="confirmDeleteConversation()"
+          >
+            {{ isDeletingConversation ? 'Suppression...' : 'Supprimer definitivement' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

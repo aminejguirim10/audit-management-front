@@ -1,0 +1,75 @@
+<section class="chat-page">
+  <header class="chat-hero">
+    <button type="button" class="back-btn" (click)="goBack()">Retour</button>
+    <div class="chat-hero__identity">
+      <span class="avatar-pill">{{ counterpartName.slice(0, 1) }}</span>
+      <div>
+        <p class="eyebrow">Conversation d'audit</p>
+        <h1>{{ audit?.title || 'Audit #' + auditId }}</h1>
+        <p>{{ subtitle }}</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="status-box" *ngIf="error">{{ error }}</div>
+  <div class="status-box loading" *ngIf="loading && !error">Chargement de la conversation...</div>
+
+  <div class="chat-layout" *ngIf="!loading && !error">
+    <article class="conversation-card">
+      <div class="conversation-header">
+        <h2>Messages</h2>
+        <span>{{ messages.length }} total</span>
+      </div>
+
+      <div
+        class="message-thread"
+        #messageScroller
+        *ngIf="messages.length > 0; else noMessagesTemplate"
+      >
+        <div
+          class="message-row"
+          [class.own]="isOwnMessage(message)"
+          *ngFor="let message of messages; trackBy: trackByMessageId"
+        >
+          <span class="message-avatar" *ngIf="!isOwnMessage(message)">
+            {{ counterpartInitials }}
+          </span>
+
+          <div class="message-stack" [class.own]="isOwnMessage(message)">
+            <strong class="message-author" *ngIf="!isOwnMessage(message)">
+              {{ messageAuthorLabel(message) }}
+            </strong>
+
+            <article class="message-bubble" [class.own]="isOwnMessage(message)">
+              <p>{{ message.content }}</p>
+            </article>
+
+            <small class="message-time">{{ formatDateTime(message.sentAt) }}</small>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noMessagesTemplate>
+        <div class="empty-box">Aucun message pour cet audit. Demarrez la discussion.</div>
+      </ng-template>
+
+      <form class="composer" (submit)="$event.preventDefault(); sendMessage()">
+        <textarea
+          name="content"
+          rows="3"
+          [(ngModel)]="draftMessage"
+          maxlength="2000"
+          placeholder="Ecrivez votre message..."
+          (keydown)="onComposerKeydown($event)"
+          [disabled]="sending"
+        ></textarea>
+        <div class="composer-footer">
+          <small>{{ draftMessage.trim().length }}/2000</small>
+          <button type="submit" [disabled]="sending || !draftMessage.trim()">
+            {{ sending ? 'Envoi...' : 'Envoyer' }}
+          </button>
+        </div>
+      </form>
+    </article>
+  </div>
+</section>

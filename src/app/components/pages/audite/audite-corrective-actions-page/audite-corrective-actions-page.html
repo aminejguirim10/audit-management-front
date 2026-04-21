@@ -1,4 +1,90 @@
-﻿<section class="page-placeholder">
-  <h1>Audite - Actions correctives</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role AUDITE.</p>
+﻿<section class="corrective-page">
+  <header class="hero-card">
+    <div class="hero-copy">
+      <p class="eyebrow">Espace audité</p>
+      <h1>Actions correctives des audits</h1>
+      <p class="hero-text">
+        Chaque audit est présenté comme une carte principale avec ses informations clés, puis les
+        actions correctives associées en sous-cartes.
+      </p>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-box">
+        <span class="stat-value">{{ totalAudits }}</span>
+        <span class="stat-label">Audit(s)</span>
+      </div>
+      <div class="stat-box accent">
+        <span class="stat-value">{{ totalActions }}</span>
+        <span class="stat-label">Action(s) corrective(s)</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="status-panel" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="status-panel loading" *ngIf="loading && !error">
+    Chargement des audits et actions correctives...
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && !error && audits.length === 0">
+    <h2>Aucune action corrective disponible</h2>
+    <p>Les audits associés à votre compte n’ont pas encore d’actions correctives publiées.</p>
+  </div>
+
+  <div class="audit-stack" *ngIf="!loading && !error && audits.length > 0">
+    <article class="audit-card" *ngFor="let audit of audits; trackBy: trackByAuditId">
+      <div class="audit-card__header">
+        <div>
+          <p class="audit-index">Audit #{{ audit.auditId }}</p>
+          <h2>{{ audit.auditTitle }}</h2>
+          <div class="audit-meta">
+            <span>{{ audit.typeAuditName || "Type d'audit non défini" }}</span>
+            <span class="dot"></span>
+            <span>{{ audit.auditeurName || 'Auditeur non défini' }}</span>
+          </div>
+        </div>
+
+        <div class="date-block">
+          <span>
+            <strong>Début</strong>
+            {{ formatDate(audit.dateDebut) }}
+          </span>
+          <span>
+            <strong>Fin</strong>
+            {{ formatDate(audit.dateFin) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="actions-shell">
+        <div class="actions-title">
+          <span>Actions correctives</span>
+          <small>{{ audit.correctiveActions.length }} élément(s)</small>
+        </div>
+
+        <div class="action-list" *ngIf="audit.correctiveActions.length > 0; else noActionTemplate">
+          <section
+            class="action-card"
+            *ngFor="let action of audit.correctiveActions; trackBy: trackByActionId"
+          >
+            <div class="action-card__top">
+              <span class="priority-chip">{{ action.priority }}</span>
+              <span class="estimate-chip">{{ action.tempsEstime }}</span>
+            </div>
+            <h3>{{ action.title }}</h3>
+            <p>{{ action.description }}</p>
+          </section>
+        </div>
+
+        <ng-template #noActionTemplate>
+          <div class="no-action-box">
+            Aucune action corrective n’est encore rattachée à cet audit.
+          </div>
+        </ng-template>
+      </div>
+    </article>
+  </div>
 </section>
