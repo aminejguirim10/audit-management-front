@@ -40,49 +40,56 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   private pieChart: Chart | null = null;
 
   readonly departementsLabels: Record<string, string> = {
-    'INFORMATIQUE': 'Génie Informatique',
-    'ELECTRIQUE': 'Génie Électrique',
-    'INDUS': 'Génie Industriel'
+    INFORMATIQUE: 'Génie Informatique',
+    ELECTRIQUE: 'Génie Électrique',
+    INDUS: 'Génie Industriel',
   };
 
   readonly rolesLabels: Record<string, string> = {
-    'ADMIN': 'Administrateurs',
-    'AUDITEUR': 'Auditeurs',
-    'AUDITE': 'Chefs dept.',
-    'ETUDIANT': 'Étudiants'
+    ADMIN: 'Administrateurs',
+    AUDITEUR: 'Auditeurs',
+    AUDITE: 'Chefs dept.',
+    ETUDIANT: 'Étudiants',
   };
 
   readonly rolesIcons: Record<string, string> = {
-    'ADMIN': '🛡️',
-    'AUDITEUR': '🔍',
-    'AUDITE': '👥',
-    'ETUDIANT': '🎓'
+    ADMIN: '🛡️',
+    AUDITEUR: '🔍',
+    AUDITE: '👥',
+    ETUDIANT: '🎓',
   };
 
   readonly rolesColors: Record<string, string> = {
-    'ADMIN': '#8B5CF6',
-    'AUDITEUR': '#3B82F6',
-    'AUDITE': '#10B981',
-    'ETUDIANT': '#F59E0B'
+    ADMIN: '#8B5CF6',
+    AUDITEUR: '#3B82F6',
+    AUDITE: '#10B981',
+    ETUDIANT: '#F59E0B',
   };
 
   readonly rolesBg: Record<string, string> = {
-    'ADMIN': '#F5F3FF',
-    'AUDITEUR': '#EFF6FF',
-    'AUDITE': '#ECFDF5',
-    'ETUDIANT': '#FFFBEB'
+    ADMIN: '#F5F3FF',
+    AUDITEUR: '#EFF6FF',
+    AUDITE: '#ECFDF5',
+    ETUDIANT: '#FFFBEB',
   };
 
   readonly moisData = {
     labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin'],
-    values: [12, 16, 14, 21, 28, 26]
+    values: [12, 16, 14, 21, 28, 26],
   };
 
- 
-  get totalAudits(): number { return this.audits.length; }
-  get auditsPlanifies(): number { return this.audits.filter(a => a.status === 'PLANIFIE').length; }
-  get auditsEnCours(): number { return this.audits.filter(a => a.status === 'EN_COURS').length; }
-  get auditsTermines(): number { return this.audits.filter(a => a.status === 'TERMINEE').length; }
+  get totalAudits(): number {
+    return this.audits.length;
+  }
+  get auditsPlanifies(): number {
+    return this.audits.filter((a) => a.status === 'PLANIFIE').length;
+  }
+  get auditsEnCours(): number {
+    return this.audits.filter((a) => a.status === 'EN_COURS').length;
+  }
+  get auditsTermines(): number {
+    return this.audits.filter((a) => a.status === 'TERMINEE').length;
+  }
 
   ngOnInit(): void {
     this.chargerStatistiques();
@@ -101,7 +108,8 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   chargerStatistiques(): void {
     this.chargement = true;
-    this.http.get<ApiResponse<UserStatistiques>>(`${API_BASE_URL}/utilisateurs/statistiques`)
+    this.http
+      .get<ApiResponse<UserStatistiques>>(`${API_BASE_URL}/utilisateurs/statistiques`)
       .subscribe({
         next: (res) => {
           this.statistiques = res.data;
@@ -111,7 +119,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
         error: () => {
           this.erreur = 'Erreur lors du chargement';
           this.chargement = false;
-        }
+        },
       });
   }
 
@@ -121,14 +129,16 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
         this.typesAudits = data;
         setTimeout(() => this.initPieChart(), 100);
       },
-      error: () => {}
+      error: () => {},
     });
   }
 
   chargerAudits(): void {
     this.auditService.findAll().subscribe({
-      next: (data) => { this.audits = data; },
-      error: () => {}
+      next: (data) => {
+        this.audits = data;
+      },
+      error: () => {},
     });
   }
 
@@ -145,13 +155,15 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
       type: 'bar',
       data: {
         labels: this.moisData.labels,
-        datasets: [{
-          label: 'audits',
-          data: this.moisData.values,
-          backgroundColor: '#6366F1',
-          borderRadius: 8,
-          hoverBackgroundColor: '#4F46E5'
-        }]
+        datasets: [
+          {
+            label: 'audits',
+            data: this.moisData.values,
+            backgroundColor: '#6366F1',
+            borderRadius: 8,
+            hoverBackgroundColor: '#4F46E5',
+          },
+        ],
       },
       options: {
         responsive: true,
@@ -161,22 +173,22 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
           tooltip: {
             callbacks: {
               title: (items) => items[0].label,
-              label: (item) => `audits : ${item.raw}`
-            }
-          }
+              label: (item) => `audits : ${item.raw}`,
+            },
+          },
         },
         scales: {
           y: {
             beginAtZero: true,
             grid: { color: '#F1F5F9' },
-            ticks: { color: '#94A3B8', font: { size: 11 } }
+            ticks: { color: '#94A3B8', font: { size: 11 } },
           },
           x: {
             grid: { display: false },
-            ticks: { color: '#94A3B8', font: { size: 11 } }
-          }
-        }
-      }
+            ticks: { color: '#94A3B8', font: { size: 11 } },
+          },
+        },
+      },
     });
   }
 
@@ -187,13 +199,15 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.pieChart = new Chart(canvas, {
       type: 'doughnut',
       data: {
-        labels: this.typesAudits.map(t => t.name),
-        datasets: [{
-          data: this.typesAudits.map(() => Math.floor(Math.random() * 40) + 10),
-          backgroundColor: this.typesAudits.map(t => t.color),
-          borderWidth: 3,
-          borderColor: '#fff'
-        }]
+        labels: this.typesAudits.map((t) => t.name),
+        datasets: [
+          {
+            data: this.typesAudits.map(() => Math.floor(Math.random() * 40) + 10),
+            backgroundColor: this.typesAudits.map((t) => t.color),
+            borderWidth: 3,
+            borderColor: '#fff',
+          },
+        ],
       },
       options: {
         responsive: true,
@@ -207,11 +221,11 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
               font: { size: 11 },
               color: '#64748B',
               usePointStyle: true,
-              pointStyleWidth: 8
-            }
-          }
-        }
-      }
+              pointStyleWidth: 8,
+            },
+          },
+        },
+      },
     });
   }
 
@@ -234,9 +248,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getBarHeight(value: number): number {
-    const maxVal = this.statistiques
-      ? Math.max(...Object.values(this.statistiques.parRole))
-      : 1;
+    const maxVal = this.statistiques ? Math.max(...Object.values(this.statistiques.parRole)) : 1;
     return maxVal > 0 ? Math.round((value / maxVal) * 30) + 8 : 8;
   }
 }
