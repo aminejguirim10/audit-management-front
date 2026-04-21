@@ -1,134 +1,237 @@
-<div class="container">
-  <div class="entete">
-    <div>
-      <h1>Auditeurs</h1>
-      <p>Gérer les auditeurs de la plateforme</p>
+<div class="page-wrap">
+
+
+  <div class="page-header">
+    <div class="header-left">
+      <div class="header-icon" style="background:linear-gradient(135deg,#0bf5d6,#0649d9)">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Auditeurs</h1>
+        <p>Gestion des auditeurs de la plateforme</p>
+      </div>
     </div>
-    <button class="btn-primaire" (click)="ouvrirModalCreation()">
-      👤 Ajouter un auditeur
+    <button class="add-btn" style="background:linear-gradient(135deg,#0bf5d6,#0649d9)" (click)="ouvrirModalCreation()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Ajouter un auditeur
     </button>
   </div>
 
-  <div class="erreur" *ngIf="erreur">{{ erreur }}</div>
+  <div class="alert-err" *ngIf="erreur">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>
+    {{ erreur }}
+  </div>
 
-  <!-- Statistiques -->
-  <div class="stats-grid">
-    <div class="stat-carte">
-      <p class="stat-label">Total des auditeurs</p>
-      <p class="stat-valeur">{{ totalAuditors }}</p>
+  
+  <div class="circles-row">
+
+   
+    <div class="circle-card">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40" stroke="#3B82F6"
+            [style.stroke-dashoffset]="251.2 * 0"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ totalAuditors }}</span>
+          <span class="circle-pct">total</span>
+        </div>
+      </div>
+      <div class="circle-label">Total auditeurs</div>
+      <div class="circle-sub">Auditeurs enregistrés</div>
     </div>
-    <div class="stat-carte">
-      <p class="stat-label">Actifs</p>
-      <p class="stat-valeur vert">{{ auditorsActifs }}</p>
+
+    <!-- Informatique -->
+    <div class="circle-card">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40" stroke="#6366F1"
+            [style.stroke-dashoffset]="getOffset(countByDept('INFORMATIQUE'), totalAuditors || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ countByDept('INFORMATIQUE') }}</span>
+          <span class="circle-pct">{{ getPct('INFORMATIQUE') }}%</span>
+        </div>
+      </div>
+      <div class="circle-label">Informatique</div>
+      <div class="circle-sub">Part du département</div>
     </div>
-    <div class="stat-carte">
-      <p class="stat-label">Audits en cours</p>
-      <p class="stat-valeur bleu">{{ auditsEnCoursTotal }}</p>
+
+    <!-- Electrique -->
+    <div class="circle-card">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40" stroke="#F59E0B"
+            [style.stroke-dashoffset]="getOffset(countByDept('ELECTRIQUE'), totalAuditors || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ countByDept('ELECTRIQUE') }}</span>
+          <span class="circle-pct">{{ getPct('ELECTRIQUE') }}%</span>
+        </div>
+      </div>
+      <div class="circle-label">Électrique</div>
+      <div class="circle-sub">Part du département</div>
     </div>
-    <div class="stat-carte">
-      <p class="stat-label">Audits complétés</p>
-      <p class="stat-valeur">{{ auditsCompletesTotal }}</p>
+
+    <!-- Industriel -->
+    <div class="circle-card">
+      <div class="circle-svg-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="circle-bg" cx="50" cy="50" r="40"/>
+          <circle class="circle-fill" cx="50" cy="50" r="40" stroke="#8B5CF6"
+            [style.stroke-dashoffset]="getOffset(countByDept('INDUS'), totalAuditors || 1)"/>
+        </svg>
+        <div class="circle-center">
+          <span class="circle-num">{{ countByDept('INDUS') }}</span>
+          <span class="circle-pct">{{ getPct('INDUS') }}%</span>
+        </div>
+      </div>
+      <div class="circle-label">Industriel</div>
+      <div class="circle-sub">Part du département</div>
+    </div>
+
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-inp" type="text" [(ngModel)]="recherche" placeholder="Rechercher par nom, email ou département..." />
+    </div>
+    <span class="results-tag">{{ filteredAuditors.length }} résultat{{ filteredAuditors.length !== 1 ? 's' : '' }}</span>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-wrap" *ngIf="chargement">
+    <div class="ring"></div>
+    <p>Chargement des auditeurs...</p>
+  </div>
+
+  <!-- TABLE -->
+  <div class="tbl-card" *ngIf="!chargement">
+    <div class="tbl-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Auditeur</th>
+            <th>Département</th>
+            <th>Contact</th>
+            <th>Rôle</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let auditor of filteredAuditors; let i = index" [style.animation-delay]="i * 25 + 'ms'">
+            <td data-label="Auditeur">
+              <div class="person-cell">
+                <div class="avatar-lg" style="background:#EFF6FF;color:#2563EB">{{ getInitials(auditor.name) }}</div>
+                <div>
+                  <div class="person-name">{{ auditor.name }}</div>
+                  <div class="person-id">#{{ auditor.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td data-label="Département">
+              <span class="dept-tag">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+                {{ departementsLabels[auditor.departement] }}
+              </span>
+            </td>
+            <td data-label="Contact">
+              <div class="contact-col">
+                <div class="contact-row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  {{ auditor.email }}
+                </div>
+                <div class="contact-row">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.82 19.79 19.79 0 01.38 1.22 2 2 0 012.38 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.82 7.45A16 16 0 0016.55 17.18l.81-.81a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                  {{ auditor.phoneNumber }}
+                </div>
+              </div>
+            </td>
+            <td data-label="Rôle">
+              <span class="role-badge" style="background:#EFF6FF;color:#1D4ED8">AUDITEUR</span>
+            </td>
+            <td data-label="Actions">
+              <div class="action-wrap">
+                <button class="icon-btn del" (click)="ouvrirModalSuppression(auditor)" title="Supprimer">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr class="empty-row" *ngIf="filteredAuditors.length === 0">
+            <td colspan="5">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <p>Aucun auditeur trouvé</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <div class="recherche-container">
-    <input
-      type="text"
-      [(ngModel)]="recherche"
-      placeholder="Rechercher par nom, email ou département..."
-      class="recherche-input"
-    />
-  </div>
-
-  <div class="chargement" *ngIf="chargement">Chargement...</div>
-
-  <div class="carte" *ngIf="!chargement">
-    <h2>Liste des auditeurs</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Département</th>
-          <th>Contact</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let auditor of filteredAuditors">
-          <td data-label="Nom"><strong>{{ auditor.name }}</strong></td>
-          <td data-label="Département">🏢 {{ departementsLabels[auditor.departement] }}</td>
-          <td data-label="Contact">
-            <div class="contact-cell">
-              <span>✉️{{ auditor.email }}</span>
-              <span>📞 {{ auditor.phoneNumber }}</span>
-            </div>
-          </td>
-          <td data-label="Actions">
-            <div class="actions">
-              <button class="btn-supprimer" (click)="ouvrirModalSuppression(auditor)" title="Supprimer">🗑️</button>
-            </div>
-          </td>
-        </tr>
-        <tr *ngIf="filteredAuditors.length === 0">
-          <td colspan="6" class="vide">Aucun auditeur trouvé</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
+  <!-- MODAL CRÉATION -->
   <div class="overlay" *ngIf="modalCreationOuverte" (click)="fermerModalCreation()">
     <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Ajouter un auditeur</h3>
-        <p>Créer un nouveau compte pour un auditeur</p>
-        <button class="btn-fermer" (click)="fermerModalCreation()">✕</button>
+      <div class="modal-head">
+        <div class="modal-head-text">
+          <h3>Ajouter un auditeur</h3>
+          <p>Créer un nouveau compte auditeur</p>
+        </div>
+        <button class="modal-close" (click)="fermerModalCreation()">✕</button>
       </div>
-      <div class="modal-corps">
-        <div class="erreur-msg" *ngIf="erreurCreation">{{ erreurCreation }}</div>
+      <div class="modal-body">
+        <div class="modal-err" *ngIf="erreurCreation">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          {{ erreurCreation }}
+        </div>
         <div class="form-grid">
-          <div class="champ">
-            <label>Nom complet *</label>
-            <input type="text" [(ngModel)]="nouveauAuditor.name" placeholder="Ex: Akrem Sakly" />
-          </div>
-          <div class="champ">
-            <label>Email *</label>
-            <input type="email" [(ngModel)]="nouveauAuditor.email" placeholder="email@enicar.ucar.tn" />
-          </div>
-          <div class="champ">
-            <label>Téléphone *</label>
-            <input type="text" [(ngModel)]="nouveauAuditor.phoneNumber" placeholder="Ex: 55369472" maxlength="8" />
-          </div>
-          <div class="champ">
+          <div class="field"><label>Nom complet *</label><input type="text" [(ngModel)]="nouveauAuditor.name" placeholder="Akrem Sakly" /></div>
+          <div class="field"><label>Email *</label><input type="email" [(ngModel)]="nouveauAuditor.email" placeholder="email@enicar.ucar.tn" /></div>
+          <div class="field"><label>Téléphone *</label><input type="text" [(ngModel)]="nouveauAuditor.phoneNumber" placeholder="55369472" maxlength="8" /></div>
+          <div class="field">
             <label>Département *</label>
             <select [(ngModel)]="nouveauAuditor.departement">
-              <option value="" disabled selected>Choisir un département</option>
+              <option value="">Sélectionner...</option>
               <option value="INFORMATIQUE">Informatique</option>
               <option value="ELECTRIQUE">Électrique</option>
               <option value="INDUS">Industriel</option>
             </select>
-        </div>
+          </div>
         </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalCreation()">Annuler</button>
-        <button class="btn-primaire" (click)="creerAuditor()">Créer</button>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-submit" style="background:linear-gradient(135deg,#3B82F6,#2563EB)" (click)="creerAuditor()">Créer l'auditeur</button>
       </div>
     </div>
   </div>
 
+  <!-- MODAL SUPPRESSION -->
   <div class="overlay" *ngIf="modalSuppressionOuverte" (click)="fermerModalSuppression()">
-    <div class="modal modal-suppression" (click)="$event.stopPropagation()">
-      <div class="modal-entete">
-        <h3>Confirmer la suppression</h3>
-        <button class="btn-fermer" (click)="fermerModalSuppression()">✕</button>
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <div class="modal-head-text"><h3>Confirmer la suppression</h3><p>Cette action est irréversible</p></div>
+        <button class="modal-close" (click)="fermerModalSuppression()">✕</button>
       </div>
-      <div class="modal-corps">
-        <p>Êtes-vous sûr de vouloir supprimer <strong>{{ auditorASupprimer?.name }}</strong> ?</p>
-        <p class="avertissement">⚠️ Cette action est irréversible.</p>
+      <div class="modal-body">
+        <div class="del-warn">
+          <div class="del-warn-icon">⚠️</div>
+          <div>
+            <p>Supprimer <strong>{{ auditorASupprimer?.name }}</strong> ?</p>
+            <small>Ce compte sera définitivement supprimé.</small>
+          </div>
+        </div>
       </div>
-      <div class="modal-pied">
-        <button class="btn-annuler" (click)="fermerModalSuppression()">Annuler</button>
-        <button class="btn-danger" (click)="confirmerSuppression()">Supprimer</button>
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-del-confirm" (click)="confirmerSuppression()">Supprimer</button>
       </div>
     </div>
   </div>

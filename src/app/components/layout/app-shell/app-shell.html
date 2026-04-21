@@ -122,7 +122,13 @@
         }
 
         <div class="user-block">
-          <div class="avatar">{{ initials() }}</div>
+          <div class="avatar" [class.has-image]="!!profilePhotoUrl()">
+            @if (profilePhotoUrl(); as photoUrl) {
+              <img [src]="photoUrl" [alt]="'Photo de profil de ' + displayName()" />
+            } @else {
+              {{ initials() }}
+            }
+          </div>
           <div class="user-meta">
             <p class="user-name">{{ displayName() }}</p>
             <p class="user-email">{{ email() }}</p>

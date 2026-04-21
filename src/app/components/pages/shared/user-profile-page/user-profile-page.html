@@ -1,0 +1,97 @@
+<section class="profile-page">
+  <div class="ambient ambient-top"></div>
+  <div class="ambient ambient-bottom"></div>
+
+  <article class="profile-card" aria-label="Edition du profil utilisateur">
+    <header class="profile-header">
+      <p class="kicker">Compte utilisateur</p>
+      <h1>Mon profil</h1>
+      <p class="subtitle">
+        Mettez a jour vos informations personnelles et votre photo de profil en toute simplicite.
+      </p>
+    </header>
+
+    @if (isLoading()) {
+      <p class="status-line">Chargement des informations...</p>
+    } @else {
+      <div class="profile-layout">
+        <section class="photo-panel" aria-label="Photo de profil">
+          <div class="photo-frame">
+            @if (currentPhotoUrl(); as photoUrl) {
+              <img [src]="photoUrl" alt="Photo de profil" />
+            } @else {
+              <span>{{ previewInitials() }}</span>
+            }
+          </div>
+
+          <label class="upload-btn" [class.disabled]="isBusy()">
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              [disabled]="isBusy()"
+              (change)="onSelectPhoto($event)"
+            />
+            {{ isUploadingPhoto() ? 'Upload en cours...' : 'Importer une photo' }}
+          </label>
+
+          <button
+            type="button"
+            class="remove-btn"
+            [disabled]="isBusy() || !currentPhotoUrl()"
+            (click)="removePhoto()"
+          >
+            Retirer la photo
+          </button>
+
+          @if (fileError()) {
+            <p class="error-text">{{ fileError() }}</p>
+          }
+
+          <p class="photo-help">PNG, JPG, WEBP ou GIF. Taille maximale: 3 Mo.</p>
+        </section>
+
+        <form class="profile-form" [formGroup]="profileForm" (ngSubmit)="save()" novalidate>
+          <label for="name">Nom complet</label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="Votre nom"
+            [class.field-invalid]="
+              nameControl.invalid && (nameControl.touched || nameControl.dirty)
+            "
+          />
+          @if (nameControl.invalid && (nameControl.touched || nameControl.dirty)) {
+            <p class="error-text">Le nom doit contenir entre 3 et 50 caracteres.</p>
+          }
+
+          <label for="phoneNumber">Numero de telephone</label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            formControlName="phoneNumber"
+            placeholder="8 chiffres"
+            [class.field-invalid]="
+              phoneNumberControl.invalid && (phoneNumberControl.touched || phoneNumberControl.dirty)
+            "
+          />
+          @if (
+            phoneNumberControl.invalid && (phoneNumberControl.touched || phoneNumberControl.dirty)
+          ) {
+            <p class="error-text">Le numero de telephone doit contenir exactement 8 chiffres.</p>
+          }
+
+          <label for="email">Email</label>
+          <input id="email" type="email" [value]="user()?.email ?? ''" readonly />
+
+          <label for="role">Role</label>
+          <input id="role" type="text" [value]="user()?.role ?? ''" readonly />
+
+          <button type="submit" class="save-btn" [disabled]="isBusy()">
+            {{ isSaving() ? 'Enregistrement...' : 'Enregistrer les modifications' }}
+          </button>
+        </form>
+      </div>
+    }
+  </article>
+</section>

@@ -33,6 +33,7 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
     },
     { label: 'Auditeurs', route: '/admin/auditeurs', shortLabel: 'AR' },
     { label: 'Etudiants', route: '/admin/etudiants', shortLabel: 'ET' },
+    { label: 'Profil', route: '/admin/profil', shortLabel: 'PR' },
   ],
   AUDITEUR: [
     { label: 'Tableau de bord', route: '/auditeur/tableau-de-bord', shortLabel: 'TB' },
@@ -42,7 +43,7 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
       route: '/auditeur/idees-etudiants',
       shortLabel: 'ID',
     },
-    { label: 'Parametres', route: '/auditeur/parametres', shortLabel: 'PA' },
+    { label: 'Profil', route: '/auditeur/profil', shortLabel: 'PR' },
   ],
   AUDITE: [
     { label: 'Tableau de bord', route: '/audite/tableau-de-bord', shortLabel: 'TB' },
@@ -51,7 +52,12 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
       route: '/audite/actions-correctives',
       shortLabel: 'AC',
     },
-    { label: 'Parametres', route: '/audite/parametres', shortLabel: 'PA' },
+    {
+      label: 'Assistant qualite',
+      route: '/audite/assistant-qualite',
+      shortLabel: 'IA',
+    },
+    { label: 'Profil', route: '/audite/profil', shortLabel: 'PR' },
   ],
   ETUDIANT: [
     {
@@ -60,6 +66,7 @@ const NAVIGATION_BY_ROLE: Record<UserRole, NavigationItem[]> = {
       shortLabel: 'SI',
     },
     { label: 'Mes idees', route: '/etudiant/mes-idees', shortLabel: 'MI' },
+    { label: 'Profil', route: '/etudiant/profil', shortLabel: 'PR' },
   ],
 };
 
@@ -97,8 +104,14 @@ export class AppShell implements OnInit, OnDestroy {
   });
 
   readonly email = computed(() => this.user()?.email ?? 'compte@auditpro.local');
+  readonly profilePhotoUrl = computed(() => this.user()?.profilePhotoUrl?.trim() || null);
 
   readonly displayName = computed(() => {
+    const explicitName = this.user()?.name?.trim();
+    if (explicitName) {
+      return explicitName;
+    }
+
     const localPart = this.email().split('@')[0]?.trim();
     if (!localPart) {
       return this.roleLabel();
@@ -138,6 +151,8 @@ export class AppShell implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    this.subscriptions.add(this.authService.hydrateUserProfile().subscribe());
+
     if (!this.showNotificationButton()) {
       return;
     }

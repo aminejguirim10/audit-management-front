@@ -1,0 +1,326 @@
+:host {
+  --page-bg: #ecf4ff;
+  --panel-bg: rgba(255, 255, 255, 0.87);
+  --line: rgba(27, 67, 122, 0.16);
+  --line-strong: rgba(22, 86, 165, 0.34);
+  --text-main: #153961;
+  --text-muted: #46698f;
+  --brand: #1072dd;
+  --brand-strong: #0a4f9b;
+  --danger: #c4454f;
+
+  display: block;
+  min-height: 100%;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+.profile-page {
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100dvh - 130px);
+  padding: clamp(0.9rem, 2vw, 1.8rem);
+  background:
+    radial-gradient(circle at 95% 0%, rgba(16, 114, 221, 0.17), transparent 38%),
+    radial-gradient(circle at 0% 100%, rgba(25, 121, 190, 0.16), transparent 34%),
+    linear-gradient(155deg, #f5faff 0%, #eaf4ff 46%, #e4effe 100%);
+}
+
+.ambient {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(2px);
+}
+
+.ambient-top {
+  width: 360px;
+  height: 360px;
+  right: -120px;
+  top: -120px;
+  background: radial-gradient(circle, rgba(20, 116, 208, 0.25) 0%, rgba(20, 116, 208, 0) 70%);
+  animation: float-ambient 8s ease-in-out infinite alternate;
+}
+
+.ambient-bottom {
+  width: 380px;
+  height: 380px;
+  left: -160px;
+  bottom: -180px;
+  background: radial-gradient(circle, rgba(11, 89, 159, 0.18) 0%, rgba(11, 89, 159, 0) 73%);
+  animation: float-ambient 9.8s ease-in-out infinite alternate-reverse;
+}
+
+.profile-card {
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  max-width: 1080px;
+  margin-inline: auto;
+  background: var(--panel-bg);
+  box-shadow:
+    0 28px 70px rgba(16, 55, 97, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(7px);
+  padding: clamp(1rem, 2.4vw, 2rem);
+}
+
+.profile-header {
+  margin-bottom: 1.1rem;
+}
+
+.kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--brand-strong);
+  font-weight: 780;
+  font-size: 0.72rem;
+}
+
+h1 {
+  margin: 0.3rem 0 0;
+  color: #0d2f53;
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  line-height: 1.07;
+  font-family: 'Sora', 'Trebuchet MS', sans-serif;
+}
+
+.subtitle {
+  margin: 0.52rem 0 0;
+  color: var(--text-muted);
+  max-width: 70ch;
+  line-height: 1.55;
+}
+
+.status-line {
+  margin: 0;
+  padding: 0.8rem 0.95rem;
+  border-radius: 12px;
+  border: 1px dashed var(--line-strong);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.profile-layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.photo-panel,
+.profile-form {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.photo-panel {
+  padding: 1rem;
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+}
+
+.photo-frame {
+  width: min(230px, 100%);
+  aspect-ratio: 1;
+  border-radius: 22px;
+  border: 1px solid rgba(16, 114, 221, 0.34);
+  background:
+    linear-gradient(145deg, rgba(213, 233, 255, 0.7), rgba(196, 224, 255, 0.9)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(16, 114, 221, 0.08) 0,
+      rgba(16, 114, 221, 0.08) 2px,
+      transparent 2px,
+      transparent 20px
+    );
+  display: grid;
+  place-items: center;
+  color: #0f4f95;
+  font-family: 'Sora', 'Trebuchet MS', sans-serif;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 800;
+  overflow: hidden;
+}
+
+.photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-btn,
+.remove-btn {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.upload-btn {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  color: #ffffff;
+  background: linear-gradient(104deg, #1480f0 0%, #0c61ba 58%, #0a4f9b 100%);
+  box-shadow: 0 10px 20px rgba(11, 76, 144, 0.28);
+}
+
+.upload-btn input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.remove-btn {
+  background: #f7fbff;
+  border-color: var(--line);
+  color: #1f5e9f;
+}
+
+.upload-btn:hover,
+.remove-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.remove-btn:hover:not(:disabled) {
+  border-color: rgba(22, 86, 165, 0.38);
+  background: #eef6ff;
+}
+
+.upload-btn.disabled,
+.remove-btn:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.photo-help {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+.profile-form {
+  padding: 1rem;
+  display: grid;
+  gap: 0.56rem;
+}
+
+label {
+  color: var(--text-main);
+  font-weight: 690;
+  font-size: 0.92rem;
+}
+
+input {
+  min-height: 44px;
+  border-radius: 12px;
+  border: 1px solid rgba(121, 161, 204, 0.72);
+  background: #f8fbff;
+  padding: 0 0.86rem;
+  color: #134478;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(16, 114, 221, 0.2);
+  background: #ffffff;
+}
+
+input[readonly] {
+  color: #486b92;
+  background: #eff5fd;
+}
+
+.field-invalid {
+  border-color: var(--danger);
+  background: #fff7f7;
+}
+
+.error-text {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.81rem;
+}
+
+.save-btn {
+  margin-top: 0.5rem;
+  min-height: 48px;
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-weight: 780;
+  letter-spacing: 0.01em;
+  background: linear-gradient(106deg, #127cee 0%, #0d67c8 50%, #0a4f9b 100%);
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.save-btn:hover:enabled {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 22px rgba(10, 78, 150, 0.29);
+  filter: saturate(1.06);
+}
+
+.save-btn:disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+@media (max-width: 880px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-frame {
+    width: min(240px, 100%);
+  }
+}
+
+@media (max-width: 560px) {
+  .profile-page {
+    padding: 0.6rem;
+  }
+
+  .profile-card {
+    border-radius: 18px;
+    padding: 0.9rem;
+  }
+
+  .photo-panel,
+  .profile-form {
+    padding: 0.85rem;
+  }
+}
+
+@keyframes float-ambient {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(22px);
+  }
+}

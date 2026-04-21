@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { ApiResponse } from '../models/api-response.model';
 import { API_BASE_URL } from '../config/api.config';
 import { NotificationService } from './notification.service';
@@ -11,6 +11,7 @@ import {
   AuthUser,
   ForgotPasswordRequest,
   ResetPasswordRequest,
+  UserProfile,
   UserRole,
 } from '../models/auth.model';
 
@@ -111,6 +112,35 @@ export class AuthService {
     return Date.now() < expiration;
   }
 
+  hydrateUserProfile(): Observable<AuthUser | null> {
+    const currentUser = this.userSignal();
+    if (!currentUser || !this.getAccessToken()) {
+      return of(currentUser);
+    }
+
+    return this.http.get<ApiResponse<UserProfile>>(`${this.apiUrl}/utilisateurs/me`).pipe(
+      map((response) => response.data),
+      tap((profile) => {
+        if (profile) {
+          this.syncUserProfile(profile);
+        }
+      }),
+      map(() => this.userSignal()),
+      catchError(() => of(this.userSignal())),
+    );
+  }
+
+  syncUserProfile(profile: UserProfile): void {
+    this.userSignal.set({
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      role: profile.role,
+      phoneNumber: profile.phoneNumber,
+      profilePhotoUrl: profile.profilePhotoUrl,
+    });
+  }
+
   private persistSession(response: ApiResponse<AuthenticationResponse>): void {
     if (!response.data) {
       return;
@@ -130,41 +160,21 @@ export class AuthService {
     }
 
     const payload = this.decodeJwtPayload(token);
-    console.log('Decoded JWT payload:', payload);
-    
-    if (!payload || !payload.sub) {
-      console.warn('JWT payload is missing or missing "sub"', payload);
+    if (!payload) {
       return null;
     }
 
-    // Try to extract role
-    let rawRole = payload.role;
-    if (!rawRole && payload.roles && Array.isArray(payload.roles) && payload.roles.length > 0) {
-        rawRole = payload.roles[0];
-    } else if (!rawRole && payload.authorities && Array.isArray(payload.authorities) && payload.authorities.length > 0) {
-        // Some Spring Boot configurations use 'authorities' array of strings or objects
-        const firstAuth = payload.authorities[0];
-        rawRole = typeof firstAuth === 'string' ? firstAuth : (firstAuth as any).authority;
-    }
-    
-    if (!rawRole) {
-        console.warn('Could not extract role from JWT payload', payload);
-        return null; // Let the app fallback to whatever if no role found, but here we enforce it
-    }
-
-    let parsedRole = String(rawRole).toUpperCase();
-    if (parsedRole.startsWith('ROLE_')) {
-        parsedRole = parsedRole.substring(5);
-    }
-
-    if (!this.isValidRole(parsedRole)) {
-        console.warn('Extracted role is not valid', parsedRole);
-        return null;
+    if (!payload.sub || !payload.role || !this.isValidRole(payload.role)) {
+      return null;
     }
 
     return {
+      id: null,
+      name: null,
       email: payload.sub,
-      role: parsedRole,
+      role: payload.role,
+      phoneNumber: null,
+      profilePhotoUrl: null,
     };
   }
 
@@ -172,7 +182,7 @@ export class AuthService {
     return this.validRoles.has(role as UserRole);
   }
 
-  private decodeJwtPayload(token: string): any {
+  private decodeJwtPayload(token: string): { exp?: number; sub?: string; role?: string } | null {
     try {
       const tokenPart = token.split('.')[1];
       if (!tokenPart) {
@@ -182,9 +192,8 @@ export class AuthService {
       const normalized = tokenPart.replace(/-/g, '+').replace(/_/g, '/');
       const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
       const jsonPayload = atob(padded);
-      return JSON.parse(jsonPayload);
-    } catch (e) {
-      console.error('Error decoding JWT token', e);
+      return JSON.parse(jsonPayload) as { exp?: number; sub?: string; role?: string };
+    } catch {
       return null;
     }
   }
