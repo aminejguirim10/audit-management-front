@@ -1,15 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { tap } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { ApiResponse } from '../models/api-response.model';
 import { API_BASE_URL } from '../config/api.config';
+import { NotificationService } from './notification.service';
 import {
   AuthenticationRequest,
   AuthenticationResponse,
   AuthUser,
   ForgotPasswordRequest,
   ResetPasswordRequest,
+  UserProfile,
   UserRole,
 } from '../models/auth.model';
 
@@ -18,6 +20,7 @@ import {
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly notificationService = inject(NotificationService);
 
   private readonly apiUrl = API_BASE_URL;
   private readonly accessTokenStorageKey = 'audit_access_token';
@@ -50,6 +53,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.accessTokenStorageKey);
     localStorage.removeItem(this.refreshTokenStorageKey);
+    this.notificationService.clearCache();
     this.userSignal.set(null);
   }
 
@@ -108,11 +112,41 @@ export class AuthService {
     return Date.now() < expiration;
   }
 
+  hydrateUserProfile(): Observable<AuthUser | null> {
+    const currentUser = this.userSignal();
+    if (!currentUser || !this.getAccessToken()) {
+      return of(currentUser);
+    }
+
+    return this.http.get<ApiResponse<UserProfile>>(`${this.apiUrl}/utilisateurs/me`).pipe(
+      map((response) => response.data),
+      tap((profile) => {
+        if (profile) {
+          this.syncUserProfile(profile);
+        }
+      }),
+      map(() => this.userSignal()),
+      catchError(() => of(this.userSignal())),
+    );
+  }
+
+  syncUserProfile(profile: UserProfile): void {
+    this.userSignal.set({
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      role: profile.role,
+      phoneNumber: profile.phoneNumber,
+      profilePhotoUrl: profile.profilePhotoUrl,
+    });
+  }
+
   private persistSession(response: ApiResponse<AuthenticationResponse>): void {
     if (!response.data) {
       return;
     }
 
+    this.notificationService.clearCache();
     localStorage.setItem(this.accessTokenStorageKey, response.data.access_token);
     localStorage.setItem(this.refreshTokenStorageKey, response.data.refresh_token);
 
@@ -135,8 +169,12 @@ export class AuthService {
     }
 
     return {
+      id: null,
+      name: null,
       email: payload.sub,
       role: payload.role,
+      phoneNumber: null,
+      profilePhotoUrl: null,
     };
   }
 

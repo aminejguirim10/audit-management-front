@@ -55,6 +55,13 @@ const adminChildRoutes: Routes = [
         (m) => m.AdminStudentsPage,
       ),
   },
+  {
+    path: 'profil',
+    loadComponent: () =>
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
+      ),
+  },
 ];
 
 const auditeurChildRoutes: Routes = [
@@ -78,6 +85,13 @@ const auditeurChildRoutes: Routes = [
       ),
   },
   {
+    path: 'messages/:auditId',
+    loadComponent: () =>
+      import('./components/pages/shared/audit-chat-page/audit-chat-page').then(
+        (m) => m.AuditChatPage,
+      ),
+  },
+  {
     path: 'idees-etudiants',
     loadComponent: () =>
       import('./components/pages/auditeur/auditeur-student-ideas-page/auditeur-student-ideas-page').then(
@@ -85,11 +99,16 @@ const auditeurChildRoutes: Routes = [
       ),
   },
   {
-    path: 'parametres',
+    path: 'profil',
     loadComponent: () =>
-      import('./components/pages/auditeur/auditeur-settings-page/auditeur-settings-page').then(
-        (m) => m.AuditeurSettingsPage,
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
       ),
+  },
+  {
+    path: 'parametres',
+    pathMatch: 'full',
+    redirectTo: 'profil',
   },
 ];
 
@@ -114,11 +133,30 @@ const auditeChildRoutes: Routes = [
       ),
   },
   {
-    path: 'parametres',
+    path: 'assistant-qualite',
     loadComponent: () =>
-      import('./components/pages/audite/audite-settings-page/audite-settings-page').then(
-        (m) => m.AuditeSettingsPage,
+      import('./components/pages/audite/audite-ai-assistant-page/audite-ai-assistant-page').then(
+        (m) => m.AuditeAiAssistantPage,
       ),
+  },
+  {
+    path: 'messages/:auditId',
+    loadComponent: () =>
+      import('./components/pages/shared/audit-chat-page/audit-chat-page').then(
+        (m) => m.AuditChatPage,
+      ),
+  },
+  {
+    path: 'profil',
+    loadComponent: () =>
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
+      ),
+  },
+  {
+    path: 'parametres',
+    pathMatch: 'full',
+    redirectTo: 'profil',
   },
 ];
 
@@ -147,6 +185,13 @@ const etudiantChildRoutes: Routes = [
     loadComponent: () =>
       import('./components/pages/etudiant/etudiant-my-ideas-page/etudiant-my-ideas-page').then(
         (m) => m.EtudiantMyIdeasPage,
+      ),
+  },
+  {
+    path: 'profil',
+    loadComponent: () =>
+      import('./components/pages/shared/user-profile-page/user-profile-page').then(
+        (m) => m.UserProfilePage,
       ),
   },
 ];
