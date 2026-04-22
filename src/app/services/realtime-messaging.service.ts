@@ -124,7 +124,7 @@ export class RealtimeMessagingService implements OnDestroy {
     this.notificationSubscription?.unsubscribe();
     this.unreadCountSubscription?.unsubscribe();
 
-    this.notificationSubscription = this.client.subscribe('/user/queue/notifications', (frame) => {
+    this.notificationSubscription = this.client.subscribe('/user/queue/notifications', (frame: IMessage) => {
       const payload = this.parseFrame<NotificationResponse>(frame);
       if (payload) {
         this.notificationSubject.next(payload);
@@ -133,7 +133,7 @@ export class RealtimeMessagingService implements OnDestroy {
 
     this.unreadCountSubscription = this.client.subscribe(
       '/user/queue/notifications/unread-count',
-      (frame) => {
+      (frame: IMessage) => {
         const payload = Number(frame.body);
         if (!Number.isNaN(payload)) {
           this.unreadCountSubject.next(payload);
@@ -148,7 +148,7 @@ export class RealtimeMessagingService implements OnDestroy {
     }
 
     this.auditSubscription?.unsubscribe();
-    this.auditSubscription = this.client.subscribe(`/topic/chat/audit/${auditId}`, (frame) => {
+    this.auditSubscription = this.client.subscribe(`/topic/chat/audit/${auditId}`, (frame: IMessage) => {
       const payload = this.parseFrame<MessageResponse>(frame);
       if (payload) {
         this.messageSubject.next(payload);

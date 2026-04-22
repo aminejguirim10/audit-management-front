@@ -110,7 +110,7 @@ export class AuditeAiAssistantPage implements OnInit {
     transport: new DefaultChatTransport({
       api: AI_ASSISTANT_API_URL + '/audite-chat',
     }),
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Erreur assistant IA:', error);
     },
   });
@@ -768,9 +768,9 @@ export class AuditeAiAssistantPage implements OnInit {
       }
 
       const textParts = message.parts
-        .filter((part) => part.type === 'text')
-        .map((part) => part.text.trim())
-        .filter((text) => text.length > 0);
+        .filter((part: any) => part.type === 'text')
+        .map((part: any) => part.text.trim())
+        .filter((text: string) => text.length > 0);
 
       return textParts.join('\n').trim();
     }
