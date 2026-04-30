@@ -33,7 +33,7 @@ export class AuditService {
       map(res => res.data ?? {} as AuditDetails),
       catchError(error => {
         let errorMessage = 'Impossible de charger les détails de l\'audit';
-        
+
         if (error.status === 403) {
           errorMessage = 'Accès refusé - Vous n\'êtes pas autorisé à voir cet audit';
         } else if (error.status === 404) {
@@ -41,7 +41,7 @@ export class AuditService {
         } else if (error.error?.message) {
           errorMessage = error.error.message;
         }
-        
+
         return throwError(() => ({
           error: { message: errorMessage },
           status: error.status
