@@ -1,0 +1,103 @@
+<div class="report-overlay">
+  <div class="report-container">
+    <header class="report-header">
+      <h2>Rapport d'Audit Officiel</h2>
+      <div class="header-actions">
+        <button class="btn-primary" (click)="printReport()" style="margin-right: 1rem;">Imprimer / PDF</button>
+        <button class="btn-icon" (click)="close.emit()" title="Fermer">✕</button>
+      </div>
+    </header>
+
+    <div class="report-paper" id="report-content">
+      
+      <!-- PAGE 1: Informations Générales & Certificat -->
+      <div class="page-content page-1-content" [class.hidden-screen]="currentPage !== 1">
+        
+        <div>
+          <div class="university-header">
+            <h1>Université de Carthage</h1>
+            <p style="font-weight: bold; margin-bottom: 0.3rem;">Ecole Nationale d'Ingénieurs de Carthage (ENICarthage)</p>
+            <p>Département de Qualité</p>
+          </div>
+
+          <div class="certificate-title">
+            <h2>Rapport et Certificat de Fin d'Audit</h2>
+          </div>
+
+          <p style="text-align: justify; margin-bottom: 1rem; font-size: 1rem; line-height: 1.5;">
+            Le présent document constitue le rapport officiel et le certificat d'achèvement de l'audit référencé ci-dessous. 
+            Il atteste que le processus d'évaluation a été mené à son terme par les parties prenantes.
+          </p>
+
+          <h3 class="section-title">1. Informations sur l'Audit</h3>
+          <table class="info-table">
+            <tbody>
+              <tr>
+                <th>Titre de l'audit</th>
+                <td>{{ audit?.title }}</td>
+              </tr>
+              <tr>
+                <th>Type d'audit</th>
+                <td>{{ audit?.typeAuditName }}</td>
+              </tr>
+              <tr>
+                <th>Département</th>
+                <td>{{ audit?.department }}</td>
+              </tr>
+              <tr>
+                <th>Période</th>
+                <td>Du {{ audit?.dateDebut }} au {{ audit?.dateFin }}</td>
+              </tr>
+              <tr>
+                <th>Auditeur responsable</th>
+                <td>{{ audit?.auditeurName }}</td>
+              </tr>
+              <tr>
+                <th>Entité auditée</th>
+                <td>{{ audit?.auditeName }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="section-title">2. Résultat de l'Évaluation</h3>
+          <div class="score-box">
+            Résultat final attribué :
+            <strong>{{ audit?.auditResult || 'Terminé' }}</strong>
+            Score obtenu : {{ getAuditScorePercentage() }} %
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE 2+: Réponses (Questions et Choix) -->
+      <ng-container *ngFor="let page of questionPages; let pageIndex = index">
+        <div class="page-content" [class.hidden-screen]="currentPage !== pageIndex + 2">
+          <h3 class="section-title" *ngIf="pageIndex === 0">3. Détail des Réponses</h3>
+          <h3 class="section-title" *ngIf="pageIndex > 0">Détail des Réponses (Suite)</h3>
+          
+          <div class="q-list">
+            <div class="q-item" *ngFor="let q of page; let i = index">
+              <div class="q-title">
+                Question {{ pageIndex * questionsPerPage + i + 1 }}. {{ q.title }}
+              </div>
+              <div class="q-answer">
+                Réponse : {{ getSelectedOptionLabel(q) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Paginator -->
+    <footer class="report-footer">
+      <button class="btn-page" [disabled]="currentPage === 1" (click)="prevPage()">
+        Page Précédente
+      </button>
+      <span>Page {{ currentPage }} / {{ totalPages }}</span>
+      <button class="btn-page" [disabled]="currentPage === totalPages" (click)="nextPage()">
+        Page Suivante
+      </button>
+    </footer>
+  </div>
+</div>
