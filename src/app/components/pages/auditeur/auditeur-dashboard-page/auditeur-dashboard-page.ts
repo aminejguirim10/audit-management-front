@@ -384,6 +384,18 @@ export class AuditeurDashboardPage implements OnInit {
     return selectedOption ? selectedOption.label : 'Non répondu';
   }
 
+  getSelectedOptionId(question: Question): number | null {
+    return question.optionChoisieId ?? question.selectedOptionId ?? null;
+  }
+
+  getAuditScorePercentage(audit: AuditDetails | null): number {
+    if (!audit || !audit.questions?.length) {
+      return 0;
+    }
+
+    return Math.round((audit.scoreTotal / audit.questions.length) * 100);
+  }
+
   resetForm(): void {
     this.auditForm.reset({
       title: '',

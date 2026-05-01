@@ -33,6 +33,9 @@ export class EtudiantDashboardPage implements OnInit {
   readonly activeCommentIdeaId = signal<number | null>(null);
   readonly votingId = signal<number | null>(null);
   readonly filterStatus = signal<'TOUS' | 'ENCOURS' | 'ACCEPTE' | 'REJETE'>('TOUS');
+  readonly hasIdeasWithMissingIds = computed(() =>
+    this.ideas().some((idea) => idea.id == null)
+  );
 
   readonly statusOptions: Array<'TOUS' | 'ENCOURS' | 'ACCEPTE' | 'REJETE'> = [
     'TOUS',
@@ -86,11 +89,7 @@ export class EtudiantDashboardPage implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (data) => {
-          const ideasWithIds = data.map((idea, index) => ({
-            ...idea,
-            id: idea.id || index + 1,
-          }));
-          this.ideas.set(ideasWithIds);
+          this.ideas.set(data);
         },
         error: (err) => {
           const message = err.error?.message ?? 'Erreur lors du chargement des idées';
