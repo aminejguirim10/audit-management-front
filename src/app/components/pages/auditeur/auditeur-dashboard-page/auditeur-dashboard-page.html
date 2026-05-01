@@ -166,7 +166,7 @@
         <div class="score-card">
           <div class="score-item">
             <span class="label">Score Total</span>
-            <span class="score-value">{{ selectedAudit()?.scoreTotal }}/100</span>
+            <span class="score-value">{{ getAuditScorePercentage(selectedAudit()) }}%</span>
           </div>
           <div class="score-item" *ngIf="selectedAudit()?.auditResult">
             <span class="label">Résultat</span>
@@ -202,37 +202,14 @@
               <div
                 class="option-item"
                 *ngFor="let option of question.options; let j = index"
-                [class.selected]="option.id === question.optionChoisieId"
+                [class.selected]="option.id === getSelectedOptionId(question)"
               >
                 <span class="option-badge">{{ j + 1 }}</span>
                 <span class="option-label">{{ option.label }}</span>
-                <span class="selected-check" *ngIf="option.id === question.optionChoisieId">✓</span>
+                <span class="selected-check" *ngIf="option.id === getSelectedOptionId(question)">✓</span>
               </div>
             </div>
 
-            <!-- Réponse et Score -->
-            <div
-              class="response-section"
-              *ngIf="question.optionChoisieId || question.score !== null"
-            >
-              <div class="response-item">
-                <span class="label">Réponse:</span>
-                <span class="value">{{ getQuestionResponseLabel(question) }}</span>
-              </div>
-              <div class="response-item" *ngIf="question.score !== null">
-                <span class="label">Score:</span>
-                <span class="score-badge"
-                  >{{ question.score }}/{{
-                    100 / (selectedAudit()?.questions!.length || 1) | number: '1.0-0'
-                  }}</span
-                >
-              </div>
-            </div>
-
-            <!-- Pas de réponse -->
-            <div class="no-response" *ngIf="!question.optionChoisieId && question.score === null">
-              <p>Aucune réponse fournie</p>
-            </div>
           </div>
         </div>
       </div>
@@ -494,9 +471,9 @@
       <h3 class="step-title">Ajouter les questions</h3>
       <div class="info-panel">
         <strong>ℹ️ Info</strong>
-        <p>Ordonnez les options du moins bon au meilleur.</p>
+        <p>Ordonnez les options du meilleur au moins bon.</p>
         <p>Le score est calculé automatiquement selon la position (meilleure moitié = 1).</p>
-        <p>Ex : Mauvais → Moyen → Bon → Excellent</p>
+        <p>Ex : Excellent → Bon → Moyen → Mauvais</p>
       </div>
       <button type="button" class="btn-secondary add-question-btn" (click)="addQuestion()">
         + Ajouter une question

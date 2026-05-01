@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, of } from 'rxjs';
-import { catchError, finalize, map } from 'rxjs/operators';
+import { from, of } from 'rxjs';
+import { catchError, concatMap, finalize, map, toArray } from 'rxjs/operators';
 import { AuditDetails, AuditStatus, AuditSummary, Question, QuestionOption } from '../../../../models/audit.model';
 import { AddReponseDto, UpdateReponseDto } from '../../../../models/reponse.model';
 import { AuditService } from '../../../../services/audit.service';
@@ -100,6 +100,15 @@ export class AuditeDashboardPage implements OnInit {
     }
 
     return Math.round((this.completedDraftQuestionsCount() / details.questions.length) * 100);
+  });
+
+  readonly scorePercentage = computed(() => {
+    const details = this.selectedAuditDetails();
+    if (!details?.questions.length) {
+      return 0;
+    }
+
+    return Math.round((details.scoreTotal / details.questions.length) * 100);
   });
 
   readonly canSubmitCurrentAudit = computed(() => {
@@ -258,35 +267,39 @@ export class AuditeDashboardPage implements OnInit {
       return;
     }
 
-    const pendingRequests: Array<import('rxjs').Observable<SubmitResult>> = details.questions
-      .map((question) => {
-        const optionId = this.getSelectedOptionId(question);
-        if (optionId === null) {
-          return null;
-        }
-
-        const responseId = this.getResponseId(question);
-        const request$ = responseId
-          ? this.reponseService.update({
-              reponseId: responseId,
-              optionId,
-            } satisfies UpdateReponseDto)
-          : this.reponseService.add({
-              questionId: question.id,
-              optionId,
-            } satisfies AddReponseDto);
-
-        return request$.pipe(
-          map(() => true as const),
-          catchError((error) => of({ error, questionId: question.id })),
-        );
-      })
-      .filter((request): request is import('rxjs').Observable<SubmitResult> => request !== null);
+    const questionsToSubmit = details.questions.filter(
+      (question) => this.getSelectedOptionId(question) !== null,
+    );
 
     this.submittingAnswers.set(true);
 
-    forkJoin(pendingRequests)
-      .pipe(finalize(() => this.submittingAnswers.set(false)))
+    from(questionsToSubmit)
+      .pipe(
+        concatMap((question) => {
+          const optionId = this.getSelectedOptionId(question);
+          if (optionId === null) {
+            return of({ error: new Error('Option manquante'), questionId: question.id } satisfies Exclude<SubmitResult, true>);
+          }
+
+          const responseId = this.getResponseId(question);
+          const request$ = responseId
+            ? this.reponseService.update({
+                reponseId: responseId,
+                optionId,
+              } satisfies UpdateReponseDto)
+            : this.reponseService.add({
+                questionId: question.id,
+                optionId,
+              } satisfies AddReponseDto);
+
+          return request$.pipe(
+            map(() => true as const),
+            catchError((error) => of({ error, questionId: question.id })),
+          );
+        }),
+        toArray(),
+        finalize(() => this.submittingAnswers.set(false)),
+      )
       .subscribe({
         next: (results) => {
           const failed = results.find((result): result is { error: unknown; questionId: number } => result !== true);

@@ -34,6 +34,19 @@ export class AuditeurStudentIdeasPage implements OnInit {
   readonly filterStatus = signal<'TOUS' | 'ENCOURS' | 'ACCEPTE' | 'REJETE'>('TOUS');
   readonly updatingIdeaId = signal<number | null>(null);
   readonly activeCommentIdeaId = signal<number | null>(null);
+  readonly hasIdeasWithMissingIds = computed(() =>
+    this.ideas().some((idea) => idea.id == null)
+  );
+  readonly totalIdeas = computed(() => this.ideas().length);
+  readonly pendingIdeas = computed(() =>
+    this.ideas().filter((idea) => idea.status === 'ENCOURS').length
+  );
+  readonly acceptedIdeas = computed(() =>
+    this.ideas().filter((idea) => idea.status === 'ACCEPTE').length
+  );
+  readonly rejectedIdeas = computed(() =>
+    this.ideas().filter((idea) => idea.status === 'REJETE').length
+  );
 
   // Computed signals
   readonly filteredIdeas = computed(() => {
@@ -71,7 +84,6 @@ export class AuditeurStudentIdeasPage implements OnInit {
         next: (data) => {
           const ideasWithIds = data.map((idea, index) => ({
             ...idea,
-            id: idea.id ?? index + 1,
             runtimeId: index + 1,
           }));
           this.ideas.set(ideasWithIds);

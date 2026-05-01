@@ -1,142 +1,195 @@
-﻿<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div>
-      <h1>💡 Idées des Étudiants</h1>
-      <p>Examinez et gérez le statut des idées de votre département</p>
-    </div>
-    <div class="search-box">
-      <input
-        type="text"
-        placeholder="Rechercher une idée..."
-        [value]="searchTerm()"
-        (input)="onSearchInput($event)"
-        class="search-input"
-      />
-      <span class="search-icon">🔍</span>
-    </div>
-  </div>
-
-  <!-- Filter Buttons -->
-  <div class="filter-section">
-    <button
-      class="filter-btn"
-      [class.active]="filterStatus() === 'TOUS'"
-      (click)="filterStatus.set('TOUS')"
-    >
-      📊 Tous les statuts
-    </button>
-    <button
-      class="filter-btn"
-      [class.active]="filterStatus() === 'ENCOURS'"
-      (click)="filterStatus.set('ENCOURS')"
-    >
-      ⏳ En Cours
-    </button>
-    <button
-      class="filter-btn"
-      [class.active]="filterStatus() === 'ACCEPTE'"
-      (click)="filterStatus.set('ACCEPTE')"
-    >
-      ✅ Acceptées
-    </button>
-    <button
-      class="filter-btn"
-      [class.active]="filterStatus() === 'REJETE'"
-      (click)="filterStatus.set('REJETE')"
-    >
-      ❌ Rejetées
-    </button>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="loading()" class="loading">
-    <div class="spinner"></div>
-    <p>Chargement des idées...</p>
-  </div>
-
-  <!-- Empty State -->
-  <div *ngIf="!loading() && filteredIdeas().length === 0" class="empty-state">
-    <span class="empty-icon">📭</span>
-    <h3>Aucune idée trouvée</h3>
-    <p>Essayez d'ajuster vos filtres ou votre recherche</p>
-  </div>
-
-  <!-- Ideas Grid -->
-  <div *ngIf="!loading() && filteredIdeas().length > 0" class="ideas-grid">
-    <div *ngFor="let idea of filteredIdeas()" class="idea-card">
-      <!-- Card Header -->
-      <div class="card-header">
-        <div class="card-title">
-          <h3>{{ idea.title }}</h3>
-          <p class="author">👤 {{ idea.studentName }}</p>
-        </div>
+<section class="page-shell">
+  <div class="container">
+    <header class="hero-card">
+      <div class="hero-copy">
+        <span class="eyebrow">Pilotage auditeur</span>
+        <h1>Idees des etudiants</h1>
+        <p>
+          Analysez les propositions du departement, lisez les retours des etudiants et prenez une
+          decision claire sur chaque idee.
+        </p>
       </div>
 
-      <!-- Card Body -->
-      <div class="card-body">
-        <!-- Status and Category Badges -->
-        <div class="badges-section">
-          <span class="badge status-badge" [ngClass]="getStatusBadgeClass(idea.status)">
-            {{ statusLabels[idea.status] }}
-          </span>
-          <span class="badge category-badge" [ngClass]="getCategoryBadgeClass(idea.category)">
-            {{ categoryLabels[idea.category] }}
-          </span>
-          <span class="badge department-badge"> 🏢 {{ departmentLabels[idea.department] }} </span>
+      <div class="search-box">
+        <span class="search-label">Recherche</span>
+        <input
+          type="text"
+          placeholder="Titre, description ou nom d'etudiant"
+          [value]="searchTerm()"
+          (input)="onSearchInput($event)"
+          class="search-input"
+        />
+      </div>
+    </header>
+
+    <section class="stats-grid">
+      <article class="stat-card accent-blue">
+        <span>Idees visibles</span>
+        <strong>{{ totalIdeas() }}</strong>
+        <small>Vue globale du departement</small>
+      </article>
+
+      <article class="stat-card accent-amber">
+        <span>En cours</span>
+        <strong>{{ pendingIdeas() }}</strong>
+        <small>En attente de decision</small>
+      </article>
+
+      <article class="stat-card accent-emerald">
+        <span>Acceptees</span>
+        <strong>{{ acceptedIdeas() }}</strong>
+        <small>Idees deja validees</small>
+      </article>
+
+      <article class="stat-card accent-rose">
+        <span>Rejetees</span>
+        <strong>{{ rejectedIdeas() }}</strong>
+        <small>Idees non retenues</small>
+      </article>
+    </section>
+
+    <section class="filter-card">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">Tri intelligent</span>
+          <h2>Filtrer les statuts</h2>
         </div>
+        <span class="result-chip">{{ filteredIdeas().length }} idee(s)</span>
+      </div>
 
-        <!-- Description -->
-        <p class="description">{{ idea.description }}</p>
+      <div class="filter-row">
+        <button
+          class="filter-btn"
+          [class.active]="filterStatus() === 'TOUS'"
+          (click)="filterStatus.set('TOUS')"
+        >
+          Tous les statuts
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="filterStatus() === 'ENCOURS'"
+          (click)="filterStatus.set('ENCOURS')"
+        >
+          En cours
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="filterStatus() === 'ACCEPTE'"
+          (click)="filterStatus.set('ACCEPTE')"
+        >
+          Acceptees
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="filterStatus() === 'REJETE'"
+          (click)="filterStatus.set('REJETE')"
+        >
+          Rejetees
+        </button>
+      </div>
+    </section>
 
-        <!-- Stats -->
-        <div class="stats-row">
-          <span class="stat">👍 {{ idea.voteCount }} votes</span>
-          <button
-            type="button"
-            class="comment-toggle-btn comment-toggle-bottom"
-            (click)="toggleComments(idea.runtimeId)"
-            [attr.aria-expanded]="activeCommentIdeaId() === idea.runtimeId"
-          >
-            💬 {{ idea.comments.length || 0 }}
-          </button>
-        </div>
+    <div *ngIf="loading()" class="feedback-card loading-card">
+      <div class="spinner"></div>
+      <p>Chargement des idees en cours...</p>
+    </div>
 
-        <!-- Action Buttons -->
-        <div class="action-buttons-two">
-          <button
-            type="button"
-            class="btn-action btn-accept"
-            (click)="updateStatus(idea, 'ACCEPTE')"
-            [disabled]="updatingIdeaId() === idea.id"
-          >
-            ✅ Accepter
-          </button>
-          <button
-            type="button"
-            class="btn-action btn-reject"
-            (click)="updateStatus(idea, 'REJETE')"
-            [disabled]="updatingIdeaId() === idea.id"
-          >
-            ❌ Rejeter
-          </button>
-        </div>
+    <div *ngIf="!loading() && hasIdeasWithMissingIds()" class="feedback-card warning-card">
+      Le backend ne renvoie pas encore l'identifiant reel de certaines idees. Les boutons
+      d'acceptation et de rejet sont donc bloques sur ces lignes pour eviter toute mauvaise mise a
+      jour.
+    </div>
 
-        <div *ngIf="activeCommentIdeaId() === idea.runtimeId" class="comment-section-card">
-          <div *ngIf="idea.comments.length > 0" class="comments-section">
-            <h4>💬 Commentaires ({{ idea.comments.length }})</h4>
-            <div class="comments-list">
-              <div *ngFor="let comment of idea.comments" class="comment-item">
-                <p class="comment-author">👤 {{ comment.studentName || 'Anonyme' }}</p>
-                <p class="comment-text">{{ comment.content }}</p>
-              </div>
+    <div *ngIf="!loading() && filteredIdeas().length === 0" class="empty-state">
+      <h3>Aucune idee trouvee</h3>
+      <p>Essayez une autre recherche ou changez le filtre de statut.</p>
+    </div>
+
+    <section *ngIf="!loading() && filteredIdeas().length > 0" class="ideas-grid">
+      <article *ngFor="let idea of filteredIdeas()" class="idea-card">
+        <div class="card-header">
+          <div class="card-title">
+            <div class="title-row">
+              <h3>{{ idea.title }}</h3>
+              <span class="author-pill">{{ idea.studentName }}</span>
+            </div>
+            <div class="badges-section">
+              <span class="badge status-badge" [ngClass]="getStatusBadgeClass(idea.status)">
+                {{ statusLabels[idea.status] }}
+              </span>
+              <span class="badge category-badge" [ngClass]="getCategoryBadgeClass(idea.category)">
+                {{ categoryLabels[idea.category] }}
+              </span>
+              <span class="badge department-badge">{{ departmentLabels[idea.department] }}</span>
             </div>
           </div>
-          <div *ngIf="!idea.comments.length" class="no-comments">
-            <p>Aucun commentaire pour le moment</p>
+        </div>
+
+        <div class="card-body">
+          <p class="description">{{ idea.description }}</p>
+
+          <div class="stats-row">
+            <div class="stat">
+              <span class="stat-label">Votes</span>
+              <strong>{{ idea.voteCount }}</strong>
+            </div>
+
+            <button
+              type="button"
+              class="comment-toggle-btn"
+              (click)="toggleComments(idea.runtimeId)"
+              [attr.aria-expanded]="activeCommentIdeaId() === idea.runtimeId"
+            >
+              {{ activeCommentIdeaId() === idea.runtimeId ? 'Masquer les commentaires' : 'Voir les commentaires' }}
+              <strong>{{ idea.comments.length || 0 }}</strong>
+            </button>
+          </div>
+
+          <div class="action-buttons-two">
+            <button
+              type="button"
+              class="btn-action btn-accept"
+              (click)="updateStatus(idea, 'ACCEPTE')"
+              [disabled]="updatingIdeaId() === idea.id || idea.id == null"
+              [title]="
+                idea.id == null
+                  ? 'Identifiant backend manquant pour cette idee'
+                  : 'Accepter cette idee'
+              "
+            >
+              Accepter l'idee
+            </button>
+            <button
+              type="button"
+              class="btn-action btn-reject"
+              (click)="updateStatus(idea, 'REJETE')"
+              [disabled]="updatingIdeaId() === idea.id || idea.id == null"
+              [title]="
+                idea.id == null
+                  ? 'Identifiant backend manquant pour cette idee'
+                  : 'Rejeter cette idee'
+              "
+            >
+              Rejeter l'idee
+            </button>
+          </div>
+
+          <div *ngIf="activeCommentIdeaId() === idea.runtimeId" class="comment-section-card">
+            <div *ngIf="idea.comments.length > 0" class="comments-section">
+              <h4>Commentaires etudiants ({{ idea.comments.length }})</h4>
+              <div class="comments-list">
+                <div *ngFor="let comment of idea.comments" class="comment-item">
+                  <p class="comment-author">{{ comment.studentName || 'Anonyme' }}</p>
+                  <p class="comment-text">{{ comment.content }}</p>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="!idea.comments.length" class="no-comments">
+              <p>Aucun commentaire pour le moment.</p>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </article>
+    </section>
   </div>
-</div>
+</section>

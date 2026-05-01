@@ -37,6 +37,16 @@ export class EtudiantMyIdeasPage implements OnInit {
   readonly searchTerm = signal('');
   readonly activeCommentIdeaId = signal<number | null>(null);
   readonly votingId = signal<number | null>(null);
+  readonly totalIdeas = computed(() => this.ideas().length);
+  readonly acceptedIdeas = computed(() =>
+    this.ideas().filter((idea) => idea.status === 'ACCEPTE').length
+  );
+  readonly pendingIdeas = computed(() =>
+    this.ideas().filter((idea) => idea.status === 'ENCOURS').length
+  );
+  readonly totalComments = computed(() =>
+    this.ideas().reduce((sum, idea) => sum + idea.comments.length, 0)
+  );
 
   readonly filteredIdeas = computed(() => {
     const term = this.searchTerm().toLowerCase();

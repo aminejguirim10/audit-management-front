@@ -1,205 +1,225 @@
-<div class="container">
-  <!-- Header -->
-  <div class="header">
-    <div>
-      <h1>📊 Tableau de Bord Étudiant</h1>
-      <p>Découvrez les idées de la communauté et participez</p>
-    </div>
-  </div>
+<section class="page-shell">
+  <div class="page-glow glow-left"></div>
+  <div class="page-glow glow-right"></div>
 
-  <!-- Stats Cards -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon">💡</div>
-      <div class="stat-content">
-        <p class="stat-label">Total d'idées</p>
-        <p class="stat-value">{{ totalIdeas() }}</p>
+  <div class="container">
+    <header class="hero-card">
+      <div class="hero-copy">
+        <span class="eyebrow">Boite a idees collaborative</span>
+        <h1>Tableau de bord etudiant</h1>
+        <p>
+          Explorez les idees de la communaute, suivez les propositions les plus soutenues et
+          participez avec vos votes et commentaires.
+        </p>
+
+        <div class="hero-metrics">
+          <article class="mini-metric">
+            <span>Idees publiees</span>
+            <strong>{{ totalIdeas() }}</strong>
+          </article>
+          <article class="mini-metric">
+            <span>Idees acceptees</span>
+            <strong>{{ acceptedIdeas() }}</strong>
+          </article>
+          <article class="mini-metric">
+            <span>Votes totaux</span>
+            <strong>{{ totalVotes() }}</strong>
+          </article>
+        </div>
       </div>
-    </div>
 
-    <div class="stat-card">
-      <div class="stat-icon">✅</div>
-      <div class="stat-content">
-        <p class="stat-label">Acceptées</p>
-        <p class="stat-value">{{ acceptedIdeas() }}</p>
-      </div>
-    </div>
+      <div class="hero-panel" *ngIf="topIdea() as top">
+        <span class="panel-label">Idee en vedette</span>
+        <div class="hero-panel-body">
+          <span class="hero-panel-kicker">La plus suivie du moment</span>
+          <strong>{{ top.title }}</strong>
+          <p>{{ top.description }}</p>
+        </div>
 
-    <div class="stat-card">
-      <div class="stat-icon">⏳</div>
-      <div class="stat-content">
-        <p class="stat-label">En cours</p>
-        <p class="stat-value">{{ pendingIdeas() }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">👍</div>
-      <div class="stat-content">
-        <p class="stat-label">Votes totaux</p>
-        <p class="stat-value">{{ totalVotes() }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon">💬</div>
-      <div class="stat-content">
-        <p class="stat-label">Commentaires</p>
-        <p class="stat-value">{{ totalComments() }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card highlight">
-      <div class="stat-icon">🏆</div>
-      <div class="stat-content">
-        <p class="stat-label">Idée la plus votée</p>
-        <p class="stat-value">{{ (topIdea() || { voteCount: 0 }).voteCount }}</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Top Idea Highlight -->
-  <div *ngIf="topIdea() as top" class="top-idea-section">
-    <h3>🌟 Idée en Vedette</h3>
-    <div class="top-idea-card">
-      <div class="top-idea-header">
-        <h4>{{ top.title }}</h4>
-        <span [ngClass]="getStatusBadgeClass(top.status || '')">
-          {{ statusLabels[top.status || 'ENCOURS'] }}
-        </span>
-      </div>
-      <p class="top-idea-description">{{ top.description }}</p>
-      <div class="top-idea-footer">
-        <span class="author">👤 {{ top.studentName }}</span>
-        <span class="votes">👍 {{ top.voteCount }} votes</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filter Section -->
-  <div class="filter-section">
-    <h3>🔍 Filtrer les Idées</h3>
-    <div class="filter-buttons">
-      <button
-        *ngFor="let status of statusOptions"
-        [class.active]="filterStatus() === status"
-        (click)="filterStatus.set(status)"
-        class="filter-btn"
-      >
-        {{ status === 'TOUS' ? 'Toutes' : statusLabels[status] }}
-      </button>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="loading()" class="loading">
-    <div class="spinner"></div>
-    <p>Chargement des idées...</p>
-  </div>
-
-  <!-- Ideas List -->
-  <div class="ideas-section">
-    <h3>💼 Toutes les Idées ({{ filteredIdeas().length }})</h3>
-
-    <div class="empty-state" *ngIf="!loading() && filteredIdeas().length === 0">
-      <span class="empty-icon">📭</span>
-      <p>Aucune idée trouvée dans cette catégorie</p>
-    </div>
-
-    <div class="ideas-list">
-      <div *ngFor="let idea of filteredIdeas()" class="idea-card">
-        <!-- Card Header -->
-        <div class="card-header">
-          <div class="header-left">
-            <h4 class="idea-title">{{ idea.title }}</h4>
-            <span [ngClass]="getCategoryBadgeClass(idea.category)">
-              {{ categoryLabels[idea.category] }}
-            </span>
+        <div class="hero-panel-footer">
+          <div class="hero-panel-meta">
+            <span>{{ top.studentName }}</span>
+            <span>{{ top.voteCount }} votes</span>
           </div>
-          <span [ngClass]="getStatusBadgeClass(idea.status)">
-            {{ statusLabels[idea.status] }}
-          </span>
+          <span [ngClass]="getStatusBadgeClass(top.status)">{{ statusLabels[top.status] }}</span>
         </div>
+      </div>
+    </header>
 
-        <!-- Card Body -->
-        <p class="description">{{ idea.description }}</p>
+    <section class="stats-grid">
+      <article class="stat-card accent-blue">
+        <span class="stat-label">Idees publiees</span>
+        <strong>{{ totalIdeas() }}</strong>
+        <small>Vue d'ensemble de la communaute</small>
+      </article>
 
-        <!-- Card Meta -->
-        <div class="card-meta">
-          <span class="author">👤 {{ idea.studentName }}</span>
+      <article class="stat-card accent-emerald">
+        <span class="stat-label">Acceptees</span>
+        <strong>{{ acceptedIdeas() }}</strong>
+        <small>Idees deja validees</small>
+      </article>
+
+      <article class="stat-card accent-amber">
+        <span class="stat-label">En cours</span>
+        <strong>{{ pendingIdeas() }}</strong>
+        <small>Propositions en evaluation</small>
+      </article>
+
+      <article class="stat-card accent-rose">
+        <span class="stat-label">Votes totaux</span>
+        <strong>{{ totalVotes() }}</strong>
+        <small>Engagement de la communaute</small>
+      </article>
+    </section>
+
+    <section class="filter-card">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">Navigation rapide</span>
+          <h2>Filtrer les idees</h2>
         </div>
+        <span class="result-chip">{{ filteredIdeas().length }} idee(s)</span>
+      </div>
 
-        <!-- Card Footer -->
-        <div class="card-footer">
-          <div class="stats">
-            <button
-              class="stat-btn vote-btn"
-              (click)="toggleVote(idea.id)"
-              [disabled]="votingId() === idea.id"
-              title="Voter pour cette idée"
-            >
-              👍 {{ idea.voteCount }}
-            </button>
-            <div class="stat-btn comment-count">💬 {{ idea.comments.length }}</div>
+      <div class="filter-buttons">
+        <button
+          *ngFor="let status of statusOptions"
+          [class.active]="filterStatus() === status"
+          (click)="filterStatus.set(status)"
+          class="filter-btn"
+        >
+          {{ status === 'TOUS' ? 'Toutes les idees' : statusLabels[status] }}
+        </button>
+      </div>
+    </section>
+
+    <div *ngIf="loading()" class="feedback-card loading-card">
+      <div class="spinner"></div>
+      <p>Chargement des idees en cours...</p>
+    </div>
+
+    <div *ngIf="!loading() && hasIdeasWithMissingIds()" class="feedback-card warning-card">
+      Certaines idees n'ont pas d'identifiant backend. Les actions sont bloquees sur ces cartes
+      pour eviter tout envoi vers une autre idee.
+    </div>
+
+    <section class="ideas-section">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">Communaute</span>
+          <h2>Idees disponibles</h2>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading() && filteredIdeas().length === 0">
+        <h3>Aucune idee disponible</h3>
+        <p>Essayez un autre filtre pour afficher davantage de propositions.</p>
+      </div>
+
+      <div class="ideas-list" *ngIf="!loading() && filteredIdeas().length > 0">
+        <article *ngFor="let idea of filteredIdeas()" class="idea-card">
+          <div class="idea-topbar">
+            <div class="badge-row">
+              <span [ngClass]="getCategoryBadgeClass(idea.category)">
+                {{ categoryLabels[idea.category] }}
+              </span>
+              <span [ngClass]="getStatusBadgeClass(idea.status)">
+                {{ statusLabels[idea.status] }}
+              </span>
+            </div>
+            <span class="author-pill">{{ idea.studentName }}</span>
           </div>
 
-          <button
-            class="expand-btn"
-            (click)="toggleComments(idea.id)"
-            [attr.aria-expanded]="activeCommentIdeaId() === idea.id"
-          >
-            {{ activeCommentIdeaId() === idea.id ? 'Réduire ▲' : 'Commenter ▼' }}
-          </button>
-        </div>
+          <div class="idea-body">
+            <h3 class="idea-title">{{ idea.title }}</h3>
+            <p class="description">{{ idea.description }}</p>
+          </div>
 
-        <!-- Expanded Comments Section -->
-        <div class="expanded-section" *ngIf="activeCommentIdeaId() === idea.id">
-          <div class="comments-section">
-            <h5>💬 Commentaires ({{ idea.comments.length }})</h5>
+          <div class="idea-footer">
+            <div class="stats">
+              <button
+                class="stat-btn vote-btn"
+                (click)="toggleVote(idea.id)"
+                [disabled]="votingId() === idea.id || idea.id == null"
+                [title]="
+                  idea.id == null
+                    ? 'Identifiant backend manquant pour cette idee'
+                    : 'Voter pour cette idee'
+                "
+              >
+                <span class="stat-key">Votes</span>
+                <strong>{{ idea.voteCount }}</strong>
+              </button>
 
-            <!-- Comments List -->
-            <div class="comments-list" *ngIf="idea.comments && idea.comments.length > 0">
-              <div *ngFor="let comment of idea.comments" class="comment">
-                <div class="comment-header">
-                  <strong>{{ comment.studentName }}</strong>
-                  <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
-                </div>
-                <p class="comment-content">{{ comment.content }}</p>
+              <div class="stat-btn comment-count">
+                <span class="stat-key">Commentaires</span>
+                <strong>{{ idea.comments.length }}</strong>
               </div>
             </div>
 
-            <p *ngIf="!idea.comments || idea.comments.length === 0" class="no-comments">
-              Aucun commentaire pour le moment
-            </p>
-
-            <!-- Add Comment Form -->
-            <form
-              [formGroup]="commentForm"
-              (ngSubmit)="submitComment(idea.id)"
-              class="comment-form"
+            <button
+              class="expand-btn"
+              (click)="toggleComments(idea.id)"
+              [attr.aria-expanded]="activeCommentIdeaId() === idea.id"
+              [disabled]="idea.id == null"
+              [title]="
+                idea.id == null
+                  ? 'Identifiant backend manquant pour cette idee'
+                  : 'Afficher les commentaires'
+              "
             >
-              <textarea
-                formControlName="content"
-                placeholder="Votre commentaire..."
-                class="comment-input"
-                rows="3"
-              ></textarea>
-              <div class="comment-actions">
-                <button type="submit" class="btn-submit-comment">Commenter</button>
-                <button type="button" class="btn-cancel-comment" (click)="cancelCommenting()">
-                  Annuler
-                </button>
-              </div>
-              <p
-                *ngIf="commentForm.get('content')?.invalid && commentForm.get('content')?.touched"
-                class="error-text"
-              >
-                Le commentaire doit contenir entre 3 et 200 caractères
-              </p>
-            </form>
+              {{ activeCommentIdeaId() === idea.id ? 'Masquer' : 'Consulter et commenter' }}
+            </button>
           </div>
-        </div>
+
+          <div class="expanded-section" *ngIf="activeCommentIdeaId() === idea.id">
+            <div class="comments-section">
+              <h4>Commentaires ({{ idea.comments.length }})</h4>
+
+              <div class="comments-list" *ngIf="idea.comments && idea.comments.length > 0">
+                <div *ngFor="let comment of idea.comments" class="comment">
+                  <div class="comment-header">
+                    <strong>{{ comment.studentName }}</strong>
+                    <span class="comment-date">{{ comment.createdAt | date: 'dd/MM/yyyy' }}</span>
+                  </div>
+                  <p class="comment-content">{{ comment.content }}</p>
+                </div>
+              </div>
+
+              <p *ngIf="!idea.comments || idea.comments.length === 0" class="no-comments">
+                Aucun commentaire pour le moment
+              </p>
+
+              <form
+                [formGroup]="commentForm"
+                (ngSubmit)="submitComment(idea.id)"
+                class="comment-form"
+              >
+                <textarea
+                  formControlName="content"
+                  placeholder="Partager un commentaire constructif..."
+                  class="comment-input"
+                  rows="3"
+                ></textarea>
+                <div class="comment-actions">
+                  <button type="submit" class="btn-submit-comment" [disabled]="idea.id == null">
+                    Publier le commentaire
+                  </button>
+                  <button type="button" class="btn-cancel-comment" (click)="cancelCommenting()">
+                    Annuler
+                  </button>
+                </div>
+                <p
+                  *ngIf="commentForm.get('content')?.invalid && commentForm.get('content')?.touched"
+                  class="error-text"
+                >
+                  Le commentaire doit contenir entre 3 et 200 caracteres.
+                </p>
+              </form>
+            </div>
+          </div>
+        </article>
       </div>
-    </div>
+    </section>
   </div>
-</div>
+</section>

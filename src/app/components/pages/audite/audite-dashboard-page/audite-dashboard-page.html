@@ -83,15 +83,17 @@
             <th>Departement</th>
             <th>Auditeur</th>
             <th>Statut</th>
-            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let audit of filteredAudits(); trackBy: trackByAudit" class="audit-row" (click)="openAuditWorkspace(audit)">
+          <tr
+            *ngFor="let audit of filteredAudits(); trackBy: trackByAudit"
+            class="audit-row"
+            (click)="openAuditWorkspace(audit)"
+          >
             <td>
               <div class="audit-name">
                 <strong>{{ audit.title }}</strong>
-                <small>#{{ audit.id }}</small>
               </div>
             </td>
             <td><span class="type-pill">{{ audit.typeAuditName }}</span></td>
@@ -101,18 +103,6 @@
               <span class="status-chip" [ngClass]="getStatusClass(audit.status)">
                 {{ getStatusLabel(audit.status) }}
               </span>
-            </td>
-            <td (click)="$event.stopPropagation()">
-              <button 
-                type="button" 
-                class="edit-button" 
-                *ngIf="audit.status === 'EN_COURS'"
-                (click)="editAuditResponses(audit)"
-                title="Modifier les reponses"
-              >
-                ✏️
-              </button>
-              <span *ngIf="audit.status !== 'EN_COURS'" class="no-action">-</span>
             </td>
           </tr>
         </tbody>
@@ -129,7 +119,7 @@
         <h2>{{ audit.title }}</h2>
         <p>{{ audit.typeAuditName }} - {{ formatDepartment(audit.department) }}</p>
       </div>
-      <button type="button" class="close-button" (click)="closeAuditWorkspace()">✕</button>
+      <button type="button" class="close-button" (click)="closeAuditWorkspace()">x</button>
     </header>
 
     <div class="modal-body">
@@ -142,12 +132,12 @@
             <strong>{{ formatDate(details.dateDebut) }} - {{ formatDate(details.dateFin) }}</strong>
           </article>
           <article>
-            <span>Avancement</span>
-            <strong>{{ completionRatio() }}%</strong>
-          </article>
-          <article>
             <span>Questions repondues</span>
             <strong>{{ completedDraftQuestionsCount() }}/{{ details.questions.length }}</strong>
+          </article>
+          <article>
+            <span>Score total</span>
+            <strong>{{ scorePercentage() }}%</strong>
           </article>
         </div>
 
@@ -163,16 +153,11 @@
           Veuillez repondre a toutes les questions puis envoyer vos reponses.
         </div>
 
-        <div class="locked-banner warning" *ngIf="details.status === 'EN_COURS' && answeredQuestionsCount() > 0">
-          Les reponses deja enregistrees peuvent maintenant etre modifiees dans cette interface,
-          puis renvoyees en une seule fois avec le bouton final.
-        </div>
-
         <div class="question-form" *ngIf="details.questions.length > 0; else noQuestions">
-          <article class="question-card" *ngFor="let question of details.questions; trackBy: trackByQuestion">
+          <article class="question-card" *ngFor="let question of details.questions; let i = index; trackBy: trackByQuestion">
             <div class="question-head">
               <div>
-                <span class="question-index">Question {{ question.id }}</span>
+                <span class="question-index">Question {{ i + 1 }}</span>
                 <h3>{{ question.title }}</h3>
               </div>
               <span class="answer-flag" [class.done]="hasPersistedResponse(question)" [class.consultation]="details.status !== 'EN_COURS'">
@@ -194,9 +179,6 @@
               </button>
             </div>
 
-            <p class="question-note" *ngIf="question.score !== null">
-              Score deja calcule pour cette question: {{ question.score }}/1
-            </p>
           </article>
         </div>
 
