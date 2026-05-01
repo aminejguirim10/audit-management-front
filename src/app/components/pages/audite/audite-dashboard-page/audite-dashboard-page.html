@@ -83,6 +83,7 @@
             <th>Departement</th>
             <th>Auditeur</th>
             <th>Statut</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -103,6 +104,25 @@
               <span class="status-chip" [ngClass]="getStatusClass(audit.status)">
                 {{ getStatusLabel(audit.status) }}
               </span>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <button
+                  class="action-btn chat-btn"
+                  title="Discuter"
+                  (click)="openChat(audit)"
+                >
+                  💬
+                </button>
+                <button
+                  class="action-btn report-btn"
+                  title="Générer le rapport"
+                  [disabled]="audit.status !== 'TERMINEE'"
+                  (click)="openReport(audit)"
+                >
+                  📄
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -217,3 +237,6 @@
     </footer>
   </section>
 </section>
+
+<!-- Report Modal -->
+<app-audit-report *ngIf="reportAudit()" [audit]="reportAudit()" (close)="closeReport()"></app-audit-report>

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
   FormArray,
@@ -23,6 +24,7 @@ import {
   UpdateAuditDto,
 } from '../../../../models/audit.model';
 import { TypeAudit } from '../../../../models/type-audit.model';
+import { AuditReportComponent } from '../../../shared/audit-report/audit-report.component';
 
 const AUDIT_STATUS_LABELS: Record<AuditStatus, string> = {
   PLANIFIE: 'Planifié',
@@ -40,7 +42,7 @@ const DEPARTMENTS = ['INFORMATIQUE', 'ELECTRIQUE', 'INDUS'];
 
 @Component({
   selector: 'app-auditeur-dashboard-page',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AuditReportComponent],
   templateUrl: './auditeur-dashboard-page.html',
   styleUrl: './auditeur-dashboard-page.css',
 })
@@ -50,6 +52,7 @@ export class AuditeurDashboardPage implements OnInit {
   private readonly typeAuditService = inject(TypeAuditService);
   private readonly toastr = inject(ToastrService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
 
   readonly audits = signal<AuditSummary[]>([]);
   readonly audites = signal<Audite[]>([]);
@@ -59,6 +62,7 @@ export class AuditeurDashboardPage implements OnInit {
   readonly selectedStatus = signal<'TOUS' | AuditStatus>('TOUS');
   readonly showCreatePanel = signal(false);
   readonly selectedAudit = signal<AuditDetails | null>(null);
+  readonly reportAudit = signal<AuditDetails | null>(null);
   readonly editingAudit = signal<AuditSummary | null>(null);
   readonly auditToDelete = signal<AuditSummary | null>(null);
   readonly typeAudits = signal<TypeAudit[]>([]);
@@ -279,6 +283,18 @@ export class AuditeurDashboardPage implements OnInit {
 
   closeAuditDetails(): void {
     this.selectedAudit.set(null);
+  }
+
+  openReport(audit: AuditSummary): void {
+    if (audit.status !== 'TERMINEE') return;
+    this.auditService.findById(audit.id).subscribe({
+      next: (details) => this.reportAudit.set(details),
+      error: () => this.toastr.error('Impossible de charger les détails pour le rapport')
+    });
+  }
+
+  closeReport(): void {
+    this.reportAudit.set(null);
   }
 
   editAudit(audit: AuditSummary): void {
@@ -506,5 +522,9 @@ export class AuditeurDashboardPage implements OnInit {
     );
 
     return matchedType?.id ?? null;
+  }
+
+  openChat(audit: AuditSummary) {
+    this.router.navigate(['/auditeur/messages', audit.id]);
   }
 }

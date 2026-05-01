@@ -1,4 +1,4 @@
-﻿<div class="auditeur-dashboard">
+<div class="auditeur-dashboard">
   <header class="dashboard-header">
     <div class="dashboard-intro">
       <span class="eyebrow">Tableau de bord auditeur</span>
@@ -88,6 +88,21 @@
             </span>
           </div>
           <div class="table-col col-actions" (click)="$event.stopPropagation()">
+            <button
+              class="action-btn chat-btn"
+              title="Discuter"
+              (click)="openChat(audit)"
+            >
+              💬
+            </button>
+            <button
+              class="action-btn report-btn"
+              title="Générer le rapport"
+              [disabled]="audit.status !== 'TERMINEE'"
+              (click)="openReport(audit)"
+            >
+              📄
+            </button>
             <button
               class="action-btn edit-btn"
               title="Modifier cet audit"
@@ -625,3 +640,6 @@
     </button>
   </div>
 </div>
+
+<!-- Report Modal -->
+<app-audit-report *ngIf="reportAudit()" [audit]="reportAudit()" (close)="closeReport()"></app-audit-report>

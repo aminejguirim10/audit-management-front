@@ -12,6 +12,12 @@
   margin: 0 auto;
   display: grid;
   gap: 1.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.audite-dashboard > * {
+  min-width: 0;
 }
 
 .hero-card,
@@ -243,6 +249,7 @@
   padding: 0.42rem 0.76rem;
   font-size: 0.84rem;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .results-pill {
@@ -269,12 +276,13 @@
   overflow-x: auto;
   border-radius: 22px;
   border: 1px solid #dce6f3;
+  width: 100%;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 900px;
+  min-width: 1000px;
   background: white;
 }
 
@@ -289,10 +297,23 @@ thead th {
   letter-spacing: 0.04em;
 }
 
+thead th:nth-child(1) { width: 26%; }
+thead th:nth-child(2) { width: 10%; text-align: center; }
+thead th:nth-child(3) { width: 15%; }
+thead th:nth-child(4) { width: 15%; }
+thead th:nth-child(5) { width: 14%; text-align: center; }
+thead th:nth-child(6) { width: 20%; text-align: center; }
+
 tbody td {
   padding: 1rem 1.1rem;
   border-top: 1px solid #ecf1f6;
   color: #243a58;
+}
+
+tbody td:nth-child(2),
+tbody td:nth-child(5),
+tbody td:nth-child(6) {
+  text-align: center;
 }
 
 tbody tr {
@@ -713,4 +734,54 @@ tbody tr:hover {
   .submit-button {
     width: 100%;
   }
+}
+
+.report-btn {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  color: #4338ca;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  padding: 0;
+}
+
+.report-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 16px rgba(79, 70, 229, 0.15);
+}
+
+.report-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+
+.chat-btn {
+  background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+  color: #0369a1;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  padding: 0;
+}
+
+.chat-btn:hover {
+  background: linear-gradient(135deg, #bae6fd, #7dd3fc);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 16px rgba(14, 165, 233, 0.15);
 }
