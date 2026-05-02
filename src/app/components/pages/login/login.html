@@ -28,11 +28,9 @@
           formControlName="email"
           autocomplete="username"
           placeholder="exemple@enicarthage.rnu.tn"
-          [class.field-invalid]="
-            emailControl.invalid && (emailControl.touched || emailControl.dirty)
-          "
+          [class.field-invalid]="emailControl.invalid && isSubmitted()"
         />
-        @if (emailControl.invalid && (emailControl.touched || emailControl.dirty)) {
+        @if (emailControl.invalid && isSubmitted()) {
           <p class="error-text">Veuillez saisir un email valide.</p>
         }
 
@@ -44,9 +42,7 @@
             formControlName="password"
             autocomplete="current-password"
             placeholder="Votre mot de passe"
-            [class.field-invalid]="
-              passwordControl.invalid && (passwordControl.touched || passwordControl.dirty)
-            "
+            [class.field-invalid]="passwordControl.invalid && isSubmitted()"
           />
           <button
             type="button"
@@ -73,7 +69,7 @@
             }
           </button>
         </div>
-        @if (passwordControl.invalid && (passwordControl.touched || passwordControl.dirty)) {
+        @if (passwordControl.invalid && isSubmitted()) {
           <p class="error-text">Le mot de passe est obligatoire.</p>
         }
 

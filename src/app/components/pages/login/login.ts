@@ -20,6 +20,7 @@ export class Login {
   private readonly toastr = inject(ToastrService);
 
   readonly isSubmitting = signal(false);
+  readonly isSubmitted = signal(false);
   readonly showPassword = signal(false);
 
   readonly loginForm = this.fb.nonNullable.group({
@@ -39,6 +40,8 @@ export class Login {
   }
 
   submit(): void {
+    this.isSubmitted.set(true);
+
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;

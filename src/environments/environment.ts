@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   apiUrl: 'http://localhost:8081',
-  aiAssistantApiUrl: 'http://localhost:3000/api',
+  aiAssistantApiUrl: 'https://audit-ai-gold.vercel.app/api',
   supabase: {
     url: 'https://jcuvxwdrivmjgolvnlly.supabase.co',
     anonKey:

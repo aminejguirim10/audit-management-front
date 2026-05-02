@@ -19,12 +19,15 @@ export class ForgotPassword {
   private readonly toastr = inject(ToastrService);
 
   readonly isSubmitting = signal(false);
+  readonly isSubmitted = signal(false);
 
   readonly forgotForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
   });
 
   submit(): void {
+    this.isSubmitted.set(true);
+
     if (this.forgotForm.invalid) {
       this.forgotForm.markAllAsTouched();
       return;

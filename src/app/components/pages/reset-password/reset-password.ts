@@ -20,6 +20,7 @@ export class ResetPassword {
   private readonly toastr = inject(ToastrService);
 
   readonly isSubmitting = signal(false);
+  readonly isSubmitted = signal(false);
   readonly token = signal<string>(this.route.snapshot.queryParamMap.get('token') ?? '');
 
   readonly resetForm = this.fb.nonNullable.group({
@@ -28,6 +29,8 @@ export class ResetPassword {
   });
 
   submit(): void {
+    this.isSubmitted.set(true);
+
     if (!this.token()) {
       this.toastr.error('Le lien est invalide ou incomplet.', 'Token manquant');
       return;
