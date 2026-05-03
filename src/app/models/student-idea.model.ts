@@ -14,6 +14,7 @@ export interface Idea {
   studentName: string;
   voteCount: number;
   comments: CommentSummary[];
+  isVoted?: boolean;
 }
 
 export interface AddIdeaDto {
@@ -33,6 +34,7 @@ export interface FindOneIdeaDto {
   voteCount: number;
   comments: CommentSummary[];
   studentName: string;
+  isVoted?: boolean;
 }
 
 export interface IdeaStatusUpdateDto {
@@ -59,10 +61,10 @@ export interface AddVoteDto {
 
 // ===== Category & Department Labels =====
 export const CATEGORY_LABELS: Record<CategoryIdea, string> = {
-  SERVICES: '🏢 Services',
-  INSTALLATIONS: '🔧 Installations',
-  ACADEMIQUE: '📚 Académique',
-  AUTRES: '📌 Autres',
+  SERVICES: 'Services',
+  INSTALLATIONS: 'Installations',
+  ACADEMIQUE: 'Académique',
+  AUTRES: 'Autres',
 };
 
 export const CATEGORY_COLORS: Record<CategoryIdea, string> = {
@@ -79,9 +81,9 @@ export const DEPARTMENT_LABELS: Record<Department, string> = {
 };
 
 export const STATUS_LABELS: Record<IdeaStatus, string> = {
-  ENCOURS: '⏳ En cours',
-  ACCEPTE: '✅ Acceptée',
-  REJETE: '❌ Rejetée',
+  ENCOURS: 'En cours',
+  ACCEPTE: 'Acceptée',
+  REJETE: 'Rejetée',
 };
 
 export const STATUS_COLORS: Record<IdeaStatus, string> = {
