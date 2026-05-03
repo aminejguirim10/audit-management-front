@@ -1,4 +1,4 @@
-﻿:host { display: block; }
+:host { display: block; }
 * { box-sizing: border-box; }
 
 .page-wrap { padding: 2rem; font-family: 'Sora', sans-serif; background: #F0F2F8; min-height: 100vh; }
@@ -41,7 +41,8 @@
 
 /* LOADING */
 .loading-wrap { display: flex; flex-direction: column; align-items: center; padding: 5rem; color: #94A3B8; font-size: 0.875rem; }
-.ring { width: 42px; height: 42px; border: 3px solid #E2E8F0; border-top-color: #6366F1; border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 1rem; }
+.ring { width: 42px; height: 42px; border: 3px solid #E2E8F0; border-top-color: #10B981; border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 1rem; }
+.spinner-sm { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* TABLE */
@@ -68,8 +69,63 @@ td { padding: 0.9rem 1.25rem; font-size: 0.85rem; color: #334155; white-space: n
 .icon-btn { width: 32px; height: 32px; border: none; cursor: pointer; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: background 0.15s, transform 0.15s; }
 .icon-btn:hover { transform: scale(1.08); }
 .icon-btn.del { background: #FEF2F2; color: #EF4444; }
-.icon-btn.del:hover { background: #FEE2E2; }
-.empty-row td { text-align: center; padding: 4rem; color: #94A3B8; font-size: 0.875rem; }
+/* ─── EMPTY STATE ─── */
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  text-align: center;
+  background: #fcfdfe;
+}
+
+.empty-icon-wrap {
+  width: 90px;
+  height: 90px;
+  background: #f8fafc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+  margin-bottom: 1.5rem;
+  border: 2px dashed #e2e8f0;
+}
+
+.empty-state-container h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.5rem;
+}
+
+.empty-state-container p {
+  color: #64748b;
+  font-size: 0.875rem;
+  max-width: 360px;
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.reset-filters-btn {
+  background: white;
+  color: #0659d9;
+  border: 1.5px solid #e0e7ff;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reset-filters-btn:hover {
+  background: #f5f7ff;
+  border-color: #c7d2fe;
+  transform: translateY(-1px);
+}
 
 /* MODAL */
 .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(3px); animation: fadeIn 0.15s ease; }
@@ -90,11 +146,14 @@ td { padding: 0.9rem 1.25rem; font-size: 0.85rem; color: #334155; white-space: n
 .field input:focus, .field select:focus { border-color: #6366F1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
 .modal-foot { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.5rem 1.5rem; border-top: 1px solid #F1F5F9; }
 .btn-cancel { background: #F1F5F9; color: #374151; border: none; padding: 0.65rem 1.25rem; border-radius: 10px; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.btn-cancel:hover { background: #E2E8F0; }
+.btn-cancel:hover:not(:disabled) { background: #E2E8F0; }
+.btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
 .btn-submit { color: white; border: none; padding: 0.65rem 1.5rem; border-radius: 10px; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+.btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-del-confirm { background: #EF4444; color: white; border: none; padding: 0.65rem 1.25rem; border-radius: 10px; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-.btn-del-confirm:hover { background: #DC2626; }
+.btn-del-confirm:hover:not(:disabled) { background: #DC2626; }
+.btn-del-confirm:disabled { opacity: 0.6; cursor: not-allowed; background: #FDA4AF; }
 .del-warn { display: flex; align-items: center; gap: 0.75rem; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; padding: 1rem 1.25rem; margin-top: 1rem; }
 .del-warn-icon { width: 36px; height: 36px; border-radius: 10px; background: #FEE2E2; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem; }
 .del-warn p { margin: 0; font-size: 0.85rem; color: #374151; }

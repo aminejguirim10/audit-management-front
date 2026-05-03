@@ -113,9 +113,16 @@
         </div>
       </div>
 
-      <div class="empty-state" *ngIf="!loading() && filteredIdeas().length === 0">
-        <h3>Aucune idée disponible</h3>
-        <p>Essayez un autre filtre pour afficher davantage de propositions.</p>
+      <div class="empty-state-card" *ngIf="!loading() && filteredIdeas().length === 0">
+        <div class="empty-illustration">
+          <div class="circle-pulse"></div>
+          <fa-icon [icon]="faNewspaper" class="main-icon"></fa-icon>
+        </div>
+        <h3>Aucune idée pour le moment</h3>
+        <p>Le flux est actuellement vide. Changez de filtre ou revenez plus tard pour découvrir de nouvelles propositions.</p>
+        <button *ngIf="filterStatus() !== 'TOUS'" class="premium-reset-btn" (click)="filterStatus.set('TOUS')">
+          Voir toutes les idées
+        </button>
       </div>
 
       <div class="facebook-list" *ngIf="!loading() && filteredIdeas().length > 0">

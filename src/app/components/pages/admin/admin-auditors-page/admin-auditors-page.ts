@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditorService } from '../../../../services/auditor.service';
@@ -72,6 +72,7 @@ export class AdminAuditorsPage implements OnInit {
   modalCreationOuverte = false;
   nouveauAuditor: Partial<Auditor> = {};
   erreurCreation = '';
+  enCreation = false;
 
   ouvrirModalCreation(): void {
     this.nouveauAuditor = { departement: 'INFORMATIQUE' };
@@ -93,15 +94,24 @@ export class AdminAuditorsPage implements OnInit {
     }
     if (!this.nouveauAuditor.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
 
+    this.enCreation = true;
     this.service.create(this.nouveauAuditor).subscribe({
-      next: () => { this.fermerModalCreation(); this.loadAuditors(); },
-      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
+      next: () => { 
+        this.enCreation = false;
+        this.fermerModalCreation(); 
+        this.loadAuditors(); 
+      },
+      error: (err: any) => { 
+        this.enCreation = false;
+        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; 
+      }
     });
   }
 
   // ── Modal suppression ──
   modalSuppressionOuverte = false;
   auditorASupprimer: Auditor | null = null;
+  enSuppression = false;
 
   ouvrirModalSuppression(auditor: Auditor): void {
     this.auditorASupprimer = auditor;
@@ -111,16 +121,23 @@ export class AdminAuditorsPage implements OnInit {
   fermerModalSuppression(): void {
     this.modalSuppressionOuverte = false;
     this.auditorASupprimer = null;
+    this.enSuppression = false;
   }
 
   confirmerSuppression(): void {
     if (!this.auditorASupprimer) return;
+    this.enSuppression = true;
     this.service.delete(this.auditorASupprimer.id).subscribe({
       next: () => {
+        this.enSuppression = false;
         this.auditors = this.auditors.filter(a => a.id !== this.auditorASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => { this.erreur = 'Erreur lors de la suppression'; this.fermerModalSuppression(); }
+      error: () => { 
+        this.enSuppression = false;
+        this.erreur = 'Erreur lors de la suppression'; 
+        this.fermerModalSuppression(); 
+      }
     });
   }
 }

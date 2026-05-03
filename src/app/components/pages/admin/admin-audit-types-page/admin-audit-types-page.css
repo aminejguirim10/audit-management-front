@@ -1,4 +1,4 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
 
 
 
@@ -611,7 +611,8 @@ td {
   font-size: 0.85rem; font-weight: 600; cursor: pointer;
   transition: background 0.15s;
 }
-.btn-cancel:hover { background: var(--slate-200); }
+.btn-cancel:hover:not(:disabled) { background: var(--slate-200); }
+.btn-cancel:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-submit {
   display: inline-flex; align-items: center; gap: 0.45rem;
@@ -628,14 +629,36 @@ td {
 }
 
 .btn-del {
-  background: linear-gradient(135deg, #F87171, var(--red-500));
+  background: linear-gradient(135deg, #F87171, #ef4444);
   color: white; border: none; padding: 0.65rem 1.25rem;
   border-radius: 10px; font-family: 'Sora', sans-serif;
   font-size: 0.85rem; font-weight: 600; cursor: pointer;
   box-shadow: 0 4px 12px rgba(239,68,68,0.3);
   transition: transform 0.15s;
+  display: inline-flex; align-items: center; gap: 0.45rem;
 }
-.btn-del:hover { transform: translateY(-1px); }
+.btn-del:hover:not(:disabled) { transform: translateY(-1px); }
+
+.btn-submit:disabled, .btn-del:disabled, .btn-cancel:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Spinner */
+.mini-ring {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 /* ── RESPONSIVE ── */
 @media (max-width: 1024px) {

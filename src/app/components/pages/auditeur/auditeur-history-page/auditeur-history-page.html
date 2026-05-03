@@ -127,7 +127,7 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let audit of filteredCompletedAudits(); trackBy: trackByAudit">
+          <tr *ngFor="let audit of filteredCompletedAudits(); trackBy: trackByAudit" (click)="viewAuditDetails(audit)" class="clickable-row">
             <td>
               <div class="audit-cell">
                 <div>
@@ -181,7 +181,7 @@
         </div>
         
         <div class="timeline-list">
-          <article class="timeline-item" *ngFor="let item of group.items; trackBy: trackByTimeline">
+          <article class="timeline-item" *ngFor="let item of group.items; trackBy: trackByTimeline" (click)="viewAuditDetails(item)">
             <div class="timeline-rail">
               <span class="timeline-dot"></span>
             </div>
@@ -213,4 +213,84 @@
       </p>
     </div>
   </section>
+
+  <!-- MODAL DÉTAILS (Même que Dashboard) -->
+  <div class="modal-overlay" *ngIf="selectedAudit()" (click)="closeAuditDetails()"></div>
+  <div class="details-modal" *ngIf="selectedAudit()">
+    <div class="modal-header">
+      <h2>
+        <fa-icon [icon]="faInfoCircle" style="margin-right: 0.7rem; color: var(--primary);"></fa-icon>
+        Détails de l'audit
+      </h2>
+      <button type="button" class="btn-close" (click)="closeAuditDetails()" title="Fermer">
+        <fa-icon [icon]="faTimes"></fa-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="details-grid">
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faFileAlt"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Titre</span>
+            <span class="value">{{ selectedAudit()?.title }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faLayerGroup"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Type</span>
+            <span class="value">{{ selectedAudit()?.typeAuditName }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faBuilding"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Département</span>
+            <span class="value">{{ formatDepartment(selectedAudit()?.department!) }}</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faUser"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Auditée</span>
+            <span class="value">{{ selectedAudit()?.auditeName }}</span>
+          </div>
+        </div>
+        <div class="detail-item highlight-item" *ngIf="selectedAudit()?.scoreTotal !== undefined">
+          <div class="detail-icon score-icon"><fa-icon [icon]="faChartBar"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Score</span>
+            <span class="value score-text">{{ getAuditScorePercentage(selectedAudit()) }}%</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faSync"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Statut</span>
+            <span class="value">
+              <span class="status-pill" [ngClass]="getTimelineBadgeClass(selectedAudit()?.status!)">
+                {{ getStatusLabel(selectedAudit()?.status!) }}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="detail-item full-width-item">
+          <div class="detail-icon"><fa-icon [icon]="faClock"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Période d'audit</span>
+            <span class="value">{{ formatDate(selectedAudit()?.dateDebut!) }} — {{ formatDate(selectedAudit()?.dateFin!) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPOSANT RAPPORT PDF -->
+  <app-audit-report
+    *ngIf="reportAudit()"
+    [audit]="reportAudit()!"
+    (close)="closeReport()"
+  ></app-audit-report>
 </section>

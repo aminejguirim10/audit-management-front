@@ -133,10 +133,16 @@
       </table>
     </div>
 
-    <div class="empty-state-container" *ngIf="!loading() && filteredAudits().length === 0">
-      <fa-icon [icon]="faSearch" class="empty-icon"></fa-icon>
+    <div class="empty-state-card" *ngIf="!loading() && filteredAudits().length === 0">
+      <div class="empty-illustration">
+        <div class="circle-pulse"></div>
+        <fa-icon [icon]="faSearch" class="main-icon"></fa-icon>
+      </div>
       <h3>Aucun audit trouvé</h3>
-      <p>Affinez votre recherche ou créez un nouvel audit pour démarrer.</p>
+      <p>Affinez votre recherche ou créez un nouvel audit pour démarrer vos missions.</p>
+      <button *ngIf="filterTerm() || selectedStatus() !== 'TOUS'" class="premium-reset-btn" (click)="filterTerm.set(''); selectedStatus.set('TOUS')">
+        Réinitialiser les filtres
+      </button>
     </div>
   </section>
 

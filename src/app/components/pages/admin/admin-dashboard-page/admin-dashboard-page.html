@@ -1,16 +1,19 @@
-﻿<section class="page-placeholder">
-  <h1>Admin - Tableau de bord</h1>
-  <p>Cette page est en place. La navigation fonctionne pour le role ADMIN.</p>
-</section>
 <div class="dash-wrapper">
-
-
   <div class="dash-header">
     <div class="header-left">
       <div class="header-icon">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
         </svg>
       </div>
       <div>
@@ -18,76 +21,98 @@
         <p>Vue d'ensemble de la plateforme d'audit</p>
       </div>
     </div>
-    <div class="header-date">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      Aujourd'hui
-    </div>
   </div>
 
- 
   <div class="alert-erreur" *ngIf="erreur">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    <svg
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
     </svg>
     {{ erreur }}
   </div>
 
-  
   <div class="loading-state" *ngIf="chargement">
     <div class="spinner-ring"></div>
     <p>Chargement...</p>
   </div>
 
   <div *ngIf="!chargement && statistiques">
-
-    
     <div class="section-label">Utilisateurs</div>
     <div class="roles-grid">
-      <div class="role-card" *ngFor="let role of getRoleKeys()"
-           [style.--accent]="rolesColors[role]"
-           [style.--accent-bg]="rolesBg[role]">
+      <div
+        class="role-card"
+        *ngFor="let role of getRoleKeys()"
+        [style.--accent]="rolesColors[role]"
+        [style.--accent-bg]="rolesBg[role]"
+      >
         <div class="role-icon" [style.background]="rolesBg[role]">
           <span>{{ rolesIcons[role] }}</span>
         </div>
         <div class="role-body">
           <p class="role-label">{{ rolesLabels[role] }}</p>
-          <p class="role-value" [style.color]="rolesColors[role]">{{ statistiques!.parRole[role] }}</p>
+          <p class="role-value" [style.color]="rolesColors[role]">
+            {{ statistiques!.parRole[role] }}
+          </p>
         </div>
         <div class="role-bar" [style.background]="rolesColors[role] + '22'">
-          <div class="role-bar-fill" [style.background]="rolesColors[role]"
-               [style.height]="getBarHeight(statistiques!.parRole[role]) + 'px'"></div>
+          <div
+            class="role-bar-fill"
+            [style.background]="rolesColors[role]"
+            [style.height]="getBarHeight(statistiques!.parRole[role]) + 'px'"
+          ></div>
         </div>
       </div>
 
       <div class="role-card total-card">
-        <div class="role-icon" style="background:#F1F5F9">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2">
-            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <div class="role-icon" style="background: #f1f5f9">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#475569"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
           </svg>
         </div>
         <div class="role-body">
           <p class="role-label">Total utilisateurs</p>
-          <p class="role-value" style="color:#0F172A">{{ statistiques!.totalUtilisateurs }}</p>
+          <p class="role-value" style="color: #0f172a">{{ statistiques!.totalUtilisateurs }}</p>
         </div>
       </div>
     </div>
 
-    
     <div class="section-label">
       Audits
       <a routerLink="/admin/audits" class="voir-tout">Voir tous →</a>
     </div>
     <div class="audits-stats-grid">
-      <a routerLink="/admin/audits" [queryParams]="{statut: ''}" class="audit-stat-btn total">
+      <a routerLink="/admin/audits" [queryParams]="{ statut: '' }" class="audit-stat-btn total">
         <div class="ast-left">
           <div class="ast-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-              <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+              <rect x="9" y="3" width="6" height="4" rx="1" />
+              <path d="M9 12h6M9 16h4" />
             </svg>
           </div>
           <div>
@@ -98,11 +123,23 @@
         <div class="ast-value">{{ totalAudits }}</div>
       </a>
 
-      <a routerLink="/admin/audits" [queryParams]="{statut: 'PLANIFIE'}" class="audit-stat-btn planifie">
+      <a
+        routerLink="/admin/audits"
+        [queryParams]="{ statut: 'PLANIFIE' }"
+        class="audit-stat-btn planifie"
+      >
         <div class="ast-left">
           <div class="ast-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
             </svg>
           </div>
           <div>
@@ -113,12 +150,23 @@
         <div class="ast-value">{{ auditsPlanifies }}</div>
       </a>
 
-      <a routerLink="/admin/audits" [queryParams]="{statut: 'EN_COURS'}" class="audit-stat-btn en-cours">
+      <a
+        routerLink="/admin/audits"
+        [queryParams]="{ statut: 'EN_COURS' }"
+        class="audit-stat-btn en-cours"
+      >
         <div class="ast-left">
           <div class="ast-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="23 4 23 10 17 10"/>
-              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
             </svg>
           </div>
           <div>
@@ -129,11 +177,22 @@
         <div class="ast-value">{{ auditsEnCours }}</div>
       </a>
 
-      <a routerLink="/admin/audits" [queryParams]="{statut: 'TERMINEE'}" class="audit-stat-btn terminee">
+      <a
+        routerLink="/admin/audits"
+        [queryParams]="{ statut: 'TERMINEE' }"
+        class="audit-stat-btn terminee"
+      >
         <div class="ast-left">
           <div class="ast-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"/>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
           <div>
@@ -145,7 +204,6 @@
       </a>
     </div>
 
-    
     <div class="section-label">Analyses</div>
     <div class="charts-grid">
       <div class="chart-card">
@@ -168,7 +226,6 @@
       </div>
     </div>
 
-   
     <div class="bottom-grid">
       <!-- Départements -->
       <div class="info-card">
@@ -179,16 +236,18 @@
           <div class="dep-row" *ngFor="let dep of getDepartementKeys()">
             <div class="dep-meta">
               <span class="dep-name">{{ departementsLabels[dep] }}</span>
-              <strong class="dep-count">{{ statistiques!.parDepartement[dep] }}</strong>
+              <strong class="dep-count">{{ getAuditsParDepartement(dep) }}</strong>
             </div>
             <div class="progress-track">
-              <div class="progress-fill" [style.width]="getBarWidth(statistiques!.parDepartement[dep])"></div>
+              <div
+                class="progress-fill"
+                [style.width]="getBarWidth(getAuditsParDepartement(dep))"
+              ></div>
             </div>
           </div>
         </div>
       </div>
 
-     
       <div class="info-card">
         <div class="info-card-header">
           <h3>Accès rapides</h3>
@@ -200,7 +259,17 @@
               <span class="ql-title">Types d'audits</span>
               <span class="ql-count">{{ typesAudits.length }} types</span>
             </div>
-            <svg class="ql-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg
+              class="ql-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </a>
           <a routerLink="/admin/chefs-departements" class="quick-link">
             <div class="ql-icon green">👥</div>
@@ -208,7 +277,17 @@
               <span class="ql-title">Chefs dept.</span>
               <span class="ql-count">{{ statistiques!.parRole['AUDITE'] }} chefs</span>
             </div>
-            <svg class="ql-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg
+              class="ql-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </a>
           <a routerLink="/admin/auditeurs" class="quick-link">
             <div class="ql-icon purple">🔍</div>
@@ -216,7 +295,17 @@
               <span class="ql-title">Auditeurs</span>
               <span class="ql-count">{{ statistiques!.parRole['AUDITEUR'] }} auditeurs</span>
             </div>
-            <svg class="ql-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg
+              class="ql-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </a>
           <a routerLink="/admin/etudiants" class="quick-link">
             <div class="ql-icon orange">🎓</div>
@@ -224,11 +313,20 @@
               <span class="ql-title">Étudiants</span>
               <span class="ql-count">{{ statistiques!.parRole['ETUDIANT'] }} étudiants</span>
             </div>
-            <svg class="ql-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <svg
+              class="ql-arrow"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
           </a>
         </div>
       </div>
     </div>
-
   </div>
 </div>

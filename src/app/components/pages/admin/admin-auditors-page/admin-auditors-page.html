@@ -1,4 +1,4 @@
-﻿<div class="page-wrap">
+<div class="page-wrap">
 
 
   <div class="page-header">
@@ -159,16 +159,26 @@
             </td>
             <td data-label="Actions">
               <div class="action-wrap">
-                <button class="icon-btn del" (click)="ouvrirModalSuppression(auditor)" title="Supprimer">
+                <button class="icon-btn del" [disabled]="enSuppression" (click)="ouvrirModalSuppression(auditor)" title="Supprimer">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
                 </button>
               </div>
             </td>
           </tr>
-          <tr class="empty-row" *ngIf="filteredAuditors.length === 0">
+          <tr *ngIf="filteredAuditors.length === 0">
             <td colspan="5">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <p>Aucun auditeur trouvé</p>
+              <div class="empty-state-container">
+                <div class="empty-icon-wrap">
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                </div>
+                <h3>Aucun auditeur trouvé</h3>
+                <p>Aucun auditeur ne correspond à votre recherche ou la liste est vide.</p>
+                <button *ngIf="recherche" class="reset-filters-btn" (click)="recherche = ''">
+                  Réinitialiser la recherche
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -207,8 +217,14 @@
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn-cancel" (click)="fermerModalCreation()">Annuler</button>
-        <button class="btn-submit" style="background:linear-gradient(135deg,#3B82F6,#2563EB)" (click)="creerAuditor()">Créer l'auditeur</button>
+        <button class="btn-cancel" [disabled]="enCreation" (click)="fermerModalCreation()">Annuler</button>
+        <button class="btn-submit" 
+                style="background:linear-gradient(135deg,#3B82F6,#2563EB); display: flex; align-items: center; gap: 8px;" 
+                [disabled]="enCreation"
+                (click)="creerAuditor()">
+          <div class="spinner-sm" *ngIf="enCreation"></div>
+          {{ enCreation ? 'Création...' : 'Créer l\'auditeur' }}
+        </button>
       </div>
     </div>
   </div>
@@ -230,8 +246,14 @@
         </div>
       </div>
       <div class="modal-foot">
-        <button class="btn-cancel" (click)="fermerModalSuppression()">Annuler</button>
-        <button class="btn-del-confirm" (click)="confirmerSuppression()">Supprimer</button>
+        <button class="btn-cancel" [disabled]="enSuppression" (click)="fermerModalSuppression()">Annuler</button>
+        <button class="btn-del-confirm" 
+                [disabled]="enSuppression" 
+                (click)="confirmerSuppression()"
+                style="display: flex; align-items: center; gap: 8px; justify-content: center;">
+          <div class="spinner-sm" *ngIf="enSuppression" style="border-color: white transparent white transparent;"></div>
+          {{ enSuppression ? 'Suppression...' : 'Supprimer' }}
+        </button>
       </div>
     </div>
   </div>

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditService } from '../../../../services/audit.service';
@@ -77,6 +77,11 @@ export class AdminAuditsPage implements OnInit {
   formaterDate(date: string | undefined): string {
     if (!date) return '—';
     return new Date(date).toLocaleDateString('fr-FR');
+  }
+
+  calculerPourcentage(audit: any): number {
+    if (!audit.nombreQuestions || audit.nombreQuestions === 0) return 0;
+    return Math.round(((audit.scoreTotal || 0) / audit.nombreQuestions) * 100);
   }
 
   getInitials(name: string | undefined): string {

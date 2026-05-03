@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, inject, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -119,7 +119,7 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
     this.typeAuditService.findAll().subscribe({
       next: (data) => {
         this.typesAudits = data;
-        setTimeout(() => this.initPieChart(), 100);
+        if (this.audits.length > 0) this.initPieChart();
       },
       error: () => {}
     });
@@ -127,7 +127,10 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
 
   chargerAudits(): void {
     this.auditService.findAll().subscribe({
-      next: (data) => { this.audits = data; },
+      next: (data) => { 
+        this.audits = data; 
+        this.initCharts();
+      },
       error: () => {}
     });
   }
@@ -140,14 +143,34 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   initBarChart(): void {
     const canvas = document.getElementById('barChart') as HTMLCanvasElement;
     if (!canvas) return;
+
+    // Calculer les audits par mois (6 derniers mois)
+    const maintenant = new Date();
+    const moisLabels: string[] = [];
+    const moisValues: number[] = [];
+    const moisNoms = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc'];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(maintenant.getFullYear(), maintenant.getMonth() - i, 1);
+      const label = moisNoms[d.getMonth()];
+      moisLabels.push(label);
+
+      const count = this.audits.filter(a => {
+        if (!a.dateDebut) return false;
+        const dateAudit = new Date(a.dateDebut);
+        return dateAudit.getMonth() === d.getMonth() && dateAudit.getFullYear() === d.getFullYear();
+      }).length;
+      moisValues.push(count);
+    }
+
     this.barChart?.destroy();
     this.barChart = new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: this.moisData.labels,
+        labels: moisLabels,
         datasets: [{
           label: 'audits',
-          data: this.moisData.values,
+          data: moisValues,
           backgroundColor: '#6366F1',
           borderRadius: 8,
           hoverBackgroundColor: '#4F46E5'
@@ -169,7 +192,12 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
           y: {
             beginAtZero: true,
             grid: { color: '#F1F5F9' },
-            ticks: { color: '#94A3B8', font: { size: 11 } }
+            ticks: { 
+              color: '#94A3B8', 
+              font: { size: 11 },
+              stepSize: 1, // Entiers uniquement
+              precision: 0
+            }
           },
           x: {
             grid: { display: false },
@@ -183,14 +211,20 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
   initPieChart(): void {
     const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
     if (!canvas || this.typesAudits.length === 0) return;
+
+    // Calculer le nombre d'audits par type
+    const countsPerType = this.typesAudits.map(type => {
+      return this.audits.filter(a => a.typeAuditName === type.name).length;
+    });
+
     this.pieChart?.destroy();
     this.pieChart = new Chart(canvas, {
       type: 'doughnut',
       data: {
         labels: this.typesAudits.map(t => t.name),
         datasets: [{
-          data: this.typesAudits.map(() => Math.floor(Math.random() * 40) + 10),
-          backgroundColor: this.typesAudits.map(t => t.color),
+          data: countsPerType,
+          backgroundColor: this.typesAudits.map(t => t.color || '#6366F1'),
           borderWidth: 3,
           borderColor: '#fff'
         }]
@@ -215,22 +249,27 @@ export class AdminDashboardPage implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  // Audits par département (plus pertinent pour ce dashboard)
+  getAuditsParDepartement(dep: string): number {
+    return this.audits.filter(a => a.department === dep).length;
+  }
+
   getRoleKeys(): string[] {
     return this.statistiques ? Object.keys(this.statistiques.parRole) : [];
   }
 
   getDepartementKeys(): string[] {
-    return this.statistiques ? Object.keys(this.statistiques.parDepartement) : [];
+    return Object.keys(this.departementsLabels);
   }
 
-  getMaxDepartement(): number {
-    if (!this.statistiques) return 1;
-    return Math.max(...Object.values(this.statistiques.parDepartement));
+  getMaxAuditsParDepartement(): number {
+    const counts = this.getDepartementKeys().map(k => this.getAuditsParDepartement(k));
+    return Math.max(...counts, 1);
   }
 
   getBarWidth(value: number): string {
-    const max = this.getMaxDepartement();
-    return max > 0 ? `${(value / max) * 100}%` : '0%';
+    const max = this.getMaxAuditsParDepartement();
+    return `${(value / max) * 100}%`;
   }
 
   getBarHeight(value: number): number {

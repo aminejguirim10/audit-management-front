@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChefDepartementService } from '../../../../services/chef-departement.service';
@@ -74,6 +74,7 @@ export class AdminDepartmentsPage implements OnInit {
   modalCreationOuverte = false;
   nouveauChef: Partial<Chef> = {};
   erreurCreation = '';
+  enCreation = false;
 
   ouvrirModalCreation(): void {
     this.nouveauChef = { departement: 'INFORMATIQUE' };
@@ -95,15 +96,24 @@ export class AdminDepartmentsPage implements OnInit {
     }
     if (!this.nouveauChef.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
 
+    this.enCreation = true;
     this.service.create(this.nouveauChef).subscribe({
-      next: () => { this.fermerModalCreation(); this.loadChefs(); },
-      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
+      next: () => { 
+        this.enCreation = false;
+        this.fermerModalCreation(); 
+        this.loadChefs(); 
+      },
+      error: (err: any) => { 
+        this.enCreation = false;
+        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; 
+      }
     });
   }
 
   // ── Modal suppression ──
   modalSuppressionOuverte = false;
   chefASupprimer: Chef | null = null;
+  enSuppression = false;
 
   ouvrirModalSuppression(chef: Chef): void {
     this.chefASupprimer = chef;
@@ -113,16 +123,23 @@ export class AdminDepartmentsPage implements OnInit {
   fermerModalSuppression(): void {
     this.modalSuppressionOuverte = false;
     this.chefASupprimer = null;
+    this.enSuppression = false;
   }
 
   confirmerSuppression(): void {
     if (!this.chefASupprimer) return;
+    this.enSuppression = true;
     this.service.delete(this.chefASupprimer.id).subscribe({
       next: () => {
+        this.enSuppression = false;
         this.chefs = this.chefs.filter(c => c.id !== this.chefASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => { this.erreur = 'Erreur lors de la suppression'; this.fermerModalSuppression(); }
+      error: () => { 
+        this.enSuppression = false;
+        this.erreur = 'Erreur lors de la suppression'; 
+        this.fermerModalSuppression(); 
+      }
     });
   }
 }

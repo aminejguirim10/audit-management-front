@@ -8,6 +8,10 @@ export interface AuditSummary {
   department: string;
   auditeName: string;
   auditeurName: string;
+  dateDebut: string;
+  dateFin: string;
+  scoreTotal: number;
+  nombreQuestions: number;
 }
 
 export interface AddOptionDto {

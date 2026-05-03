@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TypeAuditService } from '../../../../services/type-audit.service';
@@ -20,27 +20,24 @@ export class AdminAuditTypesPage implements OnInit {
   recherche = '';
   vue: 'cards' | 'table' = 'cards';
 
-  // Palette bleu / indigo / violet / ardoise uniquement
+  // Palette de couleurs diversifiée et professionnelle
   readonly presetColors = [
-    '#1E3A5F', 
-    '#1D4ED8', 
-    '#2563EB',
-    '#3B82F6', 
-    '#60A5FA', 
-    '#93C5FD', 
-    '#4338CA', 
-    '#4F46E5', 
-    '#6366F1', 
-    '#818CF8', 
-    '#A5B4FC', 
-    '#7C3AED', 
-    '#7C3AED', 
-    '#8B5CF6', 
-    '#A78BFA', 
-    '#1E293B', 
-    '#334155', 
-    '#475569', 
-    '#94A3B8', 
+    '#3B82F6', // Blue
+    '#6366F1', // Indigo
+    '#8B5CF6', // Violet
+    '#EC4899', // Pink
+    '#F43F5E', // Rose
+    '#EF4444', // Red
+    '#F59E0B', // Amber
+    '#F97316', // Orange
+    '#10B981', // Emerald
+    '#22C55E', // Green
+    '#14B8A6', // Teal
+    '#06B6D4', // Cyan
+    '#0EA5E9', // Sky
+    '#64748B', // Slate
+    '#475569', // Slate Dark
+    '#1E293B'  // Navy
   ];
 
   
@@ -57,6 +54,11 @@ export class AdminAuditTypesPage implements OnInit {
   
   modalSuppressionOuverte = false;
   typeASupprimer: TypeAudit | null = null;
+
+  // Signaux de chargement pour les actions
+  enTrainDeCreer = false;
+  enTrainDeModifier = false;
+  enTrainDeSupprimer = false;
 
   ngOnInit(): void { this.chargerTypes(); }
 
@@ -110,9 +112,17 @@ export class AdminAuditTypesPage implements OnInit {
     if (!this.nouveauType.color.match(/^#[0-9A-Fa-f]{6}$/)) {
       this.erreurCreation = 'La couleur doit être un code hexadécimal valide (ex: #6366F1) !'; return;
     }
+    this.enTrainDeCreer = true;
     this.typeAuditService.add(this.nouveauType).subscribe({
-      next: (type) => { this.typesAudits.push(type); this.fermerModalCreation(); },
-      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
+      next: (type) => { 
+        this.typesAudits.push(type); 
+        this.fermerModalCreation();
+        this.enTrainDeCreer = false;
+      },
+      error: (err: any) => { 
+        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
+        this.enTrainDeCreer = false;
+      }
     });
   }
 
@@ -137,13 +147,18 @@ export class AdminAuditTypesPage implements OnInit {
     if (this.modificationDto.color && !this.modificationDto.color.match(/^#[0-9A-Fa-f]{6}$/)) {
       this.erreurModification = 'La couleur doit être un code hexadécimal valide !'; return;
     }
+    this.enTrainDeModifier = true;
     this.typeAuditService.update(this.typeEnModification.id, this.modificationDto).subscribe({
       next: (typeModifie: TypeAudit) => {
         const index = this.typesAudits.findIndex(t => t.id === typeModifie.id);
         if (index !== -1) this.typesAudits[index] = typeModifie;
         this.fermerModalModification();
+        this.enTrainDeModifier = false;
       },
-      error: (err: any) => { this.erreurModification = err.error?.message ?? 'Erreur lors de la modification'; }
+      error: (err: any) => { 
+        this.erreurModification = err.error?.message ?? 'Erreur lors de la modification';
+        this.enTrainDeModifier = false;
+      }
     });
   }
 
@@ -153,12 +168,17 @@ export class AdminAuditTypesPage implements OnInit {
 
   confirmerSuppression(): void {
     if (!this.typeASupprimer) return;
+    this.enTrainDeSupprimer = true;
     this.typeAuditService.delete(this.typeASupprimer.id).subscribe({
       next: () => {
         this.typesAudits = this.typesAudits.filter(t => t.id !== this.typeASupprimer!.id);
         this.fermerModalSuppression();
+        this.enTrainDeSupprimer = false;
       },
-      error: () => { this.fermerModalSuppression(); }
+      error: () => { 
+        this.fermerModalSuppression();
+        this.enTrainDeSupprimer = false;
+      }
     });
   }
 }

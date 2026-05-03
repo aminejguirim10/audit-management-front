@@ -175,7 +175,6 @@ export class EtudiantDashboardPage implements OnInit {
               return idea;
             }),
           );
-          this.toastr.success('Vote pris en compte', 'Succès');
         },
         error: (err) => {
           const message = err.error?.message ?? 'Erreur lors du vote';

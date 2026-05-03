@@ -1,4 +1,4 @@
-﻿<div class="page-wrapper">
+<div class="page-wrapper">
 
 
   <div class="page-header">
@@ -91,6 +91,9 @@
         <button (click)="filtreStatut = ''">✕</button>
       </span>
     </div>
+    <div class="results-tag" *ngIf="!chargement">
+      {{ auditsFiltres.length }} résultat{{ auditsFiltres.length > 1 ? 's' : '' }}
+    </div>
   </div>
 
   <!-- Chargement -->
@@ -101,9 +104,6 @@
 
   <!-- Tableau -->
   <div class="table-card" *ngIf="!chargement">
-    <div class="table-header-row">
-      <span class="results-count">{{ auditsFiltres.length }} résultat{{ auditsFiltres.length > 1 ? 's' : '' }}</span>
-    </div>
     <div class="table-scroll">
       <table>
         <thead>
@@ -148,8 +148,8 @@
               <span class="date-cell">{{ formaterDate(audit.dateFin) }}</span>
             </td>
             <td data-label="Score">
-              <span class="score-chip" [class.score-zero]="(audit.scoreTotal ?? 0) === 0">
-                {{ audit.scoreTotal ?? 0 }}
+              <span class="score-chip" [class.score-zero]="!audit.scoreTotal">
+                {{ calculerPourcentage(audit) }}%
               </span>
             </td>
             <td data-label="Statut">
@@ -163,9 +163,19 @@
             </td>
           </tr>
           <tr *ngIf="auditsFiltres.length === 0">
-            <td colspan="8" class="empty-state">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <p>Aucun audit trouvé</p>
+            <td colspan="8">
+              <div class="empty-state-container">
+                <div class="empty-icon-wrap">
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  </svg>
+                </div>
+                <h3>Aucun audit trouvé</h3>
+                <p>Nous n'avons trouvé aucun audit correspondant à vos critères de recherche.</p>
+                <button *ngIf="recherche || filtreStatut" class="reset-filters-btn" (click)="recherche = ''; filtreStatut = ''">
+                  Réinitialiser les filtres
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>

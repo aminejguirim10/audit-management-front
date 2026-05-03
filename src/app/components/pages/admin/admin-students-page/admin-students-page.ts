@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StudentService } from '../../../../services/student.service';
@@ -72,6 +72,7 @@ export class AdminStudentsPage implements OnInit {
   modalCreationOuverte = false;
   nouveauStudent: Partial<Student> = {};
   erreurCreation = '';
+  enCreation = false;
 
   ouvrirModalCreation(): void {
     this.nouveauStudent = { departement: 'INFORMATIQUE' };
@@ -92,16 +93,25 @@ export class AdminStudentsPage implements OnInit {
       this.erreurCreation = 'Le téléphone doit contenir exactement 8 chiffres !'; return;
     }
     if (!this.nouveauStudent.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
-
+    
+    this.enCreation = true;
     this.service.create(this.nouveauStudent).subscribe({
-      next: () => { this.fermerModalCreation(); this.loadStudents(); },
-      error: (err: any) => { this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; }
+      next: () => { 
+        this.enCreation = false;
+        this.fermerModalCreation(); 
+        this.loadStudents(); 
+      },
+      error: (err: any) => { 
+        this.enCreation = false;
+        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; 
+      }
     });
   }
 
   // ── Modal suppression ──
   modalSuppressionOuverte = false;
   studentASupprimer: Student | null = null;
+  enSuppression = false;
 
   ouvrirModalSuppression(student: Student): void {
     this.studentASupprimer = student;
@@ -111,16 +121,23 @@ export class AdminStudentsPage implements OnInit {
   fermerModalSuppression(): void {
     this.modalSuppressionOuverte = false;
     this.studentASupprimer = null;
+    this.enSuppression = false;
   }
 
   confirmerSuppression(): void {
     if (!this.studentASupprimer) return;
+    this.enSuppression = true;
     this.service.delete(this.studentASupprimer.id).subscribe({
       next: () => {
+        this.enSuppression = false;
         this.students = this.students.filter(s => s.id !== this.studentASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => { this.erreur = 'Erreur lors de la suppression'; this.fermerModalSuppression(); }
+      error: () => { 
+        this.enSuppression = false;
+        this.erreur = 'Erreur lors de la suppression'; 
+        this.fermerModalSuppression(); 
+      }
     });
   }
 }

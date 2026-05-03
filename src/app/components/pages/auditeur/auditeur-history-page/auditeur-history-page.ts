@@ -13,8 +13,13 @@ import {
   faCheckCircle, 
   faClock,
   faHistory,
-  faSync
+  faSync,
+  faTimes,
+  faInfoCircle,
+  faExclamationTriangle,
+  faChartBar
 } from '@fortawesome/free-solid-svg-icons';
+import { AuditReportComponent } from '../../../shared/audit-report/audit-report.component';
 
 interface AuditTimelineItem {
   id: string;
@@ -36,7 +41,7 @@ const AUDIT_STATUS_LABELS: Record<AuditStatus, string> = {
 
 @Component({
   selector: 'app-auditeur-history-page',
-  imports: [CommonModule, FontAwesomeModule],
+  imports: [CommonModule, FontAwesomeModule, AuditReportComponent],
   templateUrl: './auditeur-history-page.html',
   styleUrl: './auditeur-history-page.css',
 })
@@ -50,17 +55,24 @@ export class AuditeurHistoryPage implements OnInit {
   faClock = faClock;
   faHistory = faHistory;
   faSync = faSync;
+  faTimes = faTimes;
+  faInfoCircle = faInfoCircle;
+  faExclamationTriangle = faExclamationTriangle;
+  faChartBar = faChartBar;
 
   private readonly auditService = inject(AuditService);
 
   readonly audits = signal<AuditSummary[]>([]);
   readonly auditDetails = signal<Record<number, AuditDetails>>({});
   readonly loading = signal(true);
+  readonly loadingDetails = signal(false);
   readonly loadingTimeline = signal(false);
   readonly errorMessage = signal('');
   readonly searchTerm = signal('');
   readonly selectedDepartment = signal<HistoryFilterValue>('TOUS');
   readonly selectedType = signal<HistoryFilterValue>('TOUS');
+  readonly selectedAudit = signal<AuditDetails | null>(null);
+  readonly reportAudit = signal<AuditDetails | null>(null);
 
   readonly completedAudits = computed(() =>
     this.audits()
@@ -271,6 +283,56 @@ export class AuditeurHistoryPage implements OnInit {
 
   trackByTimeline(_: number, item: AuditTimelineItem): string {
     return item.id;
+  }
+
+  viewAuditDetails(audit: any): void {
+    const id = audit.auditId || audit.id;
+    this.loadingDetails.set(true);
+    this.auditService
+      .findById(id)
+      .pipe(finalize(() => this.loadingDetails.set(false)))
+      .subscribe({
+        next: (details) => {
+          this.selectedAudit.set(details);
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des détails', err);
+        },
+      });
+  }
+
+  closeAuditDetails(): void {
+    this.selectedAudit.set(null);
+  }
+
+  openReport(audit: any): void {
+    const id = audit.auditId || audit.id;
+    this.auditService.findById(id).subscribe({
+      next: (details) => this.reportAudit.set(details),
+      error: () => console.error('Impossible de charger les détails pour le rapport'),
+    });
+  }
+
+  closeReport(): void {
+    this.reportAudit.set(null);
+  }
+
+  getQuestionResponseLabel(question: any): string {
+    const selectedOption = question.options.find(
+      (opt: any) => opt.id === question.optionChoisieId,
+    );
+    return selectedOption ? selectedOption.label : 'Non répondu';
+  }
+
+  getSelectedOptionId(question: any): number | null {
+    return question.optionChoisieId ?? question.selectedOptionId ?? null;
+  }
+
+  getAuditScorePercentage(audit: AuditDetails | null): number {
+    if (!audit || !audit.questions?.length) {
+      return 0;
+    }
+    return Math.round((audit.scoreTotal / audit.questions.length) * 100);
   }
 
   private loadTimelineDetails(audits: AuditSummary[]): void {

@@ -139,10 +139,16 @@
       </tbody>
     </table>
 
-    <div class="empty-state" *ngIf="!loading() && filteredAudits().length === 0">
-      <fa-icon [icon]="faClipboardList" class="empty-icon"></fa-icon>
-      <h3>Aucun audit trouvé</h3>
-      <p>Il semble qu'aucun audit ne corresponde à vos critères ou ne vous soit encore assigné.</p>
+    <div class="empty-state-card" *ngIf="!loading() && filteredAudits().length === 0">
+      <div class="empty-illustration">
+        <div class="circle-pulse"></div>
+        <fa-icon [icon]="faClipboardList" class="main-icon"></fa-icon>
+      </div>
+      <h3>Aucun audit assigné</h3>
+      <p>Il semble qu'aucun audit ne corresponde à vos critères ou ne vous soit encore assigné pour le moment.</p>
+      <button *ngIf="searchTerm() || selectedStatus() !== 'TOUS'" class="premium-reset-btn" (click)="searchTerm.set(''); selectedStatus.set('TOUS')">
+        Réinitialiser les filtres
+      </button>
     </div>
 
     <div class="empty-state" *ngIf="loading()">
