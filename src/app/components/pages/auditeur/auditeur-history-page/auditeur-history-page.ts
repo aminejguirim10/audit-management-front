@@ -23,6 +23,7 @@ interface AuditTimelineItem {
   subtitle: string;
   status: AuditStatus;
   period: string;
+  dateDebut: string;
 }
 
 type HistoryFilterValue = 'TOUS' | string;
@@ -153,10 +154,40 @@ export class AuditeurHistoryPage implements OnInit {
             subtitle: `${audit.auditeName} - ${this.formatDepartment(audit.department)}`,
             status: audit.status,
             period: `${this.formatDate(detail.dateDebut)} - ${this.formatDate(detail.dateFin)}`,
+            dateDebut: detail.dateDebut,
           },
         ];
       })
-      .sort((left, right) => right.auditId - left.auditId);
+      .sort((left, right) => {
+        // Sort by dateDebut descending (newest first)
+        const dateLeft = left.dateDebut ? new Date(left.dateDebut).getTime() : 0;
+        const dateRight = right.dateDebut ? new Date(right.dateDebut).getTime() : 0;
+        return dateRight - dateLeft;
+      });
+  });
+
+  readonly groupedTimeline = computed(() => {
+    const items = this.timelineItems();
+    const groups: { month: string; year: string; items: AuditTimelineItem[] }[] = [];
+
+    items.forEach((item) => {
+      const date = new Date(item.dateDebut);
+      if (isNaN(date.getTime())) return;
+
+      const month = new Intl.DateTimeFormat('fr-FR', { month: 'long' }).format(date);
+      const year = date.getFullYear().toString();
+      
+      const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1);
+      
+      let group = groups.find((g) => g.month === capitalizedMonth && g.year === year);
+      if (!group) {
+        group = { month: capitalizedMonth, year, items: [] };
+        groups.push(group);
+      }
+      group.items.push(item);
+    });
+
+    return groups;
   });
 
   ngOnInit(): void {

@@ -16,4 +16,10 @@ export class CorrectiveActionService {
       .get<ApiResponse<AuditCorrectiveActionsCard[]>>(`${this.url}/audite/me`)
       .pipe(map((response) => response.data ?? []));
   }
+
+  addCorrectiveAction(auditId: number, dto: { title: string; description: string; priority: string; tempsEstime: string }): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.url}/audits/${auditId}`, dto).pipe(
+      map(() => undefined)
+    );
+  }
 }

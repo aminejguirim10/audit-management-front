@@ -56,6 +56,14 @@ export class AuditReportComponent {
     const printContent = document.getElementById('report-content');
     if (!printContent) return;
 
+    // Build a meaningful filename from the audit title
+    const auditTitle = this.audit?.title?.replace(/[^a-zA-Z0-9àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ\s\-]/g, '').trim() || 'Audit';
+    const pdfFileName = `Rapport_Audit_${auditTitle}`;
+
+    // Save and change the document title (browser uses this for PDF filename)
+    const originalTitle = document.title;
+    document.title = pdfFileName;
+
     const iframe = document.createElement('iframe');
     iframe.style.position = 'absolute';
     iframe.style.width = '0px';
@@ -67,7 +75,7 @@ export class AuditReportComponent {
     if (!doc) return;
 
     doc.open();
-    doc.write("<html><head><title>Rapport d'Audit</title>");
+    doc.write(`<html><head><title>${pdfFileName}</title>`);
 
     // Inject all existing styles and fonts
     const styles = document.head.querySelectorAll(
@@ -100,7 +108,6 @@ export class AuditReportComponent {
            box-sizing: border-box;
         }
         .hidden-screen { display: block !important; }
-        /* Remove any hidden visibility that might have applied */
         * { visibility: visible !important; }
       </style>
     `);
@@ -114,7 +121,10 @@ export class AuditReportComponent {
     setTimeout(() => {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
-      setTimeout(() => document.body.removeChild(iframe), 1000);
+      setTimeout(() => {
+        document.title = originalTitle;
+        document.body.removeChild(iframe);
+      }, 1000);
     }, 500);
   }
 

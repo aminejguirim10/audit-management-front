@@ -125,6 +125,7 @@ export class AuditeurDashboardPage implements OnInit {
   readonly savingEdit = signal(false);
   readonly deletingAudit = signal(false);
   readonly loadingEditAudit = signal(false);
+  readonly submittingAudit = signal(false);
 
   readonly statusOptions: Array<'TOUS' | AuditStatus> = [
     'TOUS',
@@ -537,6 +538,7 @@ export class AuditeurDashboardPage implements OnInit {
       return;
     }
 
+    this.submittingAudit.set(true);
     const val = this.auditForm.getRawValue();
     const dto: AddAuditDto = {
       title: val.title ?? '',
@@ -552,18 +554,21 @@ export class AuditeurDashboardPage implements OnInit {
       })),
     };
 
-    this.auditService.add(dto).subscribe({
-      next: () => {
-        this.toastr.success('Audit créé avec succès', 'Succès');
-        this.resetForm();
-        this.loadAudits();
-        this.cancelCreation();
-      },
-      error: (err) => {
-        const message = err.error?.message ?? "Erreur lors de la création de l'audit";
-        this.toastr.error(message, 'Erreur');
-      },
-    });
+    this.auditService
+      .add(dto)
+      .pipe(finalize(() => this.submittingAudit.set(false)))
+      .subscribe({
+        next: () => {
+          this.toastr.success('Audit créé avec succès', 'Succès');
+          this.resetForm();
+          this.loadAudits();
+          this.cancelCreation();
+        },
+        error: (err) => {
+          const message = err.error?.message ?? "Erreur lors de la création de l'audit";
+          this.toastr.error(message, 'Erreur');
+        },
+      });
   }
 
   onSearchInput(e: Event): void {

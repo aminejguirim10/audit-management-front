@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { CorrectiveActionService } from '../../../../services/corrective-action.service';
 import {
@@ -38,7 +38,8 @@ export class AuditeCorrectiveActionsPage implements OnInit {
 
     this.correctiveActionService.findCurrentAuditeAudits().subscribe({
       next: (data) => {
-        this.audits = data;
+        // Only keep audits that have at least one corrective action
+        this.audits = data.filter(audit => audit.correctiveActions.length > 0);
         this.loading = false;
       },
       error: () => {
@@ -63,6 +64,17 @@ export class AuditeCorrectiveActionsPage implements OnInit {
       month: 'short',
       year: 'numeric',
     }).format(date);
+  }
+
+  getPriorityClass(priority: string): string {
+    const p = priority?.toLowerCase() || '';
+    if (p.includes('high') || p.includes('haute') || p.includes('critical')) {
+      return 'priority-high';
+    }
+    if (p.includes('low') || p.includes('faible') || p.includes('basse')) {
+      return 'priority-low';
+    }
+    return 'priority-medium';
   }
 
   trackByAuditId(_: number, audit: AuditCorrectiveActionsCard): number {
