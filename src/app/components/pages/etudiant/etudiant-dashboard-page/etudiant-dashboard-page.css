@@ -25,9 +25,9 @@
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
   position: relative;
 }
 
@@ -48,7 +48,7 @@
 /* ===== HERO CARD & PREMIUM FEATURED ===== */
 .hero-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr);
   gap: 2rem;
   padding: 2.5rem;
   margin-bottom: 2rem;
@@ -162,12 +162,12 @@
   align-items: center;
   padding-top: 1.25rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .footer-meta {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   min-width: 0;
   flex: 1;
 }
