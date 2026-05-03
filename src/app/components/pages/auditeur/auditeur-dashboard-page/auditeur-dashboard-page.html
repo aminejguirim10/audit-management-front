@@ -1,33 +1,51 @@
 <div class="auditeur-dashboard">
   <header class="dashboard-header">
     <div class="dashboard-intro">
-      <span class="eyebrow">Tableau de bord auditeur</span>
+      <span class="eyebrow">
+        <fa-icon [icon]="faHistory" style="margin-right: 0.5rem;"></fa-icon>
+        Tableau de bord auditeur
+      </span>
       <h1>Suivi des audits et création rapide</h1>
       <p>
         Visualisez les statistiques, filtrez les audits et créez un nouvel audit en quelques clics.
       </p>
     </div>
-    <button class="btn-primary" type="button" (click)="toggleCreatePanel()">Créer un audit</button>
+    <button class="btn-primary" type="button" (click)="toggleCreatePanel()">
+      <fa-icon [icon]="faPlus" style="margin-right: 0.7rem;"></fa-icon>
+      Créer un audit
+    </button>
   </header>
 
   <section class="stats-grid">
     <article class="stat-card stat-primary">
-      <span>Total audits</span>
+      <div class="stat-header">
+        <span>Total audits</span>
+        <fa-icon [icon]="faChartBar"></fa-icon>
+      </div>
       <strong>{{ stats().total }}</strong>
       <small>Vue globale de votre portefeuille d'audits</small>
     </article>
     <article class="stat-card stat-warm">
-      <span>Planifiés</span>
+      <div class="stat-header">
+        <span>Planifiés</span>
+        <fa-icon [icon]="faClock"></fa-icon>
+      </div>
       <strong>{{ stats().planned }}</strong>
       <small>Audits prêts à démarrer prochainement</small>
     </article>
     <article class="stat-card stat-cool">
-      <span>En cours</span>
+      <div class="stat-header">
+        <span>En cours</span>
+        <fa-icon [icon]="faSync"></fa-icon>
+      </div>
       <strong>{{ stats().active }}</strong>
       <small>Campagnes actuellement en suivi</small>
     </article>
     <article class="stat-card stat-success">
-      <span>Terminés</span>
+      <div class="stat-header">
+        <span>Terminés</span>
+        <fa-icon [icon]="faCheckCircle"></fa-icon>
+      </div>
       <strong>{{ stats().completed }}</strong>
       <small>Audits finalisés et archivés</small>
     </article>
@@ -36,7 +54,10 @@
   <section class="controls-panel">
     <div class="filter-row">
       <div class="search-box">
-        <label>Recherche</label>
+        <label>
+          <fa-icon [icon]="faSearch" style="margin-right: 0.4rem; opacity: 0.7;"></fa-icon>
+          Recherche
+        </label>
         <input
           type="text"
           placeholder="Rechercher par titre, audité ou type"
@@ -45,7 +66,10 @@
         />
       </div>
       <div class="status-box">
-        <label>Statut</label>
+        <label>
+          <fa-icon [icon]="faFilter" style="margin-right: 0.4rem; opacity: 0.7;"></fa-icon>
+          Statut
+        </label>
         <select [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)">
           <option *ngFor="let status of statusOptions" [value]="status">
             {{ status === 'TOUS' ? 'Tous' : getStatusLabel(status) }}
@@ -54,75 +78,63 @@
       </div>
     </div>
     <p class="filter-summary">
-      {{ filteredAudits().length }} audit(s) affiché(s) • {{ audits().length }} audit(s) total(s)
+      <fa-icon [icon]="faInfoCircle" style="margin-right: 0.4rem;"></fa-icon>
+      {{ filteredAudits().length }} audit(s) affiché(s) sur {{ audits().length }}
     </p>
   </section>
 
   <section class="audit-list">
-    <!-- Tableau des audits -->
+    <!-- Tableau des audits Moderne -->
     <div class="audit-table-container" *ngIf="filteredAudits().length > 0">
-      <div class="audit-table-header">
-        <div class="table-col col-title">Titre</div>
-        <div class="table-col col-type">Type</div>
-        <div class="table-col col-dept">Département</div>
-        <div class="table-col col-audite">Auditée</div>
-        <div class="table-col col-status">Statut</div>
-        <div class="table-col col-actions">Actions</div>
-      </div>
-
-      <div class="audit-table-body">
-        <div
-          class="audit-table-row"
-          *ngFor="let audit of filteredAudits(); trackBy: trackByAudit"
-          (click)="viewAuditDetails(audit)"
-        >
-          <div class="table-col col-title cursor-pointer">{{ audit.title }}</div>
-          <div class="table-col col-type">
-            <span class="tag">{{ audit.typeAuditName }}</span>
-          </div>
-          <div class="table-col col-dept">{{ audit.department }}</div>
-          <div class="table-col col-audite">{{ audit.auditeName }}</div>
-          <div class="table-col col-status">
-            <span class="status-badge" [ngClass]="getStatusClass(audit.status)">
-              {{ getStatusLabel(audit.status) }}
-            </span>
-          </div>
-          <div class="table-col col-actions" (click)="$event.stopPropagation()">
-            <button
-              class="action-btn chat-btn"
-              title="Discuter"
-              (click)="openChat(audit)"
-            >
-              💬
-            </button>
-            <button
-              class="action-btn report-btn"
-              title="Générer le rapport"
-              [disabled]="audit.status !== 'TERMINEE'"
-              (click)="openReport(audit)"
-            >
-              📄
-            </button>
-            <button
-              class="action-btn edit-btn"
-              title="Modifier cet audit"
-              (click)="editAudit(audit)"
-            >
-              ✏️
-            </button>
-            <button
-              class="action-btn delete-btn"
-              title="Supprimer cet audit"
-              (click)="confirmDeleteAudit(audit)"
-            >
-              🗑️
-            </button>
-          </div>
-        </div>
-      </div>
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th><fa-icon [icon]="faFileAlt" style="margin-right: 0.5rem;"></fa-icon>Titre</th>
+            <th><fa-icon [icon]="faLayerGroup" style="margin-right: 0.5rem;"></fa-icon>Type</th>
+            <th><fa-icon [icon]="faBuilding" style="margin-right: 0.5rem;"></fa-icon>Département</th>
+            <th><fa-icon [icon]="faUser" style="margin-right: 0.5rem;"></fa-icon>Auditée</th>
+            <th><fa-icon [icon]="faSync" style="margin-right: 0.5rem;"></fa-icon>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let audit of filteredAudits(); trackBy: trackByAudit" (click)="viewAuditDetails(audit)">
+            <td class="col-title">
+              <strong>{{ audit.title }}</strong>
+            </td>
+            <td>
+              <span class="type-tag">{{ audit.typeAuditName }}</span>
+            </td>
+            <td>{{ audit.department }}</td>
+            <td>{{ audit.auditeName }}</td>
+            <td>
+              <span class="status-pill" [ngClass]="getStatusClass(audit.status)">
+                {{ getStatusLabel(audit.status) }}
+              </span>
+            </td>
+            <td (click)="$event.stopPropagation()">
+              <div class="action-group">
+                <button class="action-btn chat-btn" title="Discuter" (click)="openChat(audit)">
+                  <fa-icon [icon]="faComment"></fa-icon>
+                </button>
+                <button class="action-btn report-btn" title="Rapport" [disabled]="audit.status !== 'TERMINEE'" (click)="openReport(audit)">
+                  <fa-icon [icon]="faFileAlt"></fa-icon>
+                </button>
+                <button class="action-btn edit-btn" title="Modifier" (click)="editAudit(audit)">
+                  <fa-icon [icon]="faEdit"></fa-icon>
+                </button>
+                <button class="action-btn delete-btn" title="Supprimer" (click)="confirmDeleteAudit(audit)">
+                  <fa-icon [icon]="faTrash"></fa-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="empty-state" *ngIf="!loading() && filteredAudits().length === 0">
+    <div class="empty-state-container" *ngIf="!loading() && filteredAudits().length === 0">
+      <fa-icon [icon]="faSearch" class="empty-icon"></fa-icon>
       <h3>Aucun audit trouvé</h3>
       <p>Affinez votre recherche ou créez un nouvel audit pour démarrer.</p>
     </div>
@@ -132,9 +144,12 @@
   <div class="modal-overlay" *ngIf="selectedAudit()" (click)="closeAuditDetails()"></div>
   <div class="details-modal" *ngIf="selectedAudit()">
     <div class="modal-header">
-      <h2>Détails de l'audit</h2>
+      <h2>
+        <fa-icon [icon]="faInfoCircle" style="margin-right: 0.7rem; color: var(--primary);"></fa-icon>
+        Détails de l'audit
+      </h2>
       <button type="button" class="btn-close" (click)="closeAuditDetails()" title="Fermer">
-        ✕
+        <fa-icon [icon]="faTimes"></fa-icon>
       </button>
     </div>
     <div class="modal-body" *ngIf="selectedAudit()">
@@ -170,8 +185,10 @@
         </div>
         <div class="detail-item">
           <span class="label">Statut</span>
-          <span class="value status-value" [ngClass]="getStatusClass(selectedAudit()?.status!)">
-            {{ getStatusLabel(selectedAudit()?.status!) }}
+          <span class="value status-value">
+            <span class="status-pill" [ngClass]="getStatusClass(selectedAudit()?.status!)">
+              {{ getStatusLabel(selectedAudit()?.status!) }}
+            </span>
           </span>
         </div>
       </div>
@@ -247,8 +264,13 @@
 <div class="modal-overlay" *ngIf="editingAudit()" (click)="cancelEditAudit()"></div>
 <div class="edit-modal" *ngIf="editingAudit()">
   <div class="modal-header">
-    <h2>Modifier l'audit</h2>
-    <button type="button" class="btn-close" (click)="cancelEditAudit()" title="Fermer">✕</button>
+    <h2>
+      <fa-icon [icon]="faEdit" style="margin-right: 0.7rem; color: var(--amber);"></fa-icon>
+      Modifier l'audit
+    </h2>
+    <button type="button" class="btn-close" (click)="cancelEditAudit()" title="Fermer">
+      <fa-icon [icon]="faTimes"></fa-icon>
+    </button>
   </div>
   <form [formGroup]="editAuditForm" class="edit-form">
     <div class="modal-body">
@@ -346,8 +368,13 @@
 <div class="modal-overlay" *ngIf="auditToDelete()" (click)="cancelDelete()"></div>
 <div class="delete-modal" *ngIf="auditToDelete()">
   <div class="modal-header delete-header">
-    <h2>Supprimer cet audit ?</h2>
-    <button type="button" class="btn-close" (click)="cancelDelete()" title="Fermer">✕</button>
+    <h2>
+      <fa-icon [icon]="faExclamationTriangle" style="margin-right: 0.7rem; color: var(--rose);"></fa-icon>
+      Supprimer cet audit ?
+    </h2>
+    <button type="button" class="btn-close" (click)="cancelDelete()" title="Fermer">
+      <fa-icon [icon]="faTimes"></fa-icon>
+    </button>
   </div>
   <div class="modal-body">
     <div class="delete-warning">
@@ -375,8 +402,13 @@
 <!-- Modal Création Audit - Stepper -->
 <div class="create-modal" *ngIf="showCreatePanel()">
   <div class="modal-header">
-    <h2>Créer un nouvel audit</h2>
-    <button type="button" class="btn-close" (click)="cancelCreation()" title="Fermer">✕</button>
+    <h2>
+      <fa-icon [icon]="faPlus" style="margin-right: 0.7rem; color: var(--primary);"></fa-icon>
+      Créer un nouvel audit
+    </h2>
+    <button type="button" class="btn-close" (click)="cancelCreation()" title="Fermer">
+      <fa-icon [icon]="faTimes"></fa-icon>
+    </button>
   </div>
 
   <!-- Stepper Steps Indicator -->
@@ -481,7 +513,6 @@
       </div>
     </div>
 
-    <!-- Étape 2: Questions -->
     <div class="step-content" *ngIf="currentStep() === 2">
       <h3 class="step-title">Ajouter les questions</h3>
       <div class="info-panel">
@@ -490,15 +521,20 @@
         <p>Le score est calculé automatiquement selon la position (meilleure moitié = 1).</p>
         <p>Ex : Excellent → Bon → Moyen → Mauvais</p>
       </div>
-      <button type="button" class="btn-secondary add-question-btn" (click)="addQuestion()">
-        + Ajouter une question
-      </button>
 
       <div formArrayName="questions">
-        <div
-          class="questions-list"
-          *ngIf="questions.length > 0 && questionsCount() >= 0; else noQuestions"
-        >
+        <!-- Case 1: No questions -->
+        <div class="empty-questions" *ngIf="questions.length === 0">
+          <p>Aucune question pour le moment</p>
+          <p class="small">Cliquez sur le bouton ci-dessous pour commencer à ajouter des questions.</p>
+          <button type="button" class="btn-secondary add-question-btn" (click)="addQuestion()" style="margin-top: 1.5rem;">
+            <fa-icon [icon]="faPlus" style="margin-right: 0.5rem;"></fa-icon>
+            Ajouter une question
+          </button>
+        </div>
+
+        <!-- Case 2: Questions exist -->
+        <div class="questions-list" *ngIf="questions.length > 0 && questionsCount() >= 0">
           <div
             class="question-item"
             *ngFor="let question of questions.controls; let qi = index; trackBy: trackByIndex"
@@ -513,6 +549,9 @@
                   placeholder="Énoncé de la question..."
                   class="form-input"
                 />
+                <span class="error" *ngIf="questions.at(qi).get('title')?.invalid && questions.at(qi).get('title')?.touched">
+                  L'énoncé de la question est requis (min 3 caractères).
+                </span>
               </div>
 
               <div class="form-group">
@@ -536,12 +575,17 @@
                     *ngFor="let optionControl of getOptions(qi).controls; let oi = index"
                     [formGroupName]="oi"
                   >
-                    <input
-                      type="text"
-                      formControlName="label"
-                      placeholder="Option..."
-                      class="form-input"
-                    />
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 0.25rem;">
+                      <input
+                        type="text"
+                        formControlName="label"
+                        placeholder="Option..."
+                        class="form-input"
+                      />
+                      <span class="error" *ngIf="getOptions(qi).at(oi).get('label')?.invalid && getOptions(qi).at(oi).get('label')?.touched">
+                        Requis
+                      </span>
+                    </div>
                     <button
                       type="button"
                       class="btn-icon"
@@ -549,7 +593,7 @@
                       [disabled]="getOptions(qi).length === 1"
                       title="Supprimer"
                     >
-                      🗑
+                      <fa-icon [icon]="faTrash"></fa-icon>
                     </button>
                   </div>
                 </div>
@@ -559,13 +603,15 @@
                   (click)="addOption(qi)"
                   style="margin-top: 8px"
                 >
-                  + Ajouter une option
+                  <fa-icon [icon]="faPlus" style="margin-right: 0.5rem;"></fa-icon>
+                  Ajouter une option
                 </button>
               </div>
 
               <!-- Info pour Vrai/Faux -->
               <div class="info-badge" *ngIf="questions.at(qi).get('type')?.value === 'TRUE_FALSE'">
-                ✓ Vrai/Faux - Les options seront "Vrai" ou "Faux"
+                <fa-icon [icon]="faCheckCircle" style="margin-right: 0.5rem;"></fa-icon>
+                Vrai/Faux - Les options seront "Vrai" ou "Faux"
               </div>
             </div>
 
@@ -573,20 +619,18 @@
               type="button"
               class="btn-remove"
               (click)="removeQuestion(qi)"
-              [disabled]="questions.length === 1"
               title="Supprimer la question"
             >
-              ×
+              <fa-icon [icon]="faTimes"></fa-icon>
             </button>
           </div>
-        </div>
 
-        <ng-template #noQuestions>
-          <div class="empty-questions">
-            <p>Aucune question pour le moment</p>
-            <p class="small">Cliquez sur "Ajouter une question" pour commencer</p>
-          </div>
-        </ng-template>
+          <!-- Add Question button at the end of the list -->
+          <button type="button" class="btn-secondary add-question-btn" (click)="addQuestion()" style="margin-top: 1rem;">
+            <fa-icon [icon]="faPlus" style="margin-right: 0.5rem;"></fa-icon>
+            Ajouter une question
+          </button>
+        </div>
       </div>
     </div>
 
@@ -624,7 +668,8 @@
   <!-- Buttons Navigation -->
   <div class="form-actions">
     <button type="button" class="btn-secondary" (click)="previousStep()" *ngIf="currentStep() > 1">
-      ← Précédent
+      <fa-icon [icon]="faChevronLeft" style="margin-right: 0.5rem;"></fa-icon>
+      Précédent
     </button>
 
     <div class="spacer"></div>
@@ -632,7 +677,8 @@
     <button type="button" class="btn-cancel" (click)="cancelCreation()">Annuler</button>
 
     <button type="button" class="btn-secondary" (click)="nextStep()" *ngIf="currentStep() < 3">
-      Suivant →
+      Suivant
+      <fa-icon [icon]="faChevronRight" style="margin-left: 0.5rem;"></fa-icon>
     </button>
 
     <button type="button" class="btn-primary" (click)="submitAudit()" *ngIf="currentStep() === 3">
@@ -642,4 +688,8 @@
 </div>
 
 <!-- Report Modal -->
-<app-audit-report *ngIf="reportAudit()" [audit]="reportAudit()" (close)="closeReport()"></app-audit-report>
+<app-audit-report
+  *ngIf="reportAudit()"
+  [audit]="reportAudit()"
+  (close)="closeReport()"
+></app-audit-report>

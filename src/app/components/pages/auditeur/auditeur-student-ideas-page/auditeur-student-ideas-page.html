@@ -2,49 +2,54 @@
   <div class="container">
     <header class="hero-card">
       <div class="hero-copy">
-        <span class="eyebrow">Pilotage auditeur</span>
-        <h1>Idees des etudiants</h1>
+        <span class="eyebrow">
+          <fa-icon [icon]="faBuilding"></fa-icon>
+          Pilotage auditeur
+        </span>
+        <h1>Idées des étudiants</h1>
         <p>
-          Analysez les propositions du departement, lisez les retours des etudiants et prenez une
-          decision claire sur chaque idee.
+          Analysez les propositions du département, consultez les retours des étudiants et prenez
+          une décision éclairée pour faire progresser l'établissement.
         </p>
       </div>
 
       <div class="search-box">
-        <span class="search-label">Recherche</span>
-        <input
-          type="text"
-          placeholder="Titre, description ou nom d'etudiant"
-          [value]="searchTerm()"
-          (input)="onSearchInput($event)"
-          class="search-input"
-        />
+        <span class="search-label">Recherche multicritère</span>
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            placeholder="Titre, description ou auteur..."
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            class="search-input"
+          />
+        </div>
       </div>
     </header>
 
     <section class="stats-grid">
       <article class="stat-card accent-blue">
-        <span>Idees visibles</span>
+        <span>Idées visibles</span>
         <strong>{{ totalIdeas() }}</strong>
-        <small>Vue globale du departement</small>
+        <small>Vue globale du département</small>
       </article>
 
       <article class="stat-card accent-amber">
         <span>En cours</span>
         <strong>{{ pendingIdeas() }}</strong>
-        <small>En attente de decision</small>
+        <small>En attente de décision</small>
       </article>
 
       <article class="stat-card accent-emerald">
-        <span>Acceptees</span>
+        <span>Acceptées</span>
         <strong>{{ acceptedIdeas() }}</strong>
-        <small>Idees deja validees</small>
+        <small>Idées déjà validées</small>
       </article>
 
       <article class="stat-card accent-rose">
-        <span>Rejetees</span>
+        <span>Rejetées</span>
         <strong>{{ rejectedIdeas() }}</strong>
-        <small>Idees non retenues</small>
+        <small>Idées non retenues</small>
       </article>
     </section>
 
@@ -52,9 +57,9 @@
       <div class="section-head">
         <div>
           <span class="section-kicker">Tri intelligent</span>
-          <h2>Filtrer les statuts</h2>
+          <h2>Filtrer par statut</h2>
         </div>
-        <span class="result-chip">{{ filteredIdeas().length }} idee(s)</span>
+        <span class="result-chip">{{ filteredIdeas().length }} idée(s) trouvée(s)</span>
       </div>
 
       <div class="filter-row">
@@ -63,13 +68,15 @@
           [class.active]="filterStatus() === 'TOUS'"
           (click)="filterStatus.set('TOUS')"
         >
-          Tous les statuts
+          <fa-icon [icon]="faLightbulb"></fa-icon>
+          Toutes
         </button>
         <button
           class="filter-btn"
           [class.active]="filterStatus() === 'ENCOURS'"
           (click)="filterStatus.set('ENCOURS')"
         >
+          <fa-icon [icon]="faInfoCircle"></fa-icon>
           En cours
         </button>
         <button
@@ -77,113 +84,145 @@
           [class.active]="filterStatus() === 'ACCEPTE'"
           (click)="filterStatus.set('ACCEPTE')"
         >
-          Acceptees
+          <fa-icon [icon]="faCheck"></fa-icon>
+          Acceptées
         </button>
         <button
           class="filter-btn"
           [class.active]="filterStatus() === 'REJETE'"
           (click)="filterStatus.set('REJETE')"
         >
-          Rejetees
+          <fa-icon [icon]="faTimes"></fa-icon>
+          Rejetées
         </button>
       </div>
     </section>
 
+    <!-- Feedback States -->
     <div *ngIf="loading()" class="feedback-card loading-card">
       <div class="spinner"></div>
-      <p>Chargement des idees en cours...</p>
+      <p>Synchronisation avec le serveur...</p>
     </div>
 
     <div *ngIf="!loading() && hasIdeasWithMissingIds()" class="feedback-card warning-card">
-      Le backend ne renvoie pas encore l'identifiant reel de certaines idees. Les boutons
-      d'acceptation et de rejet sont donc bloques sur ces lignes pour eviter toute mauvaise mise a
-      jour.
+      <fa-icon [icon]="faInfoCircle"></fa-icon>
+      <p>Certaines idées n'ont pas d'identifiant valide. Les actions sont temporairement limitées sur ces éléments.</p>
     </div>
 
-    <div *ngIf="!loading() && filteredIdeas().length === 0" class="empty-state">
-      <h3>Aucune idee trouvee</h3>
-      <p>Essayez une autre recherche ou changez le filtre de statut.</p>
+    <div *ngIf="!loading() && filteredIdeas().length === 0" class="empty-state-container">
+      <div class="empty-state">
+        <fa-icon [icon]="faLightbulb" size="3x"></fa-icon>
+        <h3>Aucune idée trouvée</h3>
+        <p>Ajustez vos filtres ou essayez une autre recherche.</p>
+      </div>
     </div>
 
+    <!-- Grid of Ideas -->
     <section *ngIf="!loading() && filteredIdeas().length > 0" class="ideas-grid">
       <article *ngFor="let idea of filteredIdeas()" class="idea-card">
         <div class="card-header">
-          <div class="card-title">
-            <div class="title-row">
-              <h3>{{ idea.title }}</h3>
-              <span class="author-pill">{{ idea.studentName }}</span>
+          <div class="title-row">
+            <div class="card-title-wrapper">
+              <h3 class="card-title-text">{{ idea.title }}</h3>
             </div>
-            <div class="badges-section">
-              <span class="badge status-badge" [ngClass]="getStatusBadgeClass(idea.status)">
-                {{ statusLabels[idea.status] }}
-              </span>
-              <span class="badge category-badge" [ngClass]="getCategoryBadgeClass(idea.category)">
-                {{ categoryLabels[idea.category] }}
-              </span>
-              <span class="badge department-badge">{{ departmentLabels[idea.department] }}</span>
+            <div class="author-pill">
+              <fa-icon [icon]="faUser"></fa-icon>
+              {{ idea.studentName }}
             </div>
+          </div>
+          
+          <div class="badges-section">
+            <span class="badge status-badge" [ngClass]="idea.status">
+              {{ statusLabels[idea.status] }}
+            </span>
+            <span class="badge category-badge" [ngClass]="idea.category">
+              <fa-icon [icon]="faTag"></fa-icon>
+              {{ categoryLabels[idea.category] }}
+            </span>
+            <span class="badge department-badge" [ngClass]="idea.department">
+              <fa-icon [icon]="faBuilding"></fa-icon>
+              {{ departmentLabels[idea.department] }}
+            </span>
           </div>
         </div>
 
         <div class="card-body">
-          <p class="description">{{ idea.description }}</p>
+          <div class="description-container" [class.expanded]="isExpanded(idea.runtimeId)">
+            <p class="description">{{ idea.description }}</p>
+            <button 
+              *ngIf="idea.description.length > 120" 
+              class="read-more-btn" 
+              (click)="toggleDescription(idea.runtimeId)"
+            >
+              <span>{{ isExpanded(idea.runtimeId) ? 'Lire moins' : 'Lire la suite' }}</span>
+              <fa-icon [icon]="isExpanded(idea.runtimeId) ? faChevronUp : faChevronRight" class="read-more-icon"></fa-icon>
+            </button>
+          </div>
 
           <div class="stats-row">
-            <div class="stat">
-              <span class="stat-label">Votes</span>
-              <strong>{{ idea.voteCount }}</strong>
+            <div class="stat-item">
+              <div class="stat-icon-box">
+                <fa-icon [icon]="faThumbsUp"></fa-icon>
+              </div>
+              <div class="stat-info">
+                <span class="stat-val">{{ idea.voteCount }}</span>
+                <span class="stat-lbl">Votes</span>
+              </div>
             </div>
 
             <button
               type="button"
               class="comment-toggle-btn"
+              [class.active]="activeCommentIdeaId() === idea.runtimeId"
               (click)="toggleComments(idea.runtimeId)"
-              [attr.aria-expanded]="activeCommentIdeaId() === idea.runtimeId"
             >
-              {{ activeCommentIdeaId() === idea.runtimeId ? 'Masquer les commentaires' : 'Voir les commentaires' }}
-              <strong>{{ idea.comments.length || 0 }}</strong>
+              <fa-icon [icon]="faComments"></fa-icon>
+              <span>{{ idea.comments.length || 0 }}</span>
+              <fa-icon [icon]="activeCommentIdeaId() === idea.runtimeId ? faChevronUp : faChevronDown"></fa-icon>
             </button>
           </div>
 
+          <!-- Action Buttons logic: only enabled if ENCOURS -->
           <div class="action-buttons-two">
             <button
               type="button"
               class="btn-action btn-accept"
               (click)="updateStatus(idea, 'ACCEPTE')"
-              [disabled]="updatingIdeaId() === idea.id || idea.id == null"
-              [title]="
-                idea.id == null
-                  ? 'Identifiant backend manquant pour cette idee'
-                  : 'Accepter cette idee'
-              "
+              [disabled]="updatingIdeaId() === idea.id || idea.id == null || idea.status !== 'ENCOURS'"
+              [title]="idea.status !== 'ENCOURS' ? 'Cette idée a déjà été traitée' : 'Accepter l\'idée'"
             >
-              Accepter l'idee
+              <fa-icon [icon]="faCheck"></fa-icon>
+              <span>Accepter</span>
             </button>
             <button
               type="button"
               class="btn-action btn-reject"
               (click)="updateStatus(idea, 'REJETE')"
-              [disabled]="updatingIdeaId() === idea.id || idea.id == null"
-              [title]="
-                idea.id == null
-                  ? 'Identifiant backend manquant pour cette idee'
-                  : 'Rejeter cette idee'
-              "
+              [disabled]="updatingIdeaId() === idea.id || idea.id == null || idea.status !== 'ENCOURS'"
+              [title]="idea.status !== 'ENCOURS' ? 'Cette idée a déjà été traitée' : 'Rejeter l\'idée'"
             >
-              Rejeter l'idee
+              <fa-icon [icon]="faTimes"></fa-icon>
+              <span>Rejeter</span>
             </button>
           </div>
 
+          <!-- Comments Panel -->
           <div *ngIf="activeCommentIdeaId() === idea.runtimeId" class="comment-section-card">
-            <div *ngIf="idea.comments.length > 0" class="comments-section">
-              <h4>Commentaires etudiants ({{ idea.comments.length }})</h4>
-              <div class="comments-list">
-                <div *ngFor="let comment of idea.comments" class="comment-item">
-                  <p class="comment-author">{{ comment.studentName || 'Anonyme' }}</p>
-                  <p class="comment-text">{{ comment.content }}</p>
+            <div class="comments-header">
+              <fa-icon [icon]="faComments"></fa-icon>
+              Commentaires ({{ idea.comments.length }})
+            </div>
+            
+            <div *ngIf="idea.comments.length > 0" class="comments-list">
+              <div *ngFor="let comment of idea.comments" class="comment-item">
+                <div class="comment-author-row">
+                  <fa-icon [icon]="faUser" size="xs"></fa-icon>
+                  <span class="comment-author">{{ comment.studentName || 'Étudiant' }}</span>
                 </div>
+                <p class="comment-text">{{ comment.content }}</p>
               </div>
             </div>
+            
             <div *ngIf="!idea.comments.length" class="no-comments">
               <p>Aucun commentaire pour le moment.</p>
             </div>
