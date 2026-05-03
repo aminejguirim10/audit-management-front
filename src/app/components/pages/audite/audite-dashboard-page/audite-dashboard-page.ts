@@ -330,10 +330,21 @@ export class AuditeDashboardPage implements OnInit {
           }
 
           this.toastr.success('Toutes les reponses ont ete enregistrees avec succes.', 'Succes');
-          const selectedAudit = this.selectedAuditSummary();
-          if (selectedAudit) {
-            this.openAuditWorkspace(selectedAudit);
+          
+          // Mise à jour optimiste locale pour éviter les clignotements et rechargements
+          const currentDetails = this.selectedAuditDetails();
+          if (currentDetails) {
+            this.selectedAuditDetails.set({ ...currentDetails, status: 'TERMINEE' });
           }
+
+          const currentSummary = this.selectedAuditSummary();
+          if (currentSummary) {
+            const updatedSummary = { ...currentSummary, status: 'TERMINEE' as AuditStatus };
+            this.selectedAuditSummary.set(updatedSummary);
+            this.audits.update(audits => audits.map(a => a.id === updatedSummary.id ? updatedSummary : a));
+          }
+          
+          // Rafraîchissement en arrière-plan
           this.loadAudits();
         },
         error: () => {
