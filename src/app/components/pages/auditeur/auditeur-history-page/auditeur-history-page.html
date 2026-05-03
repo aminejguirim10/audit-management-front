@@ -1,16 +1,19 @@
 <section class="history-page">
   <header class="hero-card">
     <div class="hero-copy">
-      <span class="eyebrow">Historique des audits</span>
-      <h1>Archive elegante des audits termines</h1>
+      <span class="eyebrow">
+        <fa-icon [icon]="faHistory" style="margin-right: 0.5rem;"></fa-icon>
+        Historique des audits
+      </span>
+      <h1>Archive élégante des audits terminés</h1>
       <p>
-        Cette interface rassemble les audits clotures dans un tableau moderne, puis les replace
-        dans une timeline d'activite pour mieux suivre les campagnes deja menees.
+        Cette interface rassemble les audits clôturés dans un tableau moderne, puis les replace
+        dans une timeline d'activité pour mieux suivre les campagnes déjà menées.
       </p>
     </div>
 
     <div class="hero-highlight">
-      <span class="highlight-label">Audits termines</span>
+      <span class="highlight-label">Audits terminés</span>
       <strong>{{ stats().completedCount }}</strong>
       <p>{{ filteredCompletedAudits().length }} visible(s) avec les filtres actifs</p>
     </div>
@@ -18,32 +21,35 @@
 
   <section class="stats-grid">
     <article class="stat-card accent-blue">
-      <span>Audits clotures</span>
+      <span>Audits clôturés</span>
       <strong>{{ stats().completedCount }}</strong>
-      <small>Historique complet de vos audits finalises</small>
+      <small>Historique complet de vos audits finalisés</small>
     </article>
 
     <article class="stat-card accent-amber">
-      <span>Departements couverts</span>
+      <span>Départements couverts</span>
       <strong>{{ stats().departmentCount }}</strong>
-      <small>Vision transversale des poles deja audites</small>
+      <small>Vision transversale des pôles déjà audités</small>
     </article>
 
     <article class="stat-card accent-emerald">
       <span>Types d'audit</span>
       <strong>{{ stats().typeCount }}</strong>
-      <small>Academic, qualite, installations et plus</small>
+      <small>Académique, qualité, installations et plus</small>
     </article>
   </section>
 
   <section class="filters-card">
     <div class="filters-head">
       <div>
-        <h2>Audits termines</h2>
+        <h2>Audits terminés</h2>
         <p>Filtrez rapidement le tableau avant de consulter la timeline.</p>
       </div>
 
-      <button class="refresh-button" type="button" (click)="loadHistory()">Actualiser</button>
+      <button class="refresh-button" type="button" (click)="loadHistory()">
+        <fa-icon [icon]="faSync" style="margin-right: 0.5rem;"></fa-icon>
+        Actualiser
+      </button>
     </div>
 
     <div class="filters-grid">
@@ -51,19 +57,19 @@
         <span>Recherche</span>
         <input
           type="text"
-          placeholder="Titre, audite, type ou departement"
+          placeholder="Titre, audité, type ou département"
           [value]="searchTerm()"
           (input)="onSearch($event)"
         />
       </label>
 
       <label class="field">
-        <span>Departement</span>
+        <span>Département</span>
         <select
           [value]="selectedDepartment()"
           (change)="selectedDepartment.set($any($event.target).value)"
         >
-          <option value="TOUS">Tous les departements</option>
+          <option value="TOUS">Tous les départements</option>
           <option *ngFor="let department of departmentOptions()" [value]="department">
             {{ formatDepartment(department) }}
           </option>
@@ -86,23 +92,35 @@
     <div class="section-head">
       <div>
         <span class="section-kicker">Tableau moderne</span>
-        <h2>Liste des audits termines</h2>
+        <h2>Liste des audits terminés</h2>
       </div>
-      <span class="results-chip">{{ filteredCompletedAudits().length }} resultat(s)</span>
+      <span class="results-chip">{{ filteredCompletedAudits().length }} résultat(s)</span>
     </div>
 
     <div class="feedback-card error" *ngIf="errorMessage()">{{ errorMessage() }}</div>
 
     <div class="feedback-card" *ngIf="loading()">Chargement de l'historique en cours...</div>
 
-    <div class="table-wrapper" *ngIf="!loading() && filteredCompletedAudits().length > 0">
-      <table>
+    <div class="table-container" *ngIf="!loading() && filteredCompletedAudits().length > 0">
+      <table class="modern-table">
         <thead>
           <tr>
-            <th>Audit</th>
-            <th>Type</th>
-            <th>Departement</th>
-            <th>Audite</th>
+            <th>
+              <fa-icon [icon]="faFileAlt" style="margin-right: 0.5rem;"></fa-icon>
+              Audit
+            </th>
+            <th>
+              <fa-icon [icon]="faLayerGroup" style="margin-right: 0.5rem;"></fa-icon>
+              Type
+            </th>
+            <th>
+              <fa-icon [icon]="faBuilding" style="margin-right: 0.5rem;"></fa-icon>
+              Département
+            </th>
+            <th>
+              <fa-icon [icon]="faUser" style="margin-right: 0.5rem;"></fa-icon>
+              Audité
+            </th>
             <th>Auditeur</th>
             <th>Statut</th>
           </tr>
@@ -114,18 +132,21 @@
               <div class="audit-cell">
                 <div>
                   <strong>{{ audit.title }}</strong>
-                  <small>Cloture et archive de reference</small>
+                  <small>Clôture et archive de référence</small>
                 </div>
               </div>
             </td>
             <td>
-              <span class="type-pill">{{ audit.typeAuditName }}</span>
+              <span class="type-pill">
+                {{ audit.typeAuditName }}
+              </span>
             </td>
             <td>{{ formatDepartment(audit.department) }}</td>
             <td>{{ audit.auditeName }}</td>
             <td>{{ audit.auditeurName }}</td>
             <td>
               <span class="status-pill status-completed">
+                <fa-icon [icon]="faCheckCircle" style="margin-right: 0.4rem;"></fa-icon>
                 {{ getStatusLabel(audit.status) }}
               </span>
             </td>
@@ -135,7 +156,7 @@
     </div>
 
     <div class="empty-state" *ngIf="!loading() && filteredCompletedAudits().length === 0">
-      <h3>Aucun audit termine ne correspond aux filtres</h3>
+      <h3>Aucun audit terminé ne correspond aux filtres</h3>
       <p>Essayez une autre recherche ou retirez un filtre pour retrouver les archives.</p>
     </div>
   </section>
@@ -149,7 +170,7 @@
     </div>
 
     <div class="feedback-card" *ngIf="loadingTimeline()">
-      Construction de la timeline a partir des details des audits...
+      Construction de la timeline à partir des détails des audits...
     </div>
 
     <div class="timeline-list" *ngIf="!loadingTimeline() && timelineItems().length > 0">
@@ -160,8 +181,14 @@
 
         <div class="timeline-content">
           <div class="timeline-head">
-            <span class="timeline-badge">{{ getTimelineBadgeLabel(item.status) }}</span>
-            <time>{{ item.period }}</time>
+            <span class="timeline-badge" [ngClass]="getTimelineBadgeClass(item.status)">
+              <fa-icon [icon]="getTimelineStatusIcon(item.status)" style="margin-right: 0.4rem;"></fa-icon>
+              {{ getTimelineBadgeLabel(item.status) }}
+            </span>
+            <time>
+              <fa-icon [icon]="faClock" style="margin-right: 0.4rem;"></fa-icon>
+              {{ item.period }}
+            </time>
           </div>
           <h3>{{ item.title }}</h3>
           <p>{{ item.subtitle }}</p>
@@ -172,7 +199,7 @@
     <div class="empty-state timeline-empty" *ngIf="!loadingTimeline() && timelineItems().length === 0">
       <h3>La timeline sera visible ici</h3>
       <p>
-        Elle apparait des que des audits termines avec details dates sont disponibles pour les
+        Elle apparaît dès que des audits terminés avec détails datés sont disponibles pour les
         filtres actifs.
       </p>
     </div>

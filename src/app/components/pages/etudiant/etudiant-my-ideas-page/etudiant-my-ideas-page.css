@@ -150,17 +150,25 @@
   border-radius: 32px;
   border: 1px solid var(--border-light);
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .table-container {
+    overflow-x: hidden;
+  }
 }
 
 .modern-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+  min-width: 850px;
 }
 
 .modern-table th {
-  padding: 1.5rem;
+  padding: 1.15rem 1rem;
   background: #fcfdfe;
   color: #475569;
   font-size: 0.75rem;
@@ -172,7 +180,7 @@
 }
 
 .modern-table td {
-  padding: 1.5rem;
+  padding: 1.15rem 1rem;
   border-bottom: 1px solid #f8fafc;
   vertical-align: middle;
   transition: all 0.3s ease;

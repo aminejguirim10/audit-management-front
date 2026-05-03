@@ -1,4 +1,4 @@
-﻿import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs/operators';
 import { StudentIdeaService } from '../../../../services/student-idea.service';
@@ -13,12 +13,27 @@ import {
   DEPARTMENT_LABELS,
   IdeaStatus,
 } from '../../../../models/student-idea.model';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { 
+  faCheck, 
+  faTimes, 
+  faComments, 
+  faUser, 
+  faLightbulb, 
+  faTag, 
+  faBuilding,
+  faThumbsUp,
+  faChevronDown,
+  faChevronUp,
+  faChevronRight,
+  faInfoCircle
+} from '@fortawesome/free-solid-svg-icons';
 
 type IdeaWithRuntimeId = FindOneIdeaDto & { runtimeId: number };
 
 @Component({
   selector: 'app-auditeur-student-ideas-page',
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   templateUrl: './auditeur-student-ideas-page.html',
   styleUrl: './auditeur-student-ideas-page.css',
 })
@@ -34,6 +49,8 @@ export class AuditeurStudentIdeasPage implements OnInit {
   readonly filterStatus = signal<'TOUS' | 'ENCOURS' | 'ACCEPTE' | 'REJETE'>('TOUS');
   readonly updatingIdeaId = signal<number | null>(null);
   readonly activeCommentIdeaId = signal<number | null>(null);
+  readonly expandedIdeaIds = signal<Set<number>>(new Set());
+  
   readonly hasIdeasWithMissingIds = computed(() =>
     this.ideas().some((idea) => idea.id == null)
   );
@@ -71,6 +88,20 @@ export class AuditeurStudentIdeasPage implements OnInit {
   readonly statusColors = STATUS_COLORS;
   readonly departmentLabels = DEPARTMENT_LABELS;
 
+  // Icons
+  faCheck = faCheck;
+  faTimes = faTimes;
+  faComments = faComments;
+  faUser = faUser;
+  faLightbulb = faLightbulb;
+  faTag = faTag;
+  faBuilding = faBuilding;
+  faThumbsUp = faThumbsUp;
+  faChevronDown = faChevronDown;
+  faChevronUp = faChevronUp;
+  faChevronRight = faChevronRight;
+  faInfoCircle = faInfoCircle;
+
   ngOnInit(): void {
     this.loadIdeas();
   }
@@ -104,6 +135,22 @@ export class AuditeurStudentIdeasPage implements OnInit {
     this.activeCommentIdeaId.update((current) => (current === runtimeId ? null : runtimeId));
   }
 
+  toggleDescription(runtimeId: number): void {
+    this.expandedIdeaIds.update((current) => {
+      const next = new Set(current);
+      if (next.has(runtimeId)) {
+        next.delete(runtimeId);
+      } else {
+        next.add(runtimeId);
+      }
+      return next;
+    });
+  }
+
+  isExpanded(runtimeId: number): boolean {
+    return this.expandedIdeaIds().has(runtimeId);
+  }
+
   updateStatus(idea: IdeaWithRuntimeId, status: IdeaStatus): void {
     if (!idea.id) {
       this.toastr.error('Impossible de mettre à jour cette idée : identifiant manquant', 'Erreur');
@@ -135,16 +182,5 @@ export class AuditeurStudentIdeasPage implements OnInit {
       });
   }
 
-  getStatusBadgeClass(status: IdeaStatus): string {
-    const classes: Record<IdeaStatus, string> = {
-      ENCOURS: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      ACCEPTE: 'bg-green-100 text-green-800 border-green-300',
-      REJETE: 'bg-red-100 text-red-800 border-red-300',
-    };
-    return classes[status] || '';
-  }
 
-  getCategoryBadgeClass(category: string): string {
-    return this.categoryColors[category as keyof typeof this.categoryColors] || '';
-  }
 }

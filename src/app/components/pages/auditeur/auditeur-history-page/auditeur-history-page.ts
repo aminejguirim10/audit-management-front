@@ -4,6 +4,17 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, finalize, map } from 'rxjs/operators';
 import { AuditDetails, AuditStatus, AuditSummary } from '../../../../models/audit.model';
 import { AuditService } from '../../../../services/audit.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { 
+  faFileAlt, 
+  faLayerGroup, 
+  faBuilding, 
+  faUser, 
+  faCheckCircle, 
+  faClock,
+  faHistory,
+  faSync
+} from '@fortawesome/free-solid-svg-icons';
 
 interface AuditTimelineItem {
   id: string;
@@ -24,11 +35,21 @@ const AUDIT_STATUS_LABELS: Record<AuditStatus, string> = {
 
 @Component({
   selector: 'app-auditeur-history-page',
-  imports: [CommonModule],
+  imports: [CommonModule, FontAwesomeModule],
   templateUrl: './auditeur-history-page.html',
   styleUrl: './auditeur-history-page.css',
 })
 export class AuditeurHistoryPage implements OnInit {
+  // Icons
+  faFileAlt = faFileAlt;
+  faLayerGroup = faLayerGroup;
+  faBuilding = faBuilding;
+  faUser = faUser;
+  faCheckCircle = faCheckCircle;
+  faClock = faClock;
+  faHistory = faHistory;
+  faSync = faSync;
+
   private readonly auditService = inject(AuditService);
 
   readonly audits = signal<AuditSummary[]>([]);
@@ -193,6 +214,24 @@ export class AuditeurHistoryPage implements OnInit {
 
   getTimelineBadgeLabel(status: AuditStatus): string {
     return this.getStatusLabel(status);
+  }
+
+  getTimelineBadgeClass(status: AuditStatus): string {
+    switch (status) {
+      case 'PLANIFIE': return 'badge-planifie';
+      case 'EN_COURS': return 'badge-encours';
+      case 'TERMINEE': return 'badge-terminee';
+      default: return '';
+    }
+  }
+
+  getTimelineStatusIcon(status: AuditStatus): any {
+    switch (status) {
+      case 'PLANIFIE': return this.faClock;
+      case 'EN_COURS': return this.faLayerGroup;
+      case 'TERMINEE': return this.faCheckCircle;
+      default: return this.faCheckCircle;
+    }
   }
 
   trackByAudit(_: number, audit: AuditSummary): number {

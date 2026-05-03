@@ -1,4 +1,12 @@
-import { Component, OnInit, inject, signal, computed, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  computed,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {
@@ -13,6 +21,30 @@ import { ToastrService } from 'ngx-toastr';
 import { finalize } from 'rxjs/operators';
 import { AuditService } from '../../../../services/audit.service';
 import { TypeAuditService } from '../../../../services/type-audit.service';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  faPlus,
+  faChartBar,
+  faFilter,
+  faSearch,
+  faTable,
+  faFileAlt,
+  faLayerGroup,
+  faBuilding,
+  faUser,
+  faCheckCircle,
+  faClock,
+  faComment,
+  faEdit,
+  faTrash,
+  faChevronRight,
+  faChevronLeft,
+  faHistory,
+  faTimes,
+  faInfoCircle,
+  faExclamationTriangle,
+  faSync
+} from '@fortawesome/free-solid-svg-icons';
 import {
   AddAuditDto,
   AuditStatus,
@@ -42,11 +74,34 @@ const DEPARTMENTS = ['INFORMATIQUE', 'ELECTRIQUE', 'INDUS'];
 
 @Component({
   selector: 'app-auditeur-dashboard-page',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, AuditReportComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, AuditReportComponent, FontAwesomeModule],
   templateUrl: './auditeur-dashboard-page.html',
   styleUrl: './auditeur-dashboard-page.css',
 })
 export class AuditeurDashboardPage implements OnInit {
+  // Icons
+  faPlus = faPlus;
+  faChartBar = faChartBar;
+  faFilter = faFilter;
+  faSearch = faSearch;
+  faTable = faTable;
+  faFileAlt = faFileAlt;
+  faLayerGroup = faLayerGroup;
+  faBuilding = faBuilding;
+  faUser = faUser;
+  faCheckCircle = faCheckCircle;
+  faClock = faClock;
+  faComment = faComment;
+  faEdit = faEdit;
+  faTrash = faTrash;
+  faChevronRight = faChevronRight;
+  faChevronLeft = faChevronLeft;
+  faHistory = faHistory;
+  faTimes = faTimes;
+  faInfoCircle = faInfoCircle;
+  faExclamationTriangle = faExclamationTriangle;
+  faSync = faSync;
+
   private readonly fb = inject(FormBuilder);
   private readonly auditService = inject(AuditService);
   private readonly typeAuditService = inject(TypeAuditService);
@@ -171,22 +226,21 @@ export class AuditeurDashboardPage implements OnInit {
     try {
       // Create the question
       const newQuestion = this.createQuestion();
-      
+
       // Add to FormArray
       this.questions.push(newQuestion);
-      
+
       // Update signal to trigger change detection
-      this.questionsCount.update(c => c + 1);
-      
+      this.questionsCount.update((c) => c + 1);
+
       // Update form validity
       this.auditForm.updateValueAndValidity();
-      
+
       // Trigger change detection
       this.cdr.markForCheck();
-      
     } catch (error) {
       console.error('Error adding question:', error);
-      this.toastr.error('Erreur lors de l\'ajout de la question', 'Erreur');
+      this.toastr.error("Erreur lors de l'ajout de la question", 'Erreur');
     }
   }
 
@@ -194,7 +248,7 @@ export class AuditeurDashboardPage implements OnInit {
     try {
       if (this.questions.length > 0 && index >= 0 && index < this.questions.length) {
         this.questions.removeAt(index);
-        this.questionsCount.update(c => c - 1);
+        this.questionsCount.update((c) => c - 1);
         this.auditForm.updateValueAndValidity();
       }
     } catch (error) {
@@ -207,12 +261,12 @@ export class AuditeurDashboardPage implements OnInit {
     try {
       if (questionIndex >= 0 && questionIndex < this.questions.length) {
         this.getQuestionOptions(questionIndex).push(this.createOption());
-        this.questionsCount.update(c => c);
+        this.questionsCount.update((c) => c);
         this.auditForm.updateValueAndValidity();
       }
     } catch (error) {
       console.error('Error adding option:', error);
-      this.toastr.error('Erreur lors de l\'ajout de l\'option', 'Erreur');
+      this.toastr.error("Erreur lors de l'ajout de l'option", 'Erreur');
     }
   }
 
@@ -222,13 +276,13 @@ export class AuditeurDashboardPage implements OnInit {
         const opts = this.getQuestionOptions(questionIndex);
         if (optionIndex >= 0 && optionIndex < opts.length && opts.length > 1) {
           opts.removeAt(optionIndex);
-          this.questionsCount.update(c => c);
+          this.questionsCount.update((c) => c);
           this.auditForm.updateValueAndValidity();
         }
       }
     } catch (error) {
       console.error('Error removing option:', error);
-      this.toastr.error('Erreur lors de la suppression de l\'option', 'Erreur');
+      this.toastr.error("Erreur lors de la suppression de l'option", 'Erreur');
     }
   }
 
@@ -245,6 +299,52 @@ export class AuditeurDashboardPage implements OnInit {
   }
 
   nextStep(): void {
+    if (this.currentStep() === 1) {
+      const step1Fields = ['title', 'department', 'typeAuditId', 'auditeId', 'dateDebut', 'dateFin'];
+      let step1Valid = true;
+      
+      step1Fields.forEach(field => {
+        const control = this.auditForm.get(field);
+        if (control?.invalid) {
+          control.markAsTouched();
+          step1Valid = false;
+        }
+      });
+
+      if (!step1Valid) {
+        this.toastr.warning('Veuillez remplir tous les champs obligatoires.', 'Validation Étape 1');
+        return;
+      }
+
+      const dateDebut = this.auditForm.get('dateDebut')?.value;
+      const dateFin = this.auditForm.get('dateFin')?.value;
+      
+      if (dateDebut && dateFin && new Date(dateDebut) > new Date(dateFin)) {
+        this.toastr.warning('La date de début doit être antérieure ou égale à la date de fin.', 'Erreur de Période');
+        return;
+      }
+    }
+
+    if (this.currentStep() === 2) {
+      if (this.questions.length === 0) {
+        this.toastr.warning('Veuillez ajouter au moins une question.', 'Validation Étape 2');
+        return;
+      }
+
+      let questionsValid = true;
+      this.questions.controls.forEach((q, i) => {
+        if (q.invalid) {
+          q.markAllAsTouched();
+          questionsValid = false;
+        }
+      });
+
+      if (!questionsValid) {
+        this.toastr.warning('Veuillez vérifier les questions et options.', 'Validation Étape 2');
+        return;
+      }
+    }
+
     if (this.currentStep() < 3) {
       this.currentStep.update((s) => s + 1);
     }
@@ -268,17 +368,18 @@ export class AuditeurDashboardPage implements OnInit {
 
   viewAuditDetails(audit: AuditSummary): void {
     this.loadingDetails.set(true);
-    this.auditService.findById(audit.id).pipe(
-      finalize(() => this.loadingDetails.set(false))
-    ).subscribe({
-      next: (details) => {
-        this.selectedAudit.set(details);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des détails', err);
-        this.toastr.error('Impossible de charger les détails de l\'audit');
-      }
-    });
+    this.auditService
+      .findById(audit.id)
+      .pipe(finalize(() => this.loadingDetails.set(false)))
+      .subscribe({
+        next: (details) => {
+          this.selectedAudit.set(details);
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des détails', err);
+          this.toastr.error("Impossible de charger les détails de l'audit");
+        },
+      });
   }
 
   closeAuditDetails(): void {
@@ -289,7 +390,7 @@ export class AuditeurDashboardPage implements OnInit {
     if (audit.status !== 'TERMINEE') return;
     this.auditService.findById(audit.id).subscribe({
       next: (details) => this.reportAudit.set(details),
-      error: () => this.toastr.error('Impossible de charger les détails pour le rapport')
+      error: () => this.toastr.error('Impossible de charger les détails pour le rapport'),
     });
   }
 
@@ -308,23 +409,24 @@ export class AuditeurDashboardPage implements OnInit {
     });
 
     this.loadingEditAudit.set(true);
-    this.auditService.findById(audit.id).pipe(
-      finalize(() => this.loadingEditAudit.set(false))
-    ).subscribe({
-      next: (details) => {
-        this.editAuditForm.patchValue({
-          title: details.title,
-          department: details.department,
-          typeAuditId: this.findTypeAuditIdByName(details.typeAuditName),
-          dateDebut: details.dateDebut,
-          dateFin: details.dateFin,
-        });
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement pour modification', err);
-        this.toastr.error('Impossible de préremplir les champs de cet audit');
-      }
-    });
+    this.auditService
+      .findById(audit.id)
+      .pipe(finalize(() => this.loadingEditAudit.set(false)))
+      .subscribe({
+        next: (details) => {
+          this.editAuditForm.patchValue({
+            title: details.title,
+            department: details.department,
+            typeAuditId: this.findTypeAuditIdByName(details.typeAuditName),
+            dateDebut: details.dateDebut,
+            dateFin: details.dateFin,
+          });
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement pour modification', err);
+          this.toastr.error('Impossible de préremplir les champs de cet audit');
+        },
+      });
   }
 
   cancelEditAudit(): void {
@@ -348,20 +450,21 @@ export class AuditeurDashboardPage implements OnInit {
       dateFin: this.editAuditForm.get('dateFin')?.value ?? '',
     };
 
-    this.auditService.update(updateDto).pipe(
-      finalize(() => this.savingEdit.set(false))
-    ).subscribe({
-      next: () => {
-        this.toastr.success('Audit modifié avec succès');
-        this.editingAudit.set(null);
-        this.editAuditForm.reset();
-        this.loadAudits();
-      },
-      error: (err) => {
-        console.error('Erreur lors de la modification', err);
-        this.toastr.error(err.error?.message || 'Erreur lors de la modification de l\'audit');
-      }
-    });
+    this.auditService
+      .update(updateDto)
+      .pipe(finalize(() => this.savingEdit.set(false)))
+      .subscribe({
+        next: () => {
+          this.toastr.success('Audit modifié avec succès');
+          this.editingAudit.set(null);
+          this.editAuditForm.reset();
+          this.loadAudits();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la modification', err);
+          this.toastr.error(err.error?.message || "Erreur lors de la modification de l'audit");
+        },
+      });
   }
 
   confirmDeleteAudit(audit: AuditSummary): void {
@@ -380,23 +483,26 @@ export class AuditeurDashboardPage implements OnInit {
     this.deletingAudit.set(true);
     const auditId = this.auditToDelete()!.id;
 
-    this.auditService.delete(auditId).pipe(
-      finalize(() => this.deletingAudit.set(false))
-    ).subscribe({
-      next: () => {
-        this.toastr.success('Audit supprimé avec succès');
-        this.auditToDelete.set(null);
-        this.loadAudits();
-      },
-      error: (err) => {
-        console.error('Erreur lors de la suppression', err);
-        this.toastr.error(err.error?.message || 'Erreur lors de la suppression de l\'audit');
-      }
-    });
+    this.auditService
+      .delete(auditId)
+      .pipe(finalize(() => this.deletingAudit.set(false)))
+      .subscribe({
+        next: () => {
+          this.toastr.success('Audit supprimé avec succès');
+          this.auditToDelete.set(null);
+          this.loadAudits();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression', err);
+          this.toastr.error(err.error?.message || "Erreur lors de la suppression de l'audit");
+        },
+      });
   }
 
   getQuestionResponseLabel(question: Question): string {
-    const selectedOption = question.options.find((opt: QuestionOption) => opt.id === question.optionChoisieId);
+    const selectedOption = question.options.find(
+      (opt: QuestionOption) => opt.id === question.optionChoisieId,
+    );
     return selectedOption ? selectedOption.label : 'Non répondu';
   }
 
@@ -454,7 +560,7 @@ export class AuditeurDashboardPage implements OnInit {
         this.cancelCreation();
       },
       error: (err) => {
-        const message = err.error?.message ?? 'Erreur lors de la création de l\'audit';
+        const message = err.error?.message ?? "Erreur lors de la création de l'audit";
         this.toastr.error(message, 'Erreur');
       },
     });
@@ -518,7 +624,7 @@ export class AuditeurDashboardPage implements OnInit {
     }
 
     const matchedType = this.typeAudits().find(
-      (type) => type.name.trim().toLowerCase() === typeAuditName.trim().toLowerCase()
+      (type) => type.name.trim().toLowerCase() === typeAuditName.trim().toLowerCase(),
     );
 
     return matchedType?.id ?? null;
