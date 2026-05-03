@@ -65,71 +65,87 @@
     </div>
 
     <section class="table-section" *ngIf="!loading() && filteredIdeas().length > 0">
-      <div class="table-responsive">
-        <table class="ideas-table">
+      <div class="table-container">
+        <table class="modern-table">
           <thead>
             <tr>
-              <th>Titre</th>
-              <th>Description</th>
-              <th>Catégorie</th>
-              <th>Statut</th>
-              <th>Votes</th>
-              <th>Actions</th>
+              <th class="th-title">Titre</th>
+              <th class="th-desc">Description</th>
+              <th class="th-cat">Catégorie</th>
+              <th class="th-status">Statut</th>
+              <th class="th-votes">Votes</th>
+              <th class="th-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
             <ng-container *ngFor="let idea of filteredIdeas(); trackBy: trackByIdea">
-              <tr>
-                <td class="col-title"><strong>{{ idea.title }}</strong></td>
-                <td class="col-desc" [title]="idea.description">{{ idea.description.length > 60 ? (idea.description | slice:0:60) + '...' : idea.description }}</td>
-                <td>
-                  <span [ngClass]="getCategoryBadgeClass(idea.category)">
-                    {{ categoryLabels[idea.category] }}
-                  </span>
+              <tr [class.row-expanded]="activeCommentIdeaId() === idea.runtimeId">
+                <td class="td-title">
+                  <div class="title-cell">
+                    <strong>{{ idea.title }}</strong>
+                  </div>
                 </td>
-                <td>
-                  <span [ngClass]="getStatusBadgeClass(idea.status)">
-                    {{ statusLabels[idea.status] }}
-                  </span>
+                <td class="td-desc">
+                  <p class="desc-text" [title]="idea.description">
+                    {{ idea.description.length > 55 ? (idea.description | slice:0:55) + '...' : idea.description }}
+                  </p>
                 </td>
-                <td>
-                  <div class="stat-display">
+                <td class="td-cat">
+                  <div class="badge-tag" [ngClass]="getCategoryBadgeClass(idea.category)">
+                    <fa-icon [icon]="getCategoryIcon(idea.category)"></fa-icon>
+                    <span>{{ categoryLabels[idea.category] }}</span>
+                  </div>
+                </td>
+                <td class="td-status">
+                  <div class="status-pill" [ngClass]="getStatusBadgeClass(idea.status)">
+                    <fa-icon [icon]="getStatusIcon(idea.status)"></fa-icon>
+                    <span>{{ statusLabels[idea.status] }}</span>
+                  </div>
+                </td>
+                <td class="td-votes">
+                  <div class="vote-count-chip">
                     {{ idea.voteCount }}
                   </div>
                 </td>
-                <td>
+                <td class="td-actions">
                   <button
-                    class="stat-btn comment-btn"
+                    class="action-btn comment-trigger"
                     (click)="toggleComments(idea.runtimeId)"
-                    [attr.aria-expanded]="activeCommentIdeaId() === idea.runtimeId"
-                    title="Afficher les commentaires"
+                    [class.active]="activeCommentIdeaId() === idea.runtimeId"
+                    title="Voir les commentaires"
                   >
-                    <strong>{{ idea.comments.length }}</strong>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
+                    <span class="comment-num">{{ idea.comments.length }}</span>
+                    <fa-icon [icon]="faEye" class="eye-icon"></fa-icon>
                   </button>
                 </td>
               </tr>
-              <tr *ngIf="activeCommentIdeaId() === idea.runtimeId" class="comments-row">
-                <td colspan="6">
-                  <div class="comments-panel">
-                    <h4>Commentaires recus ({{ idea.comments.length }})</h4>
 
-                    <div class="comments-list" *ngIf="idea.comments && idea.comments.length > 0">
-                      <div *ngFor="let comment of idea.comments" class="comment">
-                        <div class="comment-header">
-                          <strong>{{ comment.studentName }}</strong>
-                          <span class="comment-date">{{ comment.createdAt | date: 'dd/MM/yyyy' }}</span>
-                        </div>
-                        <p class="comment-content">{{ comment.content }}</p>
+              <!-- Expanded Comments Area -->
+              <tr *ngIf="activeCommentIdeaId() === idea.runtimeId" class="expansion-row">
+                <td colspan="6">
+                  <div class="expansion-panel">
+                    <div class="panel-header">
+                      <div class="panel-title">
+                        <fa-icon [icon]="faComment"></fa-icon>
+                        <h4>Commentaires reçus ({{ idea.comments.length }})</h4>
                       </div>
                     </div>
 
-                    <p *ngIf="!idea.comments || idea.comments.length === 0" class="no-comments">
-                      Aucun commentaire pour le moment.
-                    </p>
+                    <div class="panel-content">
+                      <div class="comments-scroll" *ngIf="idea.comments && idea.comments.length > 0">
+                        <div *ngFor="let comment of idea.comments" class="comment-item">
+                          <div class="item-meta">
+                            <span class="item-author">{{ comment.studentName }}</span>
+                            <span class="item-date">{{ comment.createdAt | date: 'dd/MM/yyyy' }}</span>
+                          </div>
+                          <p class="item-text">{{ comment.content }}</p>
+                        </div>
+                      </div>
+                      
+                      <div *ngIf="!idea.comments || idea.comments.length === 0" class="panel-empty">
+                        <p>Aucun commentaire n'a été publié sur cette idée.</p>
+                      </div>
+                    </div>
                   </div>
                 </td>
               </tr>

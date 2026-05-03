@@ -18,13 +18,42 @@ import {
 
 type IdeaWithRuntimeId = FindOneIdeaDto & { runtimeId: number };
 
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import {
+  faGraduationCap,
+  faBriefcase,
+  faTools,
+  faEllipsisH,
+  faClock,
+  faCheckCircle,
+  faTimesCircle,
+  faComment,
+  faChevronDown,
+  faChevronUp,
+  faSearch,
+  faEye
+} from '@fortawesome/free-solid-svg-icons';
+
 @Component({
   selector: 'app-etudiant-my-ideas-page',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
   templateUrl: './etudiant-my-ideas-page.html',
   styleUrl: './etudiant-my-ideas-page.css',
 })
 export class EtudiantMyIdeasPage implements OnInit {
+  // Icons
+  faGraduationCap = faGraduationCap;
+  faBriefcase = faBriefcase;
+  faTools = faTools;
+  faEllipsisH = faEllipsisH;
+  faClock = faClock;
+  faCheckCircle = faCheckCircle;
+  faTimesCircle = faTimesCircle;
+  faComment = faComment;
+  faChevronDown = faChevronDown;
+  faChevronUp = faChevronUp;
+  faSearch = faSearch;
+  faEye = faEye;
   private readonly fb = inject(FormBuilder);
   private readonly ideaService = inject(StudentIdeaService);
   private readonly commentService = inject(CommentService);
@@ -38,14 +67,14 @@ export class EtudiantMyIdeasPage implements OnInit {
   readonly activeCommentIdeaId = signal<number | null>(null);
   readonly votingId = signal<number | null>(null);
   readonly totalIdeas = computed(() => this.ideas().length);
-  readonly acceptedIdeas = computed(() =>
-    this.ideas().filter((idea) => idea.status === 'ACCEPTE').length
+  readonly acceptedIdeas = computed(
+    () => this.ideas().filter((idea) => idea.status === 'ACCEPTE').length,
   );
-  readonly pendingIdeas = computed(() =>
-    this.ideas().filter((idea) => idea.status === 'ENCOURS').length
+  readonly pendingIdeas = computed(
+    () => this.ideas().filter((idea) => idea.status === 'ENCOURS').length,
   );
   readonly totalComments = computed(() =>
-    this.ideas().reduce((sum, idea) => sum + idea.comments.length, 0)
+    this.ideas().reduce((sum, idea) => sum + idea.comments.length, 0),
   );
 
   readonly filteredIdeas = computed(() => {
@@ -53,8 +82,7 @@ export class EtudiantMyIdeasPage implements OnInit {
     if (!term) return this.ideas();
     return this.ideas().filter(
       (idea) =>
-        idea.title.toLowerCase().includes(term) ||
-        idea.description.toLowerCase().includes(term)
+        idea.title.toLowerCase().includes(term) || idea.description.toLowerCase().includes(term),
     );
   });
 
@@ -165,14 +193,14 @@ export class EtudiantMyIdeasPage implements OnInit {
               };
             }
             return idea;
-          })
+          }),
         );
 
         this.toastr.success('Commentaire ajouté', 'Succès');
         this.commentForm.reset();
       },
       error: (err) => {
-        const message = err.error?.message ?? 'Erreur lors de l\'ajout du commentaire';
+        const message = err.error?.message ?? "Erreur lors de l'ajout du commentaire";
         this.toastr.error(message, 'Erreur');
       },
     });
@@ -189,6 +217,24 @@ export class EtudiantMyIdeasPage implements OnInit {
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.searchTerm.set(target.value);
+  }
+
+  getCategoryIcon(category: string): any {
+    switch (category) {
+      case 'ACADEMIQUE': return this.faGraduationCap;
+      case 'SERVICES': return this.faBriefcase;
+      case 'INSTALLATIONS': return this.faTools;
+      default: return this.faEllipsisH;
+    }
+  }
+
+  getStatusIcon(status: string): any {
+    switch (status) {
+      case 'ENCOURS': return this.faClock;
+      case 'ACCEPTE': return this.faCheckCircle;
+      case 'REJETE': return this.faTimesCircle;
+      default: return this.faClock;
+    }
   }
 
   trackByIdea(index: number, idea: IdeaWithRuntimeId): number {

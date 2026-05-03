@@ -3,6 +3,7 @@
   <div class="page-glow glow-right"></div>
 
   <div class="container">
+    <!-- HEADER SECTION -->
     <header class="hero-card">
       <div class="hero-copy">
         <span class="eyebrow">Boite à idées collaborative</span>
@@ -11,23 +12,38 @@
           Explorez les idées de la communauté, suivez les propositions les plus soutenues et
           participez avec vos votes et commentaires.
         </p>
-
       </div>
 
-      <div class="hero-panel" *ngIf="topIdea() as top">
-        <span class="panel-label">Idée en vedette</span>
-        <div class="hero-panel-body">
-          <span class="hero-panel-kicker">La plus suivie du moment</span>
-          <strong>{{ top.title }}</strong>
-          <p>{{ top.description }}</p>
+      <!-- IMPROVED FEATURED PANEL -->
+      <div class="featured-premium-panel" *ngIf="topIdea() as top" (click)="toggleComments(top.id)">
+        <div class="panel-tag">
+          <fa-icon [icon]="faStar"></fa-icon>
+          Idée en vedette
+        </div>
+        
+        <div class="panel-content">
+          <span class="panel-kicker">La plus suivie du moment</span>
+          <h2 class="panel-title">{{ top.title }}</h2>
+          <p class="panel-desc">{{ top.description }}</p>
         </div>
 
-        <div class="hero-panel-footer">
-          <div class="hero-panel-meta">
-            <span>{{ top.studentName }}</span>
-            <span>{{ top.voteCount }} votes</span>
+        <div class="panel-footer">
+          <div class="footer-meta">
+            <div class="meta-item">
+              <div class="avatar-initials-sm" [style.background]="getAvatarColor(top.studentName)">
+                {{ getInitials(top.studentName) }}
+              </div>
+              <span>{{ top.studentName }}</span>
+            </div>
+            <div class="meta-item accent">
+              <fa-icon [icon]="faHeartSolid"></fa-icon>
+              <span><strong>{{ top.voteCount }}</strong> votes</span>
+            </div>
           </div>
-          <span [ngClass]="getStatusBadgeClass(top.status)">{{ statusLabels[top.status] }}</span>
+          <span class="premium-badge" [ngClass]="getStatusBadgeClass(top.status)">
+            <fa-icon [icon]="getStatusIcon(top.status)"></fa-icon>
+            {{ statusLabels[top.status] }}
+          </span>
         </div>
       </div>
     </header>
@@ -84,16 +100,16 @@
       <p>Chargement des idées en cours...</p>
     </div>
 
-    <div *ngIf="!loading() && hasIdeasWithMissingIds()" class="feedback-card warning-card">
-      Certaines idées n'ont pas d'identifiant backend. Les actions sont bloquées sur ces cartes
-      pour éviter tout envoi vers une autre idée.
-    </div>
-
-    <section class="ideas-section">
-      <div class="section-head">
-        <div>
+  
+    <section class="facebook-ideas-section">
+      <div class="section-header-simple">
+        <div class="header-icon-box">
+          <fa-icon [icon]="faNewspaper"></fa-icon>
+        </div>
+        <div class="header-text-box">
           <span class="section-kicker">Communauté</span>
-          <h2>Idées disponibles</h2>
+          <h2>Flux d'idées</h2>
+          <p class="section-subtitle">Découvrez et interagissez avec les dernières propositions de vos collègues</p>
         </div>
       </div>
 
@@ -102,114 +118,102 @@
         <p>Essayez un autre filtre pour afficher davantage de propositions.</p>
       </div>
 
-      <div class="ideas-list" *ngIf="!loading() && filteredIdeas().length > 0">
-        <article *ngFor="let idea of filteredIdeas(); trackBy: trackByIdea" class="idea-card">
-          <div class="idea-topbar">
-            <div class="badge-row">
-              <span [ngClass]="getCategoryBadgeClass(idea.category)">
-                {{ categoryLabels[idea.category] }}
-              </span>
-              <span [ngClass]="getStatusBadgeClass(idea.status)">
-                {{ statusLabels[idea.status] }}
-              </span>
-            </div>
-            <span class="author-pill">{{ idea.studentName }}</span>
-          </div>
+      <div class="facebook-list" *ngIf="!loading() && filteredIdeas().length > 0">
+        <article *ngFor="let idea of filteredIdeas(); trackBy: trackByIdea" class="fb-idea-card">
 
-          <div class="idea-body">
-            <h3 class="idea-title">{{ idea.title }}</h3>
-            <p class="description">{{ idea.description }}</p>
-          </div>
-
-          <div class="idea-footer">
-            <div class="stats">
-              <button
-                class="stat-btn like-btn"
-                [class.voted]="idea.isVoted"
-                (click)="toggleVote(idea.id)"
-                [disabled]="votingId() === idea.id || idea.id == null"
-                [title]="
-                  idea.id == null
-                    ? 'Identifiant backend manquant pour cette idée'
-                    : 'Voter pour cette idée'
-                "
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-icon">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-              </button>
-
-              <div class="stat-btn vote-count">
-                <span class="stat-key">Votes</span>
-                <strong>{{ idea.voteCount }}</strong>
+          <div class="fb-card-header">
+            <div class="author-info">
+              <div class="avatar-initials" [style.background]="getAvatarColor(idea.studentName)">
+                {{ getInitials(idea.studentName) }}
               </div>
-
-              <div class="stat-btn comment-count">
-                <span class="stat-key">Commentaires</span>
-                <strong>{{ idea.comments.length }}</strong>
+              <div class="author-details">
+                <span class="name">{{ idea.studentName }}</span>
+                <div class="idea-badges">
+                  <span class="fb-badge cat" [ngClass]="getCategoryBadgeClass(idea.category)">
+                    <fa-icon [icon]="getCategoryIcon(idea.category)"></fa-icon>
+                    {{ categoryLabels[idea.category] }}
+                  </span>
+                  <span class="fb-badge stat" [ngClass]="getStatusBadgeClass(idea.status)">
+                    <fa-icon [icon]="getStatusIcon(idea.status)"></fa-icon>
+                    {{ statusLabels[idea.status] }}
+                  </span>
+                </div>
               </div>
             </div>
+          </div>
 
-            <button
-              class="expand-btn"
-              (click)="toggleComments(idea.id)"
-              [attr.aria-expanded]="activeCommentIdeaId() === idea.id"
-              [disabled]="idea.id == null"
-              [title]="
-                idea.id == null
-                  ? 'Identifiant backend manquant pour cette idée'
-                  : 'Afficher les commentaires'
-              "
+          <div class="fb-card-body">
+            <h3 class="title">{{ idea.title }}</h3>
+            <p class="text">{{ idea.description }}</p>
+          </div>
+
+          <div class="fb-card-stats">
+            <div class="voters">
+              <fa-icon [icon]="faHeartSolid" class="heart-icon"></fa-icon>
+              <span>{{ idea.voteCount }} personnes aiment ça</span>
+            </div>
+            <div class="comment-count" (click)="toggleComments(idea.id)">
+              {{ idea.comments.length }} commentaires
+            </div>
+          </div>
+
+          <div class="fb-card-actions">
+            <button 
+              class="action-btn" 
+              [class.voted]="idea.isVoted"
+              (click)="toggleVote(idea.id)"
+              [disabled]="votingId() === idea.id || idea.id == null"
             >
-              {{ activeCommentIdeaId() === idea.id ? 'Masquer' : 'Consulter et commenter' }}
+              <fa-icon [icon]="faHeartSolid"></fa-icon>
+              <span>{{ idea.isVoted ? 'J\'aime' : 'J\'aime' }}</span>
+            </button>
+
+            <button 
+              class="action-btn" 
+              (click)="toggleComments(idea.id)"
+              [class.active]="activeCommentIdeaId() === idea.id"
+            >
+              <fa-icon [icon]="faComment"></fa-icon>
+              <span>Commenter</span>
             </button>
           </div>
 
-          <div class="expanded-section" *ngIf="activeCommentIdeaId() === idea.id">
-            <div class="comments-section">
-              <h4>Commentaires ({{ idea.comments.length }})</h4>
-
-              <div class="comments-list" *ngIf="idea.comments && idea.comments.length > 0">
-                <div *ngFor="let comment of idea.comments" class="comment">
-                  <div class="comment-header">
-                    <strong>{{ comment.studentName }}</strong>
-                    <span class="comment-date">{{ comment.createdAt | date: 'dd/MM/yyyy' }}</span>
-                  </div>
-                  <p class="comment-content">{{ comment.content }}</p>
+  
+          <div class="fb-comments-panel" *ngIf="activeCommentIdeaId() === idea.id">
+            <div class="fb-comment-list">
+              <div *ngFor="let comment of idea.comments" class="fb-comment-item">
+                <div class="avatar-initials-sm" [style.background]="getAvatarColor(comment.studentName)">
+                  {{ getInitials(comment.studentName) }}
+                </div>
+                <div class="comment-bubble">
+                  <span class="user-name">{{ comment.studentName }}</span>
+                  <p class="content">{{ comment.content }}</p>
                 </div>
               </div>
 
-              <p *ngIf="!idea.comments || idea.comments.length === 0" class="no-comments">
-                Aucun commentaire pour le moment
-              </p>
+              <div *ngIf="!idea.comments || idea.comments.length === 0" class="empty-comments">
+                Soyez le premier à commenter.
+              </div>
+            </div>
 
-              <form
-                [formGroup]="commentForm"
-                (ngSubmit)="submitComment(idea.id)"
-                class="comment-form"
-              >
+    
+            <form [formGroup]="commentForm" (ngSubmit)="submitComment(idea.id)" class="fb-input-bar">
+              <div class="avatar-initials-sm" [style.background]="getAvatarColor('Moi')">
+                {{ getInitials('Moi') }}
+              </div>
+              <div class="input-container">
                 <textarea
                   formControlName="content"
-                  placeholder="Partager un commentaire constructif..."
-                  class="comment-input"
-                  rows="3"
+                  placeholder="Écrivez un commentaire..."
+                  rows="1"
+                  class="fb-textarea"
+                  (keydown.enter)="onEnterKey($event, idea.id)"
                 ></textarea>
-                <div class="comment-actions">
-                  <button type="submit" class="btn-submit-comment" [disabled]="idea.id == null">
-                    Publier le commentaire
-                  </button>
-                  <button type="button" class="btn-cancel-comment" (click)="cancelCommenting()">
-                    Annuler
-                  </button>
-                </div>
-                <p
-                  *ngIf="commentForm.get('content')?.invalid && commentForm.get('content')?.touched"
-                  class="error-text"
-                >
-                  Le commentaire doit contenir entre 3 et 200 caractères.
-                </p>
-              </form>
-            </div>
+                <button type="submit" class="fb-send-btn" [disabled]="commentForm.invalid || idea.id == null">
+                  <fa-icon [icon]="faPaperPlane"></fa-icon>
+                </button>
+              </div>
+            </form>
           </div>
         </article>
       </div>
