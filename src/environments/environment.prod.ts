@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://audit-management-production.com',
+  apiUrl: 'https://audit-management-back.onrender.com',
   aiAssistantApiUrl: 'https://audit-ai-gold.vercel.app/api',
   supabase: {
     url: 'https://jcuvxwdrivmjgolvnlly.supabase.co',
