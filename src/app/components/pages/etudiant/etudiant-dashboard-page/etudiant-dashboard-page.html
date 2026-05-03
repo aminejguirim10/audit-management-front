@@ -5,31 +5,17 @@
   <div class="container">
     <header class="hero-card">
       <div class="hero-copy">
-        <span class="eyebrow">Boite a idees collaborative</span>
-        <h1>Tableau de bord etudiant</h1>
+        <span class="eyebrow">Boite à idées collaborative</span>
+        <h1>Tableau de bord étudiant</h1>
         <p>
-          Explorez les idees de la communaute, suivez les propositions les plus soutenues et
+          Explorez les idées de la communauté, suivez les propositions les plus soutenues et
           participez avec vos votes et commentaires.
         </p>
 
-        <div class="hero-metrics">
-          <article class="mini-metric">
-            <span>Idees publiees</span>
-            <strong>{{ totalIdeas() }}</strong>
-          </article>
-          <article class="mini-metric">
-            <span>Idees acceptees</span>
-            <strong>{{ acceptedIdeas() }}</strong>
-          </article>
-          <article class="mini-metric">
-            <span>Votes totaux</span>
-            <strong>{{ totalVotes() }}</strong>
-          </article>
-        </div>
       </div>
 
       <div class="hero-panel" *ngIf="topIdea() as top">
-        <span class="panel-label">Idee en vedette</span>
+        <span class="panel-label">Idée en vedette</span>
         <div class="hero-panel-body">
           <span class="hero-panel-kicker">La plus suivie du moment</span>
           <strong>{{ top.title }}</strong>
@@ -48,27 +34,27 @@
 
     <section class="stats-grid">
       <article class="stat-card accent-blue">
-        <span class="stat-label">Idees publiees</span>
+        <span class="stat-label">Idées publiées</span>
         <strong>{{ totalIdeas() }}</strong>
-        <small>Vue d'ensemble de la communaute</small>
+        <small>Vue d'ensemble de la communauté</small>
       </article>
 
       <article class="stat-card accent-emerald">
-        <span class="stat-label">Acceptees</span>
+        <span class="stat-label">Acceptées</span>
         <strong>{{ acceptedIdeas() }}</strong>
-        <small>Idees deja validees</small>
+        <small>Idées déjà validées</small>
       </article>
 
       <article class="stat-card accent-amber">
         <span class="stat-label">En cours</span>
         <strong>{{ pendingIdeas() }}</strong>
-        <small>Propositions en evaluation</small>
+        <small>Propositions en évaluation</small>
       </article>
 
       <article class="stat-card accent-rose">
         <span class="stat-label">Votes totaux</span>
         <strong>{{ totalVotes() }}</strong>
-        <small>Engagement de la communaute</small>
+        <small>Engagement de la communauté</small>
       </article>
     </section>
 
@@ -76,9 +62,9 @@
       <div class="section-head">
         <div>
           <span class="section-kicker">Navigation rapide</span>
-          <h2>Filtrer les idees</h2>
+          <h2>Filtrer les idées</h2>
         </div>
-        <span class="result-chip">{{ filteredIdeas().length }} idee(s)</span>
+        <span class="result-chip">{{ filteredIdeas().length }} idée(s)</span>
       </div>
 
       <div class="filter-buttons">
@@ -88,36 +74,36 @@
           (click)="filterStatus.set(status)"
           class="filter-btn"
         >
-          {{ status === 'TOUS' ? 'Toutes les idees' : statusLabels[status] }}
+          {{ status === 'TOUS' ? 'Toutes les idées' : statusLabels[status] }}
         </button>
       </div>
     </section>
 
     <div *ngIf="loading()" class="feedback-card loading-card">
       <div class="spinner"></div>
-      <p>Chargement des idees en cours...</p>
+      <p>Chargement des idées en cours...</p>
     </div>
 
     <div *ngIf="!loading() && hasIdeasWithMissingIds()" class="feedback-card warning-card">
-      Certaines idees n'ont pas d'identifiant backend. Les actions sont bloquees sur ces cartes
-      pour eviter tout envoi vers une autre idee.
+      Certaines idées n'ont pas d'identifiant backend. Les actions sont bloquées sur ces cartes
+      pour éviter tout envoi vers une autre idée.
     </div>
 
     <section class="ideas-section">
       <div class="section-head">
         <div>
-          <span class="section-kicker">Communaute</span>
-          <h2>Idees disponibles</h2>
+          <span class="section-kicker">Communauté</span>
+          <h2>Idées disponibles</h2>
         </div>
       </div>
 
       <div class="empty-state" *ngIf="!loading() && filteredIdeas().length === 0">
-        <h3>Aucune idee disponible</h3>
+        <h3>Aucune idée disponible</h3>
         <p>Essayez un autre filtre pour afficher davantage de propositions.</p>
       </div>
 
       <div class="ideas-list" *ngIf="!loading() && filteredIdeas().length > 0">
-        <article *ngFor="let idea of filteredIdeas()" class="idea-card">
+        <article *ngFor="let idea of filteredIdeas(); trackBy: trackByIdea" class="idea-card">
           <div class="idea-topbar">
             <div class="badge-row">
               <span [ngClass]="getCategoryBadgeClass(idea.category)">
@@ -138,18 +124,25 @@
           <div class="idea-footer">
             <div class="stats">
               <button
-                class="stat-btn vote-btn"
+                class="stat-btn like-btn"
+                [class.voted]="idea.isVoted"
                 (click)="toggleVote(idea.id)"
                 [disabled]="votingId() === idea.id || idea.id == null"
                 [title]="
                   idea.id == null
-                    ? 'Identifiant backend manquant pour cette idee'
-                    : 'Voter pour cette idee'
+                    ? 'Identifiant backend manquant pour cette idée'
+                    : 'Voter pour cette idée'
                 "
               >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="heart-icon">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
+
+              <div class="stat-btn vote-count">
                 <span class="stat-key">Votes</span>
                 <strong>{{ idea.voteCount }}</strong>
-              </button>
+              </div>
 
               <div class="stat-btn comment-count">
                 <span class="stat-key">Commentaires</span>
@@ -164,7 +157,7 @@
               [disabled]="idea.id == null"
               [title]="
                 idea.id == null
-                  ? 'Identifiant backend manquant pour cette idee'
+                  ? 'Identifiant backend manquant pour cette idée'
                   : 'Afficher les commentaires'
               "
             >
@@ -213,7 +206,7 @@
                   *ngIf="commentForm.get('content')?.invalid && commentForm.get('content')?.touched"
                   class="error-text"
                 >
-                  Le commentaire doit contenir entre 3 et 200 caracteres.
+                  Le commentaire doit contenir entre 3 et 200 caractères.
                 </p>
               </form>
             </div>

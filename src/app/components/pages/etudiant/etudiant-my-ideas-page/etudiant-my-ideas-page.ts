@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -145,9 +145,31 @@ export class EtudiantMyIdeasPage implements OnInit {
 
     this.commentService.add(dto).subscribe({
       next: () => {
+        const studentName =
+          this.authService.user()?.name ?? this.authService.user()?.email ?? 'Moi';
+
+        this.ideas.update((ideas) =>
+          ideas.map((idea) => {
+            if (idea.id === ideaId) {
+              return {
+                ...idea,
+                comments: [
+                  ...(idea.comments || []),
+                  {
+                    id: Date.now(),
+                    content: dto.content,
+                    createdAt: new Date().toISOString(),
+                    studentName: studentName,
+                  },
+                ],
+              };
+            }
+            return idea;
+          })
+        );
+
         this.toastr.success('Commentaire ajouté', 'Succès');
         this.commentForm.reset();
-        this.loadIdeas();
       },
       error: (err) => {
         const message = err.error?.message ?? 'Erreur lors de l\'ajout du commentaire';

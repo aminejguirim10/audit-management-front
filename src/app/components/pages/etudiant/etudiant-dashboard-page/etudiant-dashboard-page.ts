@@ -6,6 +6,7 @@ import { finalize } from 'rxjs/operators';
 import { StudentIdeaService } from '../../../../services/student-idea.service';
 import { CommentService } from '../../../../services/comment.service';
 import { VoteService } from '../../../../services/vote.service';
+import { AuthService } from '../../../../services/auth.service';
 import {
   FindOneIdeaDto,
   AddCommentDto,
@@ -26,6 +27,7 @@ export class EtudiantDashboardPage implements OnInit {
   private readonly ideaService = inject(StudentIdeaService);
   private readonly commentService = inject(CommentService);
   private readonly voteService = inject(VoteService);
+  private readonly authService = inject(AuthService);
   private readonly toastr = inject(ToastrService);
 
   readonly ideas = signal<FindOneIdeaDto[]>([]);
@@ -122,8 +124,20 @@ export class EtudiantDashboardPage implements OnInit {
       .pipe(finalize(() => this.votingId.set(null)))
       .subscribe({
         next: () => {
-          this.loadIdeas();
-          this.toastr.success('Vote mis à jour', 'Succès');
+          this.ideas.update((ideas) =>
+            ideas.map((idea) => {
+              if (idea.id === ideaId) {
+                const isCurrentlyVoted = idea.isVoted ?? false;
+                return {
+                  ...idea,
+                  isVoted: !isCurrentlyVoted,
+                  voteCount: isCurrentlyVoted ? idea.voteCount - 1 : idea.voteCount + 1,
+                };
+              }
+              return idea;
+            })
+          );
+          this.toastr.success('Vote pris en compte', 'Succès');
         },
         error: (err) => {
           const message = err.error?.message ?? 'Erreur lors du vote';
@@ -155,9 +169,31 @@ export class EtudiantDashboardPage implements OnInit {
 
     this.commentService.add(dto).subscribe({
       next: () => {
+        const studentName =
+          this.authService.user()?.name ?? this.authService.user()?.email ?? 'Moi';
+
+        this.ideas.update((ideas) =>
+          ideas.map((idea) => {
+            if (idea.id === ideaId) {
+              return {
+                ...idea,
+                comments: [
+                  ...(idea.comments || []),
+                  {
+                    id: Date.now(),
+                    content: dto.content,
+                    createdAt: new Date().toISOString(),
+                    studentName: studentName,
+                  },
+                ],
+              };
+            }
+            return idea;
+          })
+        );
+
         this.toastr.success('Commentaire ajouté', 'Succès');
         this.commentForm.reset();
-        this.loadIdeas();
       },
       error: (err) => {
         const message = err.error?.message ?? 'Erreur lors de l\'ajout du commentaire';
@@ -172,5 +208,9 @@ export class EtudiantDashboardPage implements OnInit {
 
   getCategoryBadgeClass(category: string): string {
     return `category-badge ${this.categoryColors[category as keyof typeof this.categoryColors] || 'bg-gray-100'}`;
+  }
+
+  trackByIdea(index: number, idea: FindOneIdeaDto): number {
+    return idea.id ?? index;
   }
 }

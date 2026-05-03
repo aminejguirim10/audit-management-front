@@ -183,24 +183,92 @@
   color: #64748b;
 }
 
-.ideas-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
+.table-section {
+  margin-top: 1.5rem;
 }
 
-.idea-card {
-  padding: 1.3rem;
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.92);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 22px 56px rgba(15, 23, 42, 0.08);
 }
 
-.idea-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.12);
+.ideas-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.ideas-table th {
+  padding: 1.25rem 1.5rem;
+  background: #f8fbff;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.ideas-table td {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.col-title {
+  min-width: 200px;
+}
+
+.col-desc {
+  max-width: 300px;
+  color: #475569;
+}
+
+.ideas-table tbody tr:hover:not(.comments-row) {
+  background: rgba(248, 251, 255, 0.6);
+}
+
+.ideas-table .stat-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.comments-row td {
+  padding: 0;
+  border-bottom: none;
+}
+
+.comment-btn {
+  gap: 0.5rem;
+  min-width: auto;
+}
+
+.comment-btn svg {
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.comments-row .comments-panel {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  background: #f8fbff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem 2.5rem;
 }
 
 .idea-main {
@@ -263,6 +331,7 @@
   border: 1px solid transparent;
   font-size: 0.82rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .author-pill {

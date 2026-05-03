@@ -14,6 +14,7 @@ export interface Idea {
   studentName: string;
   voteCount: number;
   comments: CommentSummary[];
+  isVoted?: boolean;
 }
 
 export interface AddIdeaDto {
@@ -33,6 +34,7 @@ export interface FindOneIdeaDto {
   voteCount: number;
   comments: CommentSummary[];
   studentName: string;
+  isVoted?: boolean;
 }
 
 export interface IdeaStatusUpdateDto {

@@ -301,13 +301,13 @@ export class AuditeDashboardPage implements OnInit {
           const responseId = this.getResponseId(question);
           const request$ = responseId
             ? this.reponseService.update({
-                reponseId: responseId,
-                optionId,
-              } satisfies UpdateReponseDto)
+              reponseId: responseId,
+              optionId,
+            } satisfies UpdateReponseDto)
             : this.reponseService.add({
-                questionId: question.id,
-                optionId,
-              } satisfies AddReponseDto);
+              questionId: question.id,
+              optionId,
+            } satisfies AddReponseDto);
 
           return request$.pipe(
             map(() => true as const),
@@ -323,7 +323,7 @@ export class AuditeDashboardPage implements OnInit {
           if (failed) {
             this.toastr.error(
               (failed.error as { error?: { message?: string } })?.error?.message ??
-                "Une ou plusieurs reponses n'ont pas pu etre enregistrees.",
+              "Une ou plusieurs reponses n'ont pas pu etre enregistrees.",
               'Erreur',
             );
             return;
