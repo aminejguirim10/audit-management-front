@@ -153,109 +153,64 @@
       </button>
     </div>
     <div class="modal-body" *ngIf="selectedAudit()">
-      <!-- Informations générales -->
       <div class="details-grid">
         <div class="detail-item">
-          <span class="label">Titre</span>
-          <span class="value">{{ selectedAudit()?.title }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Type</span>
-          <span class="value">{{ selectedAudit()?.typeAuditName }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Département</span>
-          <span class="value">{{ selectedAudit()?.department }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Auditée</span>
-          <span class="value">{{ selectedAudit()?.auditeName }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Auditeur</span>
-          <span class="value">{{ selectedAudit()?.auditeurName }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Date de début</span>
-          <span class="value">{{ selectedAudit()?.dateDebut }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Date de fin</span>
-          <span class="value">{{ selectedAudit()?.dateFin }}</span>
-        </div>
-        <div class="detail-item">
-          <span class="label">Statut</span>
-          <span class="value status-value">
-            <span class="status-pill" [ngClass]="getStatusClass(selectedAudit()?.status!)">
-              {{ getStatusLabel(selectedAudit()?.status!) }}
-            </span>
-          </span>
-        </div>
-      </div>
-
-      <!-- Score Total et Résultat -->
-      <div class="score-section" *ngIf="selectedAudit()?.scoreTotal !== undefined">
-        <div class="score-card">
-          <div class="score-item">
-            <span class="label">Score Total</span>
-            <span class="score-value">{{ getAuditScorePercentage(selectedAudit()) }}%</span>
+          <div class="detail-icon"><fa-icon [icon]="faFileAlt"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Titre</span>
+            <span class="value">{{ selectedAudit()?.title }}</span>
           </div>
-          <div class="score-item" *ngIf="selectedAudit()?.auditResult">
-            <span class="label">Résultat</span>
-            <span
-              class="result-badge"
-              [ngClass]="'result-' + selectedAudit()?.auditResult?.toLowerCase()"
-            >
-              {{ selectedAudit()?.auditResult }}
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faLayerGroup"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Type</span>
+            <span class="value">{{ selectedAudit()?.typeAuditName }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faBuilding"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Département</span>
+            <span class="value">{{ selectedAudit()?.department }}</span>
+          </div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faUser"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Auditée</span>
+            <span class="value">{{ selectedAudit()?.auditeName }}</span>
+          </div>
+        </div>
+        <div class="detail-item highlight-item" *ngIf="selectedAudit()?.scoreTotal !== undefined">
+          <div class="detail-icon score-icon"><fa-icon [icon]="faChartBar"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Score</span>
+            <span class="value score-text">{{ getAuditScorePercentage(selectedAudit()) }}%</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-icon"><fa-icon [icon]="faSync"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Statut</span>
+            <span class="value">
+              <span class="status-pill" [ngClass]="getStatusClass(selectedAudit()?.status!)">
+                {{ getStatusLabel(selectedAudit()?.status!) }}
+              </span>
             </span>
           </div>
         </div>
-      </div>
 
-      <!-- Questions avec Réponses et Scores -->
-      <div
-        class="questions-section"
-        *ngIf="selectedAudit()?.questions && selectedAudit()?.questions!.length > 0"
-      >
-        <h3 class="questions-title">Questions et Réponses</h3>
-        <div class="questions-list">
-          <div
-            class="question-card"
-            *ngFor="let question of selectedAudit()?.questions; let i = index"
-          >
-            <div class="question-header">
-              <span class="question-number">Q{{ i + 1 }}</span>
-              <h4 class="question-text">{{ question.title }}</h4>
-            </div>
 
-            <!-- Options disponibles -->
-            <div class="options-container">
-              <p class="options-label">Options disponibles:</p>
-              <div
-                class="option-item"
-                *ngFor="let option of question.options; let j = index"
-                [class.selected]="option.id === getSelectedOptionId(question)"
-              >
-                <span class="option-badge">{{ j + 1 }}</span>
-                <span class="option-label">{{ option.label }}</span>
-                <span class="selected-check" *ngIf="option.id === getSelectedOptionId(question)">✓</span>
-              </div>
-            </div>
-
+        <div class="detail-item full-width-item">
+          <div class="detail-icon"><fa-icon [icon]="faClock"></fa-icon></div>
+          <div class="detail-info">
+            <span class="label">Période d'audit</span>
+            <span class="value">{{ selectedAudit()?.dateDebut }} — {{ selectedAudit()?.dateFin }}</span>
           </div>
         </div>
       </div>
-
-      <!-- Pas de questions -->
-      <div
-        class="no-questions"
-        *ngIf="!selectedAudit()?.questions || selectedAudit()?.questions!.length === 0"
-      >
-        <p>Aucune question définie pour cet audit</p>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" (click)="closeAuditDetails()">Fermer</button>
     </div>
   </div>
 </div>
@@ -681,8 +636,9 @@
       <fa-icon [icon]="faChevronRight" style="margin-left: 0.5rem;"></fa-icon>
     </button>
 
-    <button type="button" class="btn-primary" (click)="submitAudit()" *ngIf="currentStep() === 3">
-      Créer l'audit
+    <button type="button" class="btn-primary" (click)="submitAudit()" *ngIf="currentStep() === 3" [disabled]="submittingAudit() || auditForm.invalid">
+      <fa-icon [icon]="faSync" class="spinning" style="margin-right: 0.5rem;" *ngIf="submittingAudit()"></fa-icon>
+      {{ submittingAudit() ? 'Création en cours...' : "Créer l'audit" }}
     </button>
   </div>
 </div>

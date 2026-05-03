@@ -1,134 +1,156 @@
-<section class="audite-dashboard">
-  <header class="hero-card">
-    <div class="hero-copy">
-      <span class="eyebrow">Espace audite</span>
-      <h1>Consultez vos audits et repondez dans une interface claire</h1>
+<div class="audite-dashboard">
+  <header class="dashboard-header">
+    <div class="dashboard-intro">
+      <span class="eyebrow">
+        <fa-icon [icon]="faHistory" style="margin-right: 0.5rem;"></fa-icon>
+        Espace Audité
+      </span>
+      <h1>Suivi de vos audits et participation</h1>
       <p>
-        Le tableau de bord centralise vos audits assignes dans un tableau moderne. Un clic ouvre
-        un espace de reponse complet avec un seul bouton d'envoi en fin de formulaire.
+        Consultez la liste des audits qui vous sont assignés, répondez aux questionnaires et téléchargez vos rapports.
       </p>
     </div>
-
-    <div class="hero-panel">
-      <span class="panel-label">Suivi rapide</span>
-      <strong>{{ stats().total }}</strong>
-      <p>audit(s) visible(s) pour votre espace audite</p>
+    <div class="hero-summary" style="text-align: right;">
+        <span class="eyebrow" style="background: var(--emerald-soft); color: var(--emerald);">
+            <fa-icon [icon]="faCheckDouble" style="margin-right: 0.5rem;"></fa-icon>
+            {{ stats().completed }} Terminés
+        </span>
     </div>
   </header>
 
   <section class="stats-grid">
-    <article class="stat-card stat-total">
-      <span>Total audits</span>
-      <strong>{{ stats().total }}</strong>
-      <small>Toutes les missions qui vous sont assignees</small>
-    </article>
-    <article class="stat-card stat-plan">
-      <span>Planifies</span>
-      <strong>{{ stats().planned }}</strong>
-      <small>Audits a preparer avant leur ouverture</small>
-    </article>
-    <article class="stat-card stat-live">
-      <span>En cours</span>
-      <strong>{{ stats().active }}</strong>
-      <small>Questionnaires actuellement actifs</small>
-    </article>
-    <article class="stat-card stat-done">
-      <span>Termines</span>
-      <strong>{{ stats().completed }}</strong>
-      <small>Audits deja traites et consultables</small>
-    </article>
-  </section>
-
-  <section class="toolbar-card">
-    <div class="search-box">
-      <label>Recherche</label>
-      <input
-        type="text"
-        placeholder="Titre, type, departement ou auditeur"
-        [value]="searchTerm()"
-        (input)="onSearchInput($event)"
-      />
-    </div>
-
-    <div class="filter-box">
-      <label>Statut</label>
-      <select [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)">
-        <option *ngFor="let status of statusOptions" [value]="status">
-          {{ status === 'TOUS' ? 'Tous' : getStatusLabel(status) }}
-        </option>
-      </select>
-    </div>
-  </section>
-
-  <section class="table-card">
-    <div class="section-head">
-      <div>
-        <span class="section-kicker">Mes audits</span>
-        <h2>Liste des audits assignes</h2>
+    <article class="stat-card stat-primary">
+      <div class="stat-header">
+        <span>Total audits</span>
+        <fa-icon [icon]="faChartBar"></fa-icon>
       </div>
-      <span class="results-pill">{{ filteredAudits().length }} resultat(s)</span>
+      <strong>{{ stats().total }}</strong>
+      <small>Missions assignées à votre espace</small>
+    </article>
+    <article class="stat-card stat-warm">
+      <div class="stat-header">
+        <span>Planifiés</span>
+        <fa-icon [icon]="faClock"></fa-icon>
+      </div>
+      <strong>{{ stats().planned }}</strong>
+      <small>Audits en attente de démarrage</small>
+    </article>
+    <article class="stat-card stat-cool">
+      <div class="stat-header">
+        <span>En cours</span>
+        <fa-icon [icon]="faSync"></fa-icon>
+      </div>
+      <strong>{{ stats().active }}</strong>
+      <small>Questionnaires actifs à remplir</small>
+    </article>
+    <article class="stat-card stat-success">
+      <div class="stat-header">
+        <span>Terminés</span>
+        <fa-icon [icon]="faCheckCircle"></fa-icon>
+      </div>
+      <strong>{{ stats().completed }}</strong>
+      <small>Audits clôturés et consultables</small>
+    </article>
+  </section>
+
+  <section class="controls-panel">
+    <div class="filter-row">
+      <div class="search-box">
+        <label>Rechercher un audit</label>
+        <div style="position: relative;">
+          <fa-icon [icon]="faSearch" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--muted);"></fa-icon>
+          <input
+            type="text"
+            placeholder="Titre, type, département ou auditeur..."
+            [value]="searchTerm()"
+            (input)="onSearchInput($event)"
+            style="padding-left: 3rem;"
+          />
+        </div>
+      </div>
+
+      <div class="status-box">
+        <label>Filtrer par statut</label>
+        <select [value]="selectedStatus()" (change)="selectedStatus.set($any($event.target).value)">
+          <option *ngFor="let status of statusOptions" [value]="status">
+            {{ status === 'TOUS' ? 'Tous les statuts' : getStatusLabel(status) }}
+          </option>
+        </select>
+      </div>
     </div>
+  </section>
+
+  <div class="audit-table-container">
+    <table class="modern-table" *ngIf="!loading() && filteredAudits().length > 0">
+      <thead>
+        <tr>
+          <th class="col-title">Audit</th>
+          <th>Type d'audit</th>
+          <th>Département</th>
+          <th>Auditeur</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let audit of filteredAudits(); trackBy: trackByAudit" (click)="openAuditWorkspace(audit)">
+          <td class="col-title">
+            <strong>{{ audit.title }}</strong>
+          </td>
+          <td>
+            <span class="type-tag">
+              <fa-icon [icon]="faLayerGroup" style="margin-right: 0.4rem; font-size: 0.8rem;"></fa-icon>
+              {{ audit.typeAuditName }}
+            </span>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <fa-icon [icon]="faBuilding" style="color: var(--muted);"></fa-icon>
+              {{ formatDepartment(audit.department) }}
+            </div>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+              <fa-icon [icon]="faUser" style="color: var(--muted);"></fa-icon>
+              {{ audit.auditeurName }}
+            </div>
+          </td>
+          <td>
+            <span class="status-pill" [ngClass]="getStatusClass(audit.status)">
+              {{ getStatusLabel(audit.status) }}
+            </span>
+          </td>
+          <td (click)="$event.stopPropagation()">
+            <div class="action-group">
+              <button class="action-btn chat-btn" title="Discuter avec l'auditeur" (click)="openChat(audit)">
+                <fa-icon [icon]="faComment"></fa-icon>
+              </button>
+              <button
+                class="action-btn report-btn"
+                title="Consulter le rapport"
+                [disabled]="audit.status !== 'TERMINEE'"
+                (click)="openReport(audit)"
+              >
+                <fa-icon [icon]="faFileAlt"></fa-icon>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
     <div class="empty-state" *ngIf="!loading() && filteredAudits().length === 0">
-      <h3>Aucun audit trouve</h3>
-      <p>Essayez un autre filtre ou revenez plus tard si aucun audit ne vous est encore assigne.</p>
+      <fa-icon [icon]="faClipboardList" class="empty-icon"></fa-icon>
+      <h3>Aucun audit trouvé</h3>
+      <p>Il semble qu'aucun audit ne corresponde à vos critères ou ne vous soit encore assigné.</p>
     </div>
 
-    <div class="table-wrapper" *ngIf="filteredAudits().length > 0">
-      <table>
-        <thead>
-          <tr>
-            <th>Audit</th>
-            <th>Type</th>
-            <th>Departement</th>
-            <th>Auditeur</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            *ngFor="let audit of filteredAudits(); trackBy: trackByAudit"
-            class="audit-row"
-            (click)="openAuditWorkspace(audit)"
-          >
-            <td>
-              <div class="audit-name">
-                <strong>{{ audit.title }}</strong>
-              </div>
-            </td>
-            <td><span class="type-pill">{{ audit.typeAuditName }}</span></td>
-            <td>{{ formatDepartment(audit.department) }}</td>
-            <td>{{ audit.auditeurName }}</td>
-            <td>
-              <span class="status-chip" [ngClass]="getStatusClass(audit.status)">
-                {{ getStatusLabel(audit.status) }}
-              </span>
-            </td>
-            <td (click)="$event.stopPropagation()">
-              <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                <button
-                  class="action-btn chat-btn"
-                  title="Discuter"
-                  (click)="openChat(audit)"
-                >
-                  💬
-                </button>
-                <button
-                  class="action-btn report-btn"
-                  title="Générer le rapport"
-                  [disabled]="audit.status !== 'TERMINEE'"
-                  (click)="openReport(audit)"
-                >
-                  📄
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="empty-state" *ngIf="loading()">
+      <fa-icon [icon]="faSync" class="empty-icon spinning"></fa-icon>
+      <h3>Chargement des données...</h3>
+      <p>Veuillez patienter pendant que nous récupérons vos audits.</p>
     </div>
-  </section>
+  </div>
 
   <div class="modal-overlay" *ngIf="showAuditWorkspace()" (click)="closeAuditWorkspace()"></div>
 
@@ -198,7 +220,6 @@
                 <span class="option-text">{{ option.label }}</span>
               </button>
             </div>
-
           </article>
         </div>
 
@@ -236,7 +257,11 @@
       </button>
     </footer>
   </section>
-</section>
+</div>
 
 <!-- Report Modal -->
-<app-audit-report *ngIf="reportAudit()" [audit]="reportAudit()" (close)="closeReport()"></app-audit-report>
+<app-audit-report
+  *ngIf="reportAudit()"
+  [audit]="reportAudit()"
+  (close)="closeReport()"
+></app-audit-report>

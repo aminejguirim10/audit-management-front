@@ -173,27 +173,36 @@
       Construction de la timeline à partir des détails des audits...
     </div>
 
-    <div class="timeline-list" *ngIf="!loadingTimeline() && timelineItems().length > 0">
-      <article class="timeline-item" *ngFor="let item of timelineItems(); trackBy: trackByTimeline">
-        <div class="timeline-rail">
-          <span class="timeline-dot"></span>
+    <div class="timeline-container" *ngIf="!loadingTimeline() && groupedTimeline().length > 0">
+      <div class="timeline-group" *ngFor="let group of groupedTimeline()">
+        <div class="timeline-month-header">
+          <span class="month">{{ group.month }}</span>
+          <span class="year">{{ group.year }}</span>
         </div>
+        
+        <div class="timeline-list">
+          <article class="timeline-item" *ngFor="let item of group.items; trackBy: trackByTimeline">
+            <div class="timeline-rail">
+              <span class="timeline-dot"></span>
+            </div>
 
-        <div class="timeline-content">
-          <div class="timeline-head">
-            <span class="timeline-badge" [ngClass]="getTimelineBadgeClass(item.status)">
-              <fa-icon [icon]="getTimelineStatusIcon(item.status)" style="margin-right: 0.4rem;"></fa-icon>
-              {{ getTimelineBadgeLabel(item.status) }}
-            </span>
-            <time>
-              <fa-icon [icon]="faClock" style="margin-right: 0.4rem;"></fa-icon>
-              {{ item.period }}
-            </time>
-          </div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.subtitle }}</p>
+            <div class="timeline-content">
+              <div class="timeline-head">
+                <span class="timeline-badge" [ngClass]="getTimelineBadgeClass(item.status)">
+                  <fa-icon [icon]="getTimelineStatusIcon(item.status)" style="margin-right: 0.4rem;"></fa-icon>
+                  {{ getTimelineBadgeLabel(item.status) }}
+                </span>
+                <time>
+                  <fa-icon [icon]="faClock" style="margin-right: 0.4rem;"></fa-icon>
+                  {{ item.period }}
+                </time>
+              </div>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.subtitle }}</p>
+            </div>
+          </article>
         </div>
-      </article>
+      </div>
     </div>
 
     <div class="empty-state timeline-empty" *ngIf="!loadingTimeline() && timelineItems().length === 0">
