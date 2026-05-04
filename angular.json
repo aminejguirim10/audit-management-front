@@ -21,6 +21,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "favicon.png",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": ["src/styles.css"]
@@ -79,6 +84,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "favicon.png",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": ["src/styles.css"]
