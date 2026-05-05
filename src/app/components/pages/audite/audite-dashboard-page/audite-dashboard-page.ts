@@ -3,8 +3,14 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, from, of } from 'rxjs';
-import { catchError, mergeMap, finalize, map, toArray } from 'rxjs/operators';
-import { AuditDetails, AuditStatus, AuditSummary, Question, QuestionOption } from '../../../../models/audit.model';
+import { catchError, concatMap, finalize, map, toArray } from 'rxjs/operators';
+import {
+  AuditDetails,
+  AuditStatus,
+  AuditSummary,
+  Question,
+  QuestionOption,
+} from '../../../../models/audit.model';
 import { AddReponseDto, UpdateReponseDto } from '../../../../models/reponse.model';
 import { AuditService } from '../../../../services/audit.service';
 import { ReponseService } from '../../../../services/reponse.service';
@@ -36,9 +42,8 @@ import {
   faSync,
   faClipboardList,
   faCheckDouble,
-  faCalendarAlt
+  faCalendarAlt,
 } from '@fortawesome/free-solid-svg-icons';
-
 
 const AUDIT_STATUS_LABELS: Record<AuditStatus, string> = {
   PLANIFIE: 'Planifié',
@@ -57,7 +62,6 @@ interface DraftSelection {
 }
 
 type SubmitResult = true | { error: unknown; questionId: number };
-
 
 @Component({
   selector: 'app-audite-dashboard-page',
@@ -110,7 +114,12 @@ export class AuditeDashboardPage implements OnInit {
   readonly selectedStatus = signal<'TOUS' | AuditStatus>('TOUS');
   readonly draftSelections = signal<Record<number, DraftSelection>>({});
 
-  readonly statusOptions: Array<'TOUS' | AuditStatus> = ['TOUS', 'PLANIFIE', 'EN_COURS', 'TERMINEE'];
+  readonly statusOptions: Array<'TOUS' | AuditStatus> = [
+    'TOUS',
+    'PLANIFIE',
+    'EN_COURS',
+    'TERMINEE',
+  ];
 
   readonly stats = computed(() => ({
     total: this.audits().length,
@@ -151,7 +160,8 @@ export class AuditeDashboardPage implements OnInit {
       return 0;
     }
 
-    return details.questions.filter((question) => this.getSelectedOptionId(question) !== null).length;
+    return details.questions.filter((question) => this.getSelectedOptionId(question) !== null)
+      .length;
   });
 
   readonly completionRatio = computed(() => {
@@ -215,7 +225,7 @@ export class AuditeDashboardPage implements OnInit {
     this.selectedAuditSummary.set(audit);
     this.showAuditWorkspace.set(true);
     this.loadingDetails.set(true);
-  
+
     this.auditService
       .findById(audit.id)
       .pipe(finalize(() => this.loadingDetails.set(false)))
@@ -231,23 +241,23 @@ export class AuditeDashboardPage implements OnInit {
         },
       });
   }
-  
+
   editAuditResponses(audit: AuditSummary): void {
     this.openAuditWorkspace(audit);
   }
-  
+
   closeAuditWorkspace(): void {
     this.showAuditWorkspace.set(false);
     this.selectedAuditSummary.set(null);
     this.selectedAuditDetails.set(null);
     this.draftSelections.set({});
   }
-  
+
   openReport(audit: AuditSummary): void {
     if (audit.status !== 'TERMINEE') return;
     this.auditService.findById(audit.id).subscribe({
       next: (details) => this.reportAudit.set(this.sortAuditDetails(details)),
-      error: () => this.toastr.error('Impossible de charger les details pour le rapport')
+      error: () => this.toastr.error('Impossible de charger les details pour le rapport'),
     });
   }
 
@@ -258,7 +268,7 @@ export class AuditeDashboardPage implements OnInit {
     details.questions.sort((a, b) => a.id - b.id);
 
     // Trier les options de chaque question par sortOrder ou ID
-    details.questions.forEach(q => {
+    details.questions.forEach((q) => {
       if (q.options) {
         q.options.sort((a, b) => {
           const orderA = a.sortOrder ?? a.order ?? a.id;
@@ -351,11 +361,16 @@ export class AuditeDashboardPage implements OnInit {
     }
 
     if (details.status !== 'EN_COURS') {
-      this.toastr.info("Cet audit n'est pas en cours. Les reponses ne peuvent pas etre modifiees.", 'Information');
+      this.toastr.info(
+        "Cet audit n'est pas en cours. Les reponses ne peuvent pas etre modifiees.",
+        'Information',
+      );
       return;
     }
 
-    const unansweredQuestions = details.questions.filter((question) => this.getSelectedOptionId(question) === null);
+    const unansweredQuestions = details.questions.filter(
+      (question) => this.getSelectedOptionId(question) === null,
+    );
     if (unansweredQuestions.length > 0) {
       this.toastr.warning('Veuillez repondre a toutes les questions avant l envoi.', 'Attention');
       return;
@@ -367,9 +382,10 @@ export class AuditeDashboardPage implements OnInit {
 
     this.submittingAnswers.set(true);
 
+    // Envoyer une question à la fois évite les courses entre requêtes quand l'audit contient beaucoup de questions.
     from(questionsToSubmit)
       .pipe(
-        mergeMap((question) => {
+        concatMap((question) => {
           const optionId = this.getSelectedOptionId(question);
           if (optionId === null) {
             return of({ error: new Error('Option manquante'), questionId: question.id });
@@ -378,13 +394,13 @@ export class AuditeDashboardPage implements OnInit {
           const responseId = this.getResponseId(question);
           const request$ = responseId
             ? this.reponseService.update({
-              reponseId: responseId,
-              optionId,
-            } satisfies UpdateReponseDto)
+                reponseId: responseId,
+                optionId,
+              } satisfies UpdateReponseDto)
             : this.reponseService.add({
-              questionId: question.id,
-              optionId,
-            } satisfies AddReponseDto);
+                questionId: question.id,
+                optionId,
+              } satisfies AddReponseDto);
 
           return request$.pipe(
             map(() => true as const),
@@ -396,27 +412,33 @@ export class AuditeDashboardPage implements OnInit {
       )
       .subscribe({
         next: (results) => {
-          const failed = results.find((result): result is { error: unknown; questionId: number } => result !== true);
+          const failed = results.find(
+            (result): result is { error: unknown; questionId: number } => result !== true,
+          );
           if (failed) {
             this.toastr.error(
               (failed.error as { error?: { message?: string } })?.error?.message ??
-              "Une ou plusieurs reponses n'ont pas pu etre enregistrees.",
+                "Une ou plusieurs reponses n'ont pas pu etre enregistrees.",
               'Erreur',
             );
             return;
           }
 
           this.toastr.success('Toutes les reponses ont ete enregistrees avec succes.', 'Succes');
-          
+
           // Mise à jour optimiste locale pour éviter les clignotements
           const currentDetails = this.selectedAuditDetails();
           if (currentDetails) {
-            const updatedQuestions = currentDetails.questions.map(q => ({
+            const updatedQuestions = currentDetails.questions.map((q) => ({
               ...q,
               reponseId: q.reponseId || 999, // Fake ID to trigger "Repondu" text
-              selectedOptionId: this.getSelectedOptionId(q)
+              selectedOptionId: this.getSelectedOptionId(q),
             }));
-            this.selectedAuditDetails.set({ ...currentDetails, status: 'TERMINEE', questions: updatedQuestions });
+            this.selectedAuditDetails.set({
+              ...currentDetails,
+              status: 'TERMINEE',
+              questions: updatedQuestions,
+            });
           }
 
           const currentSummary = this.selectedAuditSummary();
@@ -425,7 +447,7 @@ export class AuditeDashboardPage implements OnInit {
           // Fermeture immédiate du workspace
           this.closeAuditWorkspace();
           this.loadAudits();
-          
+
           if (auditId) {
             this.triggerAiAnalysisIfNeeded(auditId);
           }
@@ -440,8 +462,8 @@ export class AuditeDashboardPage implements OnInit {
     this.auditService.findById(auditId).subscribe({
       next: (freshDetails) => {
         const failedQuestions = freshDetails.questions
-          .filter(q => q.score === 0)
-          .map(q => q.title);
+          .filter((q) => q.score === 0)
+          .map((q) => q.title);
 
         if (failedQuestions.length > 0) {
           this.aiService.analyzeFailedQuestions(failedQuestions).subscribe({
@@ -449,29 +471,32 @@ export class AuditeDashboardPage implements OnInit {
               const actions = response.actions;
               if (actions && actions.length > 0) {
                 // Créer les actions correctives en PARALLÈLE pour plus de rapidité
-                const saveRequests = actions.map(action => 
+                const saveRequests = actions.map((action) =>
                   this.correctiveActionService.addCorrectiveAction(auditId, {
                     title: action.title,
                     description: action.description,
                     priority: action.priority,
-                    tempsEstime: action.temps_estime
-                  })
+                    tempsEstime: action.temps_estime,
+                  }),
                 );
 
                 forkJoin(saveRequests).subscribe({
                   next: () => {
-                    this.toastr.success(`${actions.length} actions correctives générées par l'IA.`, 'Analyse IA Terminée');
+                    this.toastr.success(
+                      `${actions.length} actions correctives générées par l'IA.`,
+                      'Analyse IA Terminée',
+                    );
                   },
                   error: (err) => {
                     console.error('Failed to save AI corrective actions:', err);
-                  }
+                  },
                 });
               }
             },
-            error: (err) => console.error('AI Analysis failed:', err)
+            error: (err) => console.error('AI Analysis failed:', err),
           });
         }
-      }
+      },
     });
   }
 
