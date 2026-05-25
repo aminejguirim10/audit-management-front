@@ -134,6 +134,13 @@ Notes:
 
 ## 🚀 Run Locally
 
+### Clone the repository
+
+```bash
+git clone https://github.com/aminejguirim10/audit-management-front.git
+cd audit-management-front
+```
+
 ### Prerequisites
 
 - Node.js 20 or newer
@@ -214,6 +221,12 @@ src/app/
 	services/
 	environments/
 ```
+
+## 👥 Collaborators
+
+- Mohamed Amine Jguirim
+- Fares Tekaya
+- Firas Hizem
 
 ## 📌 Operational Notes
 
