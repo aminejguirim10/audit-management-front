@@ -18,24 +18,29 @@ export class AdminDepartmentsPage implements OnInit {
   erreur = '';
   recherche = '';
 
-  get totalChefs(): number { return this.chefs.length; }
+  get totalChefs(): number {
+    return this.chefs.length;
+  }
 
   readonly departements = ['INFORMATIQUE', 'ELECTRIQUE', 'INDUS'];
   readonly departementsLabels: Record<string, string> = {
-    'INFORMATIQUE': 'Génie Informatique',
-    'ELECTRIQUE': 'Génie Électrique',
-    'INDUS': 'Génie Industriel'
+    INFORMATIQUE: 'Génie Informatique',
+    ELECTRIQUE: 'Génie Électrique',
+    INDUS: 'Génie Industriel',
   };
 
-  ngOnInit(): void { this.loadChefs(); }
+  ngOnInit(): void {
+    this.loadChefs();
+  }
 
   get filteredChefs(): Chef[] {
     const term = this.recherche.trim().toLowerCase();
     if (!term) return this.chefs;
-    return this.chefs.filter(c =>
-      c.name?.toLowerCase().includes(term) ||
-      c.email?.toLowerCase().includes(term) ||
-      c.departement?.toLowerCase().includes(term)
+    return this.chefs.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(term) ||
+        c.email?.toLowerCase().includes(term) ||
+        c.departement?.toLowerCase().includes(term),
     );
   }
 
@@ -43,8 +48,14 @@ export class AdminDepartmentsPage implements OnInit {
     this.chargement = true;
     this.erreur = '';
     this.service.findAll().subscribe({
-      next: (data: Chef[]) => { this.chefs = data; this.chargement = false; },
-      error: () => { this.erreur = 'Erreur lors du chargement des chefs'; this.chargement = false; }
+      next: (data: Chef[]) => {
+        this.chefs = data;
+        this.chargement = false;
+      },
+      error: () => {
+        this.erreur = 'Erreur lors du chargement des chefs';
+        this.chargement = false;
+      },
     });
   }
 
@@ -57,7 +68,7 @@ export class AdminDepartmentsPage implements OnInit {
   }
 
   countByDept(dept: string): number {
-    return this.chefs.filter(c => c.departement === dept).length;
+    return this.chefs.filter((c) => c.departement === dept).length;
   }
 
   getPct(dept: string): number {
@@ -67,7 +78,12 @@ export class AdminDepartmentsPage implements OnInit {
 
   getInitials(name: string | undefined): string {
     if (!name) return '?';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   }
 
   // ── Modal création ──
@@ -82,31 +98,47 @@ export class AdminDepartmentsPage implements OnInit {
     this.modalCreationOuverte = true;
   }
 
-  fermerModalCreation(): void { this.modalCreationOuverte = false; }
+  fermerModalCreation(): void {
+    this.modalCreationOuverte = false;
+  }
 
   creerChef(): void {
-    if (!this.nouveauChef.name?.trim()) { this.erreurCreation = 'Le nom complet est obligatoire !'; return; }
-    if (!this.nouveauChef.email?.trim()) { this.erreurCreation = "L'email est obligatoire !"; return; }
+    if (!this.nouveauChef.name?.trim()) {
+      this.erreurCreation = 'Le nom complet est obligatoire !';
+      return;
+    }
+    if (!this.nouveauChef.email?.trim()) {
+      this.erreurCreation = "L'email est obligatoire !";
+      return;
+    }
     if (!this.nouveauChef.email.match(/^[a-zA-Z0-9._%+-]+@enicar\.ucar\.tn$/)) {
-      this.erreurCreation = "L'email doit être au format @enicar.ucar.tn !"; return;
+      this.erreurCreation = "L'email doit être au format @enicar.ucar.tn !";
+      return;
     }
-    if (!this.nouveauChef.phoneNumber?.trim()) { this.erreurCreation = 'Le téléphone est obligatoire !'; return; }
+    if (!this.nouveauChef.phoneNumber?.trim()) {
+      this.erreurCreation = 'Le téléphone est obligatoire !';
+      return;
+    }
     if (!this.nouveauChef.phoneNumber.match(/^[0-9]{8}$/)) {
-      this.erreurCreation = 'Le téléphone doit contenir exactement 8 chiffres !'; return;
+      this.erreurCreation = 'Le téléphone doit contenir exactement 8 chiffres !';
+      return;
     }
-    if (!this.nouveauChef.departement) { this.erreurCreation = 'Le département est obligatoire !'; return; }
+    if (!this.nouveauChef.departement) {
+      this.erreurCreation = 'Le département est obligatoire !';
+      return;
+    }
 
     this.enCreation = true;
     this.service.create(this.nouveauChef).subscribe({
-      next: () => { 
+      next: () => {
         this.enCreation = false;
-        this.fermerModalCreation(); 
-        this.loadChefs(); 
+        this.fermerModalCreation();
+        this.loadChefs();
       },
-      error: (err: any) => { 
+      error: (err: any) => {
         this.enCreation = false;
-        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création'; 
-      }
+        this.erreurCreation = err.error?.message ?? 'Erreur lors de la création';
+      },
     });
   }
 
@@ -132,14 +164,14 @@ export class AdminDepartmentsPage implements OnInit {
     this.service.delete(this.chefASupprimer.id).subscribe({
       next: () => {
         this.enSuppression = false;
-        this.chefs = this.chefs.filter(c => c.id !== this.chefASupprimer!.id);
+        this.chefs = this.chefs.filter((c) => c.id !== this.chefASupprimer!.id);
         this.fermerModalSuppression();
       },
-      error: () => { 
+      error: () => {
         this.enSuppression = false;
-        this.erreur = 'Erreur lors de la suppression'; 
-        this.fermerModalSuppression(); 
-      }
+        this.erreur = 'Erreur lors de la suppression';
+        this.fermerModalSuppression();
+      },
     });
   }
 }

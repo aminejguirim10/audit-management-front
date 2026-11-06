@@ -105,6 +105,7 @@ export class AuditeAiAssistantPage implements OnInit {
   conversations: AiConversationSummary[] = [];
   uploadFeedbackMessage = '';
   uploadFeedbackType: 'info' | 'error' = 'info';
+  private aiRequestFailed = false;
 
   readonly chat = new Chat({
     transport: new DefaultChatTransport({
@@ -112,6 +113,7 @@ export class AuditeAiAssistantPage implements OnInit {
     }),
     onError: (error) => {
       console.error('Erreur assistant IA:', error);
+      this.aiRequestFailed = true;
     },
   });
 
@@ -271,6 +273,7 @@ export class AuditeAiAssistantPage implements OnInit {
     const pendingImagesSnapshot = [...this.uploadedImages];
     const pendingImageParts = this.getPendingImagePartsForNextMessage(pendingImagesSnapshot);
     this.isSubmittingConversationTurn = true;
+    this.aiRequestFailed = false;
 
     try {
       await this.chat.sendMessage(
@@ -288,7 +291,11 @@ export class AuditeAiAssistantPage implements OnInit {
 
       const assistantContent = this.extractLatestAssistantContent();
       if (!assistantContent) {
-        throw new Error('Reponse assistant vide, impossible de persister ce tour.');
+        throw new Error(
+          this.aiRequestFailed
+            ? 'Le service IA n a pas pu generer de reponse.'
+            : 'Reponse assistant vide, impossible de persister ce tour.',
+        );
       }
 
       if (activeConversationId === null) {
@@ -326,7 +333,9 @@ export class AuditeAiAssistantPage implements OnInit {
     } catch (error) {
       console.error('Erreur lors de l envoi du message IA:', error);
       this.setUploadFeedback(
-        'Impossible d envoyer ou de sauvegarder ce tour IA pour le moment. Reessayez dans un instant.',
+        this.aiRequestFailed
+          ? 'Le service IA est temporairement indisponible. Verifiez sa configuration puis reessayez.'
+          : 'Impossible d envoyer ou de sauvegarder ce tour IA pour le moment. Reessayez dans un instant.',
         'error',
       );
     } finally {
